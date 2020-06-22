@@ -1,0 +1,10 @@
+template:
+    list:
+        - domain_id
+        - name
+        - state
+        - plugin_info.plugin_id|plugin_id
+        - plugin_info.version|plugin_version
+        - plugin_info.options.auth_type|auth_type
+        - tags
+        - created_at

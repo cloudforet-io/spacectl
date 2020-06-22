@@ -1,0 +1,16 @@
+template:
+    list:
+        - server_id
+        - name
+        - data.compute.instance_type|instance_type
+        - data.hardware.core|core
+        - data.hardware.memory|memory
+        - data.compute.az|az
+        - data.compute.instance_state|instance_state
+        - collection_info.state|collection_state
+        - data.os.os_distro|os_distro
+        - nics.public_ip_address|public_ip_addresses
+        - provider
+        - data.compute.account_id|account_id
+        - project_id
+        - updated_at
