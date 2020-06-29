@@ -1,6 +1,6 @@
 import os
 from spaceone.core import utils
-from conf.global_conf import *
+from spacectl.conf.global_conf import *
 
 
 def set_config(data):

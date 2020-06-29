@@ -1,5 +1,5 @@
 # spacectl
-spacectl controls the SpaceONE services
+spacectl controls the SpaceONE services.
 
 API Reference: https://spaceone-dev.gitbook.io/spaceone-apis
 

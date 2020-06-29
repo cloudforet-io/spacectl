@@ -1,8 +1,8 @@
 import click
 from spaceone.core.utils import load_yaml_from_file
-from lib.output import print_data
-from conf.global_conf import RESOURCE_ALIAS, DEFAULT_PARSER
-from conf.my_conf import set_template, remove_template, get_template
+from spacectl.lib.output import print_data
+from spacectl.conf.global_conf import RESOURCE_ALIAS, DEFAULT_PARSER
+from spacectl.conf.my_conf import set_template, remove_template, get_template
 
 __all__ = ['cli']
 

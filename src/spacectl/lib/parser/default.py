@@ -1,4 +1,4 @@
-from lib.parser import BaseParser
+from spacectl.lib.parser import BaseParser
 
 
 class DefaultParser(BaseParser):

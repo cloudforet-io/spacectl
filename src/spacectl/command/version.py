@@ -1,6 +1,6 @@
 import click
 import pkg_resources
-from conf.global_conf import *
+from spacectl.conf.global_conf import *
 
 __all__ = ['cli']
 

@@ -1,7 +1,7 @@
 import click
-from lib.output import print_data
-from conf.global_conf import DEFAULT_ENVIRONMENT
-from conf.my_conf import set_config, get_config
+from spacectl.lib.output import print_data
+from spacectl.conf.global_conf import DEFAULT_ENVIRONMENT
+from spacectl.conf.my_conf import set_config, get_config
 
 __all__ = ['cli']
 

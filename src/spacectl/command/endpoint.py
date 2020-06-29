@@ -1,8 +1,8 @@
 import click
 from spaceone.core.utils import load_yaml_from_file
-from lib.output import print_data
-from conf.global_conf import DEFAULT_ENVIRONMENT, DEFAULT_ENDPOINTS
-from conf.my_conf import set_endpoint, remove_endpoint, get_endpoint, list_endpoints
+from spacectl.lib.output import print_data
+from spacectl.conf.global_conf import DEFAULT_ENVIRONMENT, DEFAULT_ENDPOINTS
+from spacectl.conf.my_conf import set_endpoint, remove_endpoint, get_endpoint, list_endpoints
 
 __all__ = ['cli']
 
