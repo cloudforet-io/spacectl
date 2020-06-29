@@ -15,7 +15,6 @@
 
 
 from setuptools import setup, find_packages
-from glob import glob
 
 with open('VERSION', 'r') as f:
     VERSION = f.read().strip()
@@ -31,15 +30,15 @@ setup(
     author_email='admin@spaceone.dev',
     license='Apache License 2.0',
     packages=find_packages(),
-    data_files=[
-        ('template', glob('spacectl/template/*.yml')),
-    ],
     install_requires=[
-        "spaceone-core",
-        "spaceone-api",
-        "Click",
-        "tabulate"
+        'spaceone-core',
+        'spaceone-api',
+        'Click',
+        'tabulate'
     ],
+    package_data={
+        "spacectl/template": ['*.yml']
+    },
     zip_safe=False,
     entry_points={
         'console_scripts': [
