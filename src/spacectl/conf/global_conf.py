@@ -12,7 +12,7 @@ CONFIG_PATH = os.path.join(CONFIG_DIR, 'config.yml')
 ENDPOINT_PATH = os.path.join(CONFIG_DIR, 'endpoint.yml')
 
 DEFAULT_ENVIRONMENT = 'prod'
-DEFAULT_PARSER = 'lib.parser.default.DefaultParser'
+DEFAULT_PARSER = 'spacectl.lib.parser.default.DefaultParser'
 
 DEFAULT_ENDPOINTS = {
     'identity': 'grpc://identity.spaceone.dev:50051',
