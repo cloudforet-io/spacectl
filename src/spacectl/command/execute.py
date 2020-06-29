@@ -6,9 +6,9 @@ from spaceone.core.error import ERROR_BASE
 from spaceone.core import pygrpc
 from spaceone.core.utils import parse_endpoint, load_json, load_yaml_from_file
 
-from lib.output import print_data
-from conf.global_conf import RESOURCE_ALIAS, EXCLUDE_APIS, DEFAULT_ENVIRONMENT, DEFAULT_PARSER
-from conf.my_conf import get_config, get_endpoint, get_template
+from spacectl.lib.output import print_data
+from spacectl.conf.global_conf import RESOURCE_ALIAS, EXCLUDE_APIS, DEFAULT_ENVIRONMENT, DEFAULT_PARSER
+from spacectl.conf.my_conf import get_config, get_endpoint, get_template
 
 __all__ = ['cli']
 

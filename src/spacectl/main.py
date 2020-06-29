@@ -2,11 +2,11 @@
 
 import click
 import traceback
-from command import apply, config, endpoint, execute, version, api_resource, template
+from spacectl.command import apply, config, endpoint, execute, version, api_resource, template
 
 _DEBUG = False
 _HELP = """
-spacectl controls the SpaceONE services\n
+spacectl controls the SpaceONE services.\n
 API Reference: https://spaceone-dev.gitbook.io/spaceone-apis\n
 Following steps for first time user.\n
     1. spacectl config init\n

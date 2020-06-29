@@ -3,9 +3,9 @@ import click
 from spaceone.core import pygrpc
 from spaceone.core.utils import parse_endpoint
 
-from lib.output import print_data
-from conf.global_conf import RESOURCE_ALIAS, DEFAULT_ENVIRONMENT
-from conf.my_conf import get_config, get_endpoint
+from spacectl.lib.output import print_data
+from spacectl.conf.global_conf import RESOURCE_ALIAS, DEFAULT_ENVIRONMENT
+from spacectl.conf.my_conf import get_config, get_endpoint
 
 __all__ = ['cli']
 
