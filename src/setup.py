@@ -37,7 +37,7 @@ setup(
         'tabulate'
     ],
     package_data={
-        "spacectl.template": ['*.yml']
+        'spacectl': ['template/*.yml']
     },
     zip_safe=False,
     entry_points={
