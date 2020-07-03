@@ -26,13 +26,11 @@ def cli():
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='yaml', help='Output format',
               type=click.Choice(['json', 'yaml']), show_default=True)
-@click.option('-e', '--environment', default=lambda: get_config('environment', DEFAULT_ENVIRONMENT),
-              help='Environment', show_default=True)
-def get(resource, parameter, json_parameter, file_path, api_version, output, environment):
+def get(resource, parameter, json_parameter, file_path, api_version, output):
     """Show details of a specific resource"""
     service, resource = _get_service_and_resource(resource)
     params = _parse_parameter(file_path, json_parameter, parameter)
-    _execute_api(service, resource, 'get', params=params, api_version=api_version, output=output, env=environment)
+    _execute_api(service, resource, 'get', params=params, api_version=api_version, output=output)
 
 
 @cli.command()
@@ -49,10 +47,8 @@ def get(resource, parameter, json_parameter, file_path, api_version, output, env
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='table', help='Output format',
               type=click.Choice(['table', 'json', 'yaml']), show_default=True)
-@click.option('-e', '--environment', default=lambda: get_config('environment', DEFAULT_ENVIRONMENT),
-              help='Environment', show_default=True)
 def list(resource, parameter, json_parameter, file_path, minimal_columns, all_columns, columns, template_path,
-         limit, sort, api_version, output, environment):
+         limit, sort, api_version, output):
     """Display one or many resources"""
     service, resource = _get_service_and_resource(resource)
     template = _load_template(service, resource, columns, template_path)
@@ -88,8 +84,7 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
             'desc': desc
         }
 
-    _execute_api(service, resource, 'list', params=params, api_version=api_version, output=output,
-                 env=environment, parser=parser)
+    _execute_api(service, resource, 'list', params=params, api_version=api_version, output=output, parser=parser)
 
 
 @cli.command()
@@ -101,9 +96,7 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='table', help='Output format',
               type=click.Choice(['table', 'json', 'yaml']), show_default=True)
-@click.option('-e', '--environment', default=lambda: get_config('environment', DEFAULT_ENVIRONMENT),
-              help='Environment', show_default=True)
-def stat(resource, json_parameter, file_path, limit, sort, api_version, output, environment):
+def stat(resource, json_parameter, file_path, limit, sort, api_version, output):
     """Querying statistics for resources"""
     service, resource = _get_service_and_resource(resource)
     params = _parse_parameter(file_path, json_parameter)
@@ -125,7 +118,7 @@ def stat(resource, json_parameter, file_path, limit, sort, api_version, output, 
             'desc': desc
         }
 
-    _execute_api(service, resource, 'stat', params=params, api_version=api_version, output=output, env=environment)
+    _execute_api(service, resource, 'stat', params=params, api_version=api_version, output=output)
 
 
 @cli.command()
@@ -137,13 +130,11 @@ def stat(resource, json_parameter, file_path, limit, sort, api_version, output, 
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='yaml', help='Output format',
               type=click.Choice(['table', 'json', 'yaml']), show_default=True)
-@click.option('-e', '--environment', default=lambda: get_config('environment', DEFAULT_ENVIRONMENT),
-              help='Environment', show_default=True)
-def exec(verb, resource, parameter, json_parameter, file_path, api_version, output, environment):
+def exec(verb, resource, parameter, json_parameter, file_path, api_version, output):
     """Execute a method to resource"""
     service, resource = _get_service_and_resource(resource)
     params = _parse_parameter(file_path, json_parameter, parameter)
-    _execute_api(service, resource, verb, params=params, api_version=api_version, output=output, env=environment)
+    _execute_api(service, resource, verb, params=params, api_version=api_version, output=output)
 
 
 def _parse_parameter(file_parameter=None, json_parameter=None, parameter=[]):
@@ -166,8 +157,9 @@ def _parse_parameter(file_parameter=None, json_parameter=None, parameter=[]):
     return params
 
 
-def _execute_api(service, resource, verb, params={}, api_version='v1', output='yaml', env=None, parser=None):
+def _execute_api(service, resource, verb, params={}, api_version='v1', output='yaml', parser=None):
     config = get_config()
+    env = config.get('environment')
     _check_api_permissions(service, resource, verb)
     client = _get_client(service, api_version, env)
     response = _call_api(client, resource, verb, params, config=config)

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+import os
 import click
 import traceback
 from spacectl.command import apply, config, endpoint, execute, version, api_resource, template
 
-_DEBUG = False
+_DEBUG = os.environ.get('SPACECTL_DEBUG', 'false')
 _HELP = """
 spacectl controls the SpaceONE services.\n
 API Reference: https://spaceone-dev.gitbook.io/spaceone-apis\n
@@ -24,7 +25,7 @@ def main():
         click.echo(f'ERROR: {e}')
         click.echo()
 
-        if _DEBUG:
+        if _DEBUG.lower() == 'true':
             click.echo(traceback.format_exc())
 
 

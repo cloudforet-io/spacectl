@@ -2,22 +2,88 @@ import os
 from spaceone.core import utils
 from spacectl.conf.global_conf import *
 
+__all__ = ['set_namespace', 'get_namespace', 'remove_namespace', 'list_namespaces', 'set_config',
+           'get_config', 'set_endpoint', 'get_endpoint', 'remove_endpoint', 'list_endpoints',
+           'set_template', 'get_template', 'remove_template']
 
-def set_config(data):
+
+def set_namespace(namespace):
     utils.create_dir(CONFIG_DIR)
+    try:
+        data = utils.load_yaml_from_file(CONFIG_PATH)
+    except Exception:
+        data = {}
+
+    data['namespace'] = namespace
     utils.save_yaml_to_file(data, CONFIG_PATH)
 
 
-def get_config(key=None, default=None):
+def get_namespace():
     try:
         data = utils.load_yaml_from_file(CONFIG_PATH)
     except Exception:
         raise Exception('spaceconfig is undefined. (Use "spacectl config init")')
 
+    namespace = data.get('namespace')
+    if not namespace:
+        raise Exception('The namespace is not set. Switch the namespace. (Use "spacectl namespace --help")')
+
+    return namespace
+
+
+def remove_namespace(namespace):
+    try:
+        data = utils.load_yaml_from_file(CONFIG_PATH)
+    except Exception:
+        raise Exception('spaceconfig is undefined. (Use "spacectl config init")')
+
+    data['config'] = data.get('config', {})
+
+    if namespace in data['config']:
+        del data['config'][namespace]
+
+    if 'namespace' in data:
+        del data['namespace']
+
+    utils.save_yaml_to_file(data, CONFIG_PATH)
+
+
+def list_namespaces():
+    try:
+        data = utils.load_yaml_from_file(CONFIG_PATH)
+    except Exception:
+        raise Exception('spaceconfig is undefined. (Use "spacectl config init")')
+
+    conf = data.get('config', {})
+
+    return list(conf.keys())
+
+
+def set_config(new_data, namespace=None):
+    if namespace is None:
+        namespace = get_namespace()
+
+    data = utils.load_yaml_from_file(CONFIG_PATH)
+    data['config'] = data.get('config', {})
+    data['config'][namespace] = new_data
+    utils.save_yaml_to_file(data, CONFIG_PATH)
+
+
+def get_config(key=None, default=None, namespace=None):
+    try:
+        data = utils.load_yaml_from_file(CONFIG_PATH)
+    except Exception:
+        raise Exception('spaceconfig is undefined. (Use "spacectl config init")')
+
+    if namespace is None:
+        namespace = get_namespace()
+
+    conf = data.get('config', {}).get(namespace, {})
+
     if key:
-        return data.get(key, default)
+        return conf.get(key, default)
     else:
-        return data
+        return conf
 
 
 def set_endpoint(environment, endpoints):
