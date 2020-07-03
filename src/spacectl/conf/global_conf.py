@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC_DIR = os.path.dirname(os.path.dirname(BASE_DIR))
+SRC_DIR = os.path.dirname(BASE_DIR)
 DEFAULT_TEMPLATE_DIR = os.path.join(BASE_DIR, 'template')
 
 HOME_DIR = str(Path.home())

@@ -4,7 +4,7 @@ from spaceone.core import pygrpc
 from spaceone.core.utils import parse_endpoint
 
 from spacectl.lib.output import print_data
-from spacectl.conf.global_conf import RESOURCE_ALIAS, DEFAULT_ENVIRONMENT
+from spacectl.conf.global_conf import RESOURCE_ALIAS
 from spacectl.conf.my_conf import get_config, get_endpoint
 
 __all__ = ['cli']
@@ -16,10 +16,9 @@ def cli():
 
 
 @cli.command()
-@click.option('-e', '--environment', default=lambda: get_config('environment', DEFAULT_ENVIRONMENT),
-              help='Environment', show_default=True)
-def api_resources(environment):
+def api_resources():
     """Print the supported API resources"""
+    environment = get_config('environment')
     endpoints = get_endpoint(environment)
     resources = _get_resources_from_client(endpoints)
     resources = _get_resource_alias(resources)
