@@ -2,9 +2,10 @@ import click
 from tabulate import tabulate
 from spaceone.core import utils
 
-
 def print_data(data, output, **kwargs):
-    if output == 'table':
+    if(len(data) == 0):
+        print('NO DATA')
+    elif output == 'table':
         _print_table(data, **kwargs)
     elif output == 'json':
         _print_json(data, **kwargs)
