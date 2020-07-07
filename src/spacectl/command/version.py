@@ -4,7 +4,10 @@ from spacectl.conf.global_conf import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASCII_LOGO = os.path.join(BASE_DIR, 'template', 'ascii_logo')
-LOGO_BASIC = ['#####         ', '         ######', '####################################################']
+LOGO_BASIC = ['#####         '
+              , '         ######',
+              '\n',
+              '####################################################']
 
 __all__ = ['cli']
 
@@ -26,13 +29,19 @@ def _get_ascii_logo():
     for line in lines:
         version_str = version_str+line
     f.close()
-    return version_str
+    return version_str + '\n'
+
+def _get_version_info(_version):
+    LOGO_BASIC.insert(0, _get_ascii_logo())
+    LOGO_BASIC.insert(2, 'spacectl Version: ' + _version)
+    print(''.join(LOGO_BASIC))
+    return ''.join(LOGO_BASIC)
+
 
 def _get_version_from_pkg():
     try:
         _version = pkg_resources.get_distribution('spacectl').version
-        version_info = LOGO_BASIC[0] + 'spacectl version: ' + _version + LOGO_BASIC[1] + '\n' + LOGO_BASIC[2]
-        return version_info
+        return _get_version_info(_version)
     except Exception:
         return None
 
@@ -44,7 +53,6 @@ def _get_version_from_file():
             _version = f.read().strip()
             f.close()
             if(_version is not None):
-                version_info = LOGO_BASIC[0] + 'spacectl version: ' +  _version + LOGO_BASIC[1] + '\n' + LOGO_BASIC[2]
-                return _get_ascii_logo() + version_info
+                return _get_version_info(_version)
     except Exception:
         return None
