@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import click
 import traceback
+
+try:
+    import spacectl
+except Exception:
+    path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if path not in sys.path:
+        sys.path.append(path)
+
 from spacectl.command import apply, config, endpoint, execute, version, api_resource, template
 
 _DEBUG = os.environ.get('SPACECTL_DEBUG', 'false')
