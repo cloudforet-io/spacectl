@@ -18,7 +18,7 @@ def config():
 
 
 @config.command()
-@click.option('-n', '--namespace', prompt='Namesapce', help='Namespace', default='default')
+@click.option('-n', '--namespace', prompt='Namespace', help='Namespace', default='default')
 @click.option('-d', '--domain-id', prompt='Domain ID', help='Domain ID')
 @click.option('-k', '--api-key', prompt='API Key', help='API Key')
 @click.option('-e', '--environment', prompt='Environment', default=DEFAULT_ENVIRONMENT, help='Environment')
