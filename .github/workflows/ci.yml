@@ -13,6 +13,7 @@ jobs:
       - name: Set environment virables
         env:
           # 이 곳에서 환경변수를 통해 설정 관리
+          IMAGE_PREFIX: spaceone
           PYPI_UPLOAD: true # upload pypi if this is true
           DOCKER_UPLOAD: true
           # LOCATION points the parent directory
@@ -22,6 +23,7 @@ jobs:
         run: |
           cat <<EOF>set_env.sh
           echo "::set-env name=SERVICE::$(cut -d'/' -f2 <<<${{github.repository}})"
+          echo "::set-env name=IMAGE_PREFIX::$IMAGE_PREFIX"
           echo "::set-env name=PYPI_UPLOAD::$PYPI_UPLOAD"
           echo "::set-env name=DOCKER_UPLOAD::$DOCKER_UPLOAD"
 
