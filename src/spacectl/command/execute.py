@@ -234,14 +234,14 @@ def _check_resource_and_verb(client, resource, verb):
 
 
 def _call_api(client, resource, verb, params={}, **kwargs):
-    config = kwargs.get('config', {})
-    if 'api_key' not in config:
-        raise Exception('The api_key of spaceconfig is not set. (Use "spacectl config init")')
-
     _check_resource_and_verb(client, resource, verb)
 
-    api_key = config['api_key']
-    params['domain_id'] = config.get('domain_id')
+    config = kwargs.get('config', {})
+    api_key = config.get('api_key')
+    domain_id = config.get('domain_id')
+
+    if domain_id:
+        params['domain_id'] = config.get('domain_id')
 
     try:
         message = getattr(getattr(client, resource), verb)(
@@ -250,7 +250,10 @@ def _call_api(client, resource, verb, params={}, **kwargs):
         )
         return _change_message(message)
     except ERROR_BASE as e:
-        raise Exception(e.message.strip())
+        if e.error_code == 'ERROR_AUTHENTICATE_FAILURE':
+            raise Exception('The api_key of spaceconfig is not set. (Use "spacectl config init")')
+        else:
+            raise Exception(e.message.strip())
     except Exception as e:
         raise Exception(e)
 
