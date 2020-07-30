@@ -8,6 +8,6 @@ COPY src ${SRC_DIR}
 
 WORKDIR ${SRC_DIR}
 RUN python3 setup.py install && rm -rf /tmp/*
-WORKDIR $HOME
+WORKDIR /root
 # you can mount spacectl configurations on /root/.spaceone/
 ENTRYPOINT ["spacectl"]
