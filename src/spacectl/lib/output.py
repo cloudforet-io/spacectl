@@ -6,7 +6,9 @@ def print_data(data, output, **kwargs):
     if(len(data) == 0):
         print('NO DATA')
     elif output == 'table':
-        _print_table(data, **kwargs)
+        if kwargs.get("quiet"):
+            _print_quiet(data, **kwargs)
+        else: _print_table(data, **kwargs)
     elif output == 'json':
         _print_json(data, **kwargs)
     elif output == 'yaml':
@@ -19,7 +21,6 @@ def _print_table(data, **kwargs):
         del kwargs['root_key']
     headers = kwargs.get('headers', 'keys')
     total_count = kwargs.get('total_count')
-
     if isinstance(data, dict):
         _print_yaml(data)
     else:
@@ -47,3 +48,17 @@ def _print_yaml(data, **kwargs):
     else:
         click.echo('---')
         click.echo(utils.dump_yaml(data))
+
+def _print_quiet(data, **kwargs):
+    '''
+    This can be used in _print_table.
+    '''
+    results=data["results"]
+    output = ''
+    for obj in results:
+        row = ''
+        for v in obj.values():
+            row += str(v) + ' '
+        output += row.strip()+'\n'
+    output = output.strip()
+    click.echo(output)
