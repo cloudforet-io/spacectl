@@ -7,7 +7,7 @@ from spaceone.core import pygrpc
 from spaceone.core.utils import parse_endpoint, load_json, load_yaml_from_file
 
 from spacectl.lib.output import print_data
-from spacectl.conf.global_conf import RESOURCE_ALIAS, EXCLUDE_APIS, DEFAULT_ENVIRONMENT, DEFAULT_PARSER
+from spacectl.conf.global_conf import RESOURCE_ALIAS, EXCLUDE_APIS, DEFAULT_PARSER
 from spacectl.conf.my_conf import get_config, get_endpoint, get_template
 
 __all__ = ['cli']
@@ -159,9 +159,8 @@ def _parse_parameter(file_parameter=None, json_parameter=None, parameter=[]):
 
 def _execute_api(service, resource, verb, params={}, api_version='v1', output='yaml', parser=None):
     config = get_config()
-    env = config.get('environment')
     _check_api_permissions(service, resource, verb)
-    client = _get_client(service, api_version, env)
+    client = _get_client(service, api_version)
     response = _call_api(client, resource, verb, params, config=config)
 
     if verb == 'list' and parser:
@@ -205,14 +204,11 @@ def _get_service_and_resource(resource):
         return resource_split[0], resource_split[1]
 
 
-def _get_client(service, api_version, env):
-    if env is None:
-        raise Exception('The environment of spaceconfig is not set. (Use "spacectl config init")')
-
-    endpoint = get_endpoint(env, service)
+def _get_client(service, api_version):
+    endpoint = get_endpoint(service)
 
     if endpoint is None:
-        raise Exception(f'Endpoint is not set. (environment={env}, service={service})')
+        raise Exception(f'Endpoint is not set. (service={service})')
 
     try:
         e = parse_endpoint(endpoint)
