@@ -19,7 +19,7 @@ def config():
 
 @config.command()
 @click.option('-e', '--environment', prompt='Environment', help='Environment', default=DEFAULT_ENVIRONMENT)
-@click.option('-i', '--import-file', type=click.Path(exists=True), help='YAML file only')
+@click.option('-f', '--import-file', type=click.Path(exists=True), help='YAML file only')
 def init(environment, import_file):
     """Initialize spaceconfig"""
     set_environment(environment)
