@@ -2,147 +2,130 @@ import os
 from spaceone.core import utils
 from spacectl.conf.global_conf import *
 
-__all__ = ['set_namespace', 'get_namespace', 'remove_namespace', 'list_namespaces', 'set_config',
-           'get_config', 'set_endpoint', 'get_endpoint', 'remove_endpoint', 'list_endpoints',
-           'set_template', 'get_template', 'remove_template']
+__all__ = ['set_environment', 'get_environment', 'remove_environment', 'list_environments',
+           'import_config', 'set_config', 'get_config', 'set_endpoint', 'get_endpoint',
+           'remove_endpoint', 'list_endpoints', 'set_template', 'get_template', 'remove_template']
 
 
-def set_namespace(namespace):
+def set_environment(environment):
     utils.create_dir(CONFIG_DIR)
+    utils.create_dir(ENVIRONMENT_DIR)
+    utils.save_yaml_to_file({'environment': environment}, ENVIRONMENT_CONF_PATH)
+
+
+def get_environment():
     try:
-        data = utils.load_yaml_from_file(CONFIG_PATH)
-    except Exception:
-        data = {}
-
-    data['namespace'] = namespace
-    utils.save_yaml_to_file(data, CONFIG_PATH)
-
-
-def get_namespace():
-    try:
-        data = utils.load_yaml_from_file(CONFIG_PATH)
+        data = utils.load_yaml_from_file(ENVIRONMENT_CONF_PATH)
     except Exception:
         raise Exception('spaceconfig is undefined. (Use "spacectl config init")')
 
-    namespace = data.get('namespace')
-    if not namespace:
-        raise Exception('The namespace is not set. Switch the namespace. (Use "spacectl namespace --help")')
+    environment = data.get('environment')
+    if not environment:
+        raise Exception('The environment is not set. Switch the environment. (Use "spacectl config environment --help")')
 
-    return namespace
+    return environment
 
 
-def remove_namespace(namespace):
+def remove_environment(environment):
     try:
-        data = utils.load_yaml_from_file(CONFIG_PATH)
+        environment_path = os.path.join(ENVIRONMENT_DIR, f'{environment}.yml')
+        if os.path.exists(environment_path):
+            os.remove(environment_path)
+    except Exception as e:
+        raise Exception(f'Environment deletion error: {e}')
+
+    environments = list_environments()
+    if len(environments) > 0:
+        utils.save_yaml_to_file({'environment': environments[0]}, ENVIRONMENT_CONF_PATH)
+    else:
+        os.remove(ENVIRONMENT_CONF_PATH)
+
+
+def list_environments():
+    environments = []
+    try:
+        for f in os.listdir(ENVIRONMENT_DIR):
+            if os.path.isfile(os.path.join(ENVIRONMENT_DIR, f)) and f.find('.yml') > 1:
+                environments.append(f.rsplit('.', 1)[0])
     except Exception:
         raise Exception('spaceconfig is undefined. (Use "spacectl config init")')
 
-    data['config'] = data.get('config', {})
-
-    if namespace in data['config']:
-        del data['config'][namespace]
-
-    if 'namespace' in data:
-        del data['namespace']
-
-    utils.save_yaml_to_file(data, CONFIG_PATH)
+    return environments
 
 
-def list_namespaces():
+def import_config(import_file_path, environment=None):
+    if environment is None:
+        environment = get_environment()
+
     try:
-        data = utils.load_yaml_from_file(CONFIG_PATH)
+        environment_path = os.path.join(ENVIRONMENT_DIR, f'{environment}.yml')
+        data = utils.load_yaml_from_file(import_file_path)
+        utils.save_yaml_to_file(data, environment_path)
+    except Exception:
+        raise Exception(f'Import file format is invalid. (file = {import_file_path})')
+
+
+def set_config(new_data, environment=None):
+    if environment is None:
+        environment = get_environment()
+
+    try:
+        environment_path = os.path.join(ENVIRONMENT_DIR, f'{environment}.yml')
+        utils.save_yaml_to_file(new_data, environment_path)
     except Exception:
         raise Exception('spaceconfig is undefined. (Use "spacectl config init")')
 
-    conf = data.get('config', {})
 
-    return list(conf.keys())
+def get_config(key=None, default=None, environment=None):
+    if environment is None:
+        environment = get_environment()
 
-
-def set_config(new_data, namespace=None):
-    if namespace is None:
-        namespace = get_namespace()
-
-    data = utils.load_yaml_from_file(CONFIG_PATH)
-    data['config'] = data.get('config', {})
-    data['config'][namespace] = new_data
-    utils.save_yaml_to_file(data, CONFIG_PATH)
-
-
-def get_config(key=None, default=None, namespace=None):
     try:
-        data = utils.load_yaml_from_file(CONFIG_PATH)
+        environment_path = os.path.join(ENVIRONMENT_DIR, f'{environment}.yml')
+        data = utils.load_yaml_from_file(environment_path)
     except Exception:
         raise Exception('spaceconfig is undefined. (Use "spacectl config init")')
-
-    if namespace is None:
-        namespace = get_namespace()
-
-    conf = data.get('config', {}).get(namespace, {})
 
     if key:
-        return conf.get(key, default)
+        return data.get(key, default)
     else:
-        return conf
+        return data
 
 
-def set_endpoint(environment, endpoints):
-    utils.create_dir(CONFIG_DIR)
-    try:
-        data = utils.load_yaml_from_file(ENDPOINT_PATH)
-    except Exception:
-        data = {}
+def set_endpoint(endpoints, environment=None):
+    data = get_config(environment)
+    data['endpoints'] = endpoints
 
-    data[environment] = endpoints
-
-    utils.save_yaml_to_file(data, ENDPOINT_PATH)
+    set_config(data, environment)
 
 
-def remove_endpoint(environment, service=None):
-    utils.create_dir(CONFIG_DIR)
-    try:
-        data = utils.load_yaml_from_file(ENDPOINT_PATH)
-    except Exception:
-        data = {}
-
-    if environment in data:
-        if service:
-            if service in data[environment]:
-                del data[environment][service]
-        else:
-            del data[environment]
-
-        utils.save_yaml_to_file(data, ENDPOINT_PATH)
-
-
-def get_endpoint(environment, service=None):
-    try:
-        data = utils.load_yaml_from_file(ENDPOINT_PATH)
-    except Exception:
-        raise Exception('Endpoint is undefined. (Use "spacectl endpoint init")')
-
-    if environment not in data:
-        raise Exception(f'The endpoint of the \'{environment}\' environment is not set. (See "spacectl endpoint show")')
+def get_endpoint(service=None, environment=None):
+    endpoints = get_config('endpoints', {}, environment)
 
     if service:
-        return data[environment].get(service)
+        return endpoints.get(service)
     else:
-        return data[environment]
+        return endpoints
+
+
+def remove_endpoint(service, environment=None):
+    data = get_config(environment)
+    endpoints = data.get('endpoints', {})
+
+    if service in endpoints:
+        del endpoints[service]
+
+    data['endpoints'] = endpoints
+
+    set_config(data, environment)
 
 
 def list_endpoints(environment=None):
-    try:
-        data = utils.load_yaml_from_file(ENDPOINT_PATH)
-    except Exception:
-        raise Exception('Endpoint is undefined. (Use "spacectl endpoint init")')
-
+    endpoints = get_config('endpoints', {}, environment)
     result = []
-    for env, endpoints in data.items():
-        if environment and environment != env:
-            continue
 
-        for service, endpoint in endpoints.items():
-            result.append((env, service, endpoint))
+    for service, endpoint in endpoints.items():
+        result.append((service, endpoint))
 
     return result
 

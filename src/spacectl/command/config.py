@@ -18,18 +18,16 @@ def config():
 
 
 @config.command()
-@click.option('-n', '--namespace', prompt='Namespace', help='Namespace', default='default')
-@click.option('-d', '--domain-id', prompt='Domain ID', help='Domain ID')
-@click.option('-k', '--api-key', prompt='API Key', help='API Key')
-@click.option('-e', '--environment', prompt='Environment', default=DEFAULT_ENVIRONMENT, help='Environment')
-def init(namespace, domain_id, api_key, environment):
+@click.option('-e', '--environment', prompt='Environment', help='Environment', default=DEFAULT_ENVIRONMENT)
+@click.option('-i', '--import-file', type=click.Path(exists=True), help='YAML file only')
+def init(environment, import_file):
     """Initialize spaceconfig"""
-    set_namespace(namespace)
-    set_config({
-        'domain_id': domain_id,
-        'api_key': api_key,
-        'environment': environment
-    }, namespace=namespace)
+    set_environment(environment)
+
+    if import_file:
+        import_config(import_file, environment)
+    else:
+        set_config({}, environment)
 
 
 @config.command()
@@ -55,39 +53,40 @@ def remove(key):
 
 
 @config.command()
-@click.option('-s', '--switch', help='Switch the namespace')
-@click.option('-r', '--remove', help='Remove the namespace')
-def namespace(switch, remove):
-    """Display a spaceconfig"""
+@click.option('-s', '--switch', help='Switch the environment')
+@click.option('-r', '--remove', help='Remove the environment')
+def environment(switch, remove):
+    """Manage environments"""
 
     if switch:
-        namespaces = list_namespaces()
-        if switch not in namespaces:
-            raise Exception(f"'{switch}' namespace not found.")
+        environments = list_environments()
+        if switch not in environments:
+            raise Exception(f"'{switch}' environment not found.")
 
-        set_namespace(switch)
-        click.echo(switch)
+        set_environment(switch)
+        click.echo(f"Switched to '{switch}' environment.")
     elif remove:
-        namespaces = list_namespaces()
-        if remove not in namespaces:
-            raise Exception(f"'{remove}' namespace not found.")
+        environments = list_environments()
+        if remove not in environments:
+            raise Exception(f"'{switch}' environment not found.")
 
-        remove_namespace(remove)
+        remove_environment(remove)
+        click.echo(f"'{remove}' environment has been removed.")
     else:
         try:
-            current_ns = get_namespace()
+            current_env = get_environment()
         except Exception:
-            current_ns = None
+            current_env = None
 
-        namespaces = list_namespaces()
-        if len(namespaces) == 0:
+        environments = list_environments()
+        if len(environments) == 0:
             raise Exception('spaceconfig is undefined. (Use "spacectl config init")')
 
-        for ns in namespaces:
-            if current_ns == ns:
-                click.echo(f'{ns} (current)')
+        for env in environments:
+            if current_env == env:
+                click.echo(f'{env} (current)')
             else:
-                click.echo(ns)
+                click.echo(env)
 
 
 @config.command()
@@ -97,3 +96,43 @@ def show(output):
     """Display a spaceconfig"""
     data = get_config()
     print_data(data, output)
+
+
+@config.group()
+def endpoint():
+    """Manage API endpoints"""
+    pass
+
+
+@endpoint.command()
+@click.argument('service')
+@click.argument('endpoint')
+def add(service, endpoint):
+    """Add a API endpoint"""
+    try:
+        endpoints = get_endpoint()
+    except Exception:
+        endpoints = {}
+
+    if service in endpoints:
+        raise ValueError(f"'{service}' service already exists.")
+    endpoints[service] = endpoint
+    set_endpoint(endpoints)
+    click.echo(f"'{service}: {endpoint}' endpoint has been added.")
+
+
+@endpoint.command()
+@click.argument('service')
+def remove(service):
+    """Remove a API endpoint"""
+    remove_endpoint(service)
+    click.echo(f"'{service}' endpoint has been removed.")
+
+
+@endpoint.command()
+@click.option('-o', '--output', default='table', help='Output format',
+              type=click.Choice(['table', 'json', 'yaml']), show_default=True)
+def show(output):
+    """Display API endpoints"""
+    endpoints = list_endpoints()
+    print_data(endpoints, output, headers=['Service', 'Endpoint'])
