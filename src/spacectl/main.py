@@ -12,7 +12,7 @@ except Exception:
     if path not in sys.path:
         sys.path.append(path)
 
-from spacectl.command import apply, config, endpoint, execute, version, api_resource, template
+from spacectl.command import apply, config, execute, version, api_resource, template
 
 _DEBUG = os.environ.get('SPACECTL_DEBUG', 'false')
 _HELP = """
@@ -20,11 +20,12 @@ spacectl controls the SpaceONE services.\n
 API Reference: https://spaceone-dev.gitbook.io/spaceone-apis\n
 Following steps for first time user.\n
     1. spacectl config init\n
-    2. spacectl endpoint init
+    2. spacectl config set api_key <api_key>\n
+    3. spacectl config endpoint add <service> <endpoint>
 """
 
-cli = click.CommandCollection(sources=[apply.cli, config.cli, endpoint.cli, execute.cli,
-                                       version.cli, api_resource.cli, template.cli], help=_HELP)
+cli = click.CommandCollection(sources=[apply.cli, config.cli, execute.cli, version.cli,
+                                       api_resource.cli, template.cli], help=_HELP)
 
 
 def main():

@@ -38,11 +38,13 @@ Run it like this:
 - Set up spacectl configuration
     ```commandline
     spacectl config init
+    spacectl config set api_key <api_key>
+    spacectl config endpoint add <service> <endpoint>
     ```
 
-- Set up spacectl endpoints
+- Import configuration file which was downloaded at SpaceONE console
     ```commandline
-    spacectl endpoint init
+    spacectl config init -f <import_file>
     ```
 
 ### Discovering builtin services:
@@ -53,30 +55,25 @@ Run it like this:
 spacectl api-resources
 ```
 
-## Examples
-Case 1 - List Servers:
+# Examples
+### Case 1: List Servers:
 ```commandline
-spacectl ls server
+spacectl list server
 ```
 
-Case 2 - Create Project Group:
+### Case 2: Create Project Group:
 ```commandline
 spacectl exec create project_group -p name=<project_group_name>
 ```
 
-&nbsp;  
-
-## Advanced Guides
+# Advanced Guides
 
 ## Configuration
-- Namespace
 - Config Settings
-
-## Endpoint Settings
-- Environment
 - Manage Endpoints
+- Switch the Environment
 
-### Command Details
+## Command Details
 - get: Show details of a specific resource
 - list: Display one or many resources
 - stat: Querying statistics for resources

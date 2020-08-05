@@ -2,14 +2,14 @@ import click
 import pkg_resources
 from spacectl.conf.global_conf import *
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ASCII_LOGO = os.path.join(BASE_DIR, 'template', 'ascii_logo')
+ASCII_LOGO = os.path.join(ASSET_DIR, 'ascii_logo')
 LOGO_BASIC = ['#####         '
               , '         ######',
               '\n',
               '####################################################']
 
 __all__ = ['cli']
+
 
 @click.group()
 def cli():
@@ -31,9 +31,10 @@ def _get_ascii_logo():
     f.close()
     return version_str + '\n'
 
+
 def _get_version_info(_version):
     LOGO_BASIC.insert(0, _get_ascii_logo())
-    LOGO_BASIC.insert(2, 'spacectl Version: ' + _version)
+    LOGO_BASIC.insert(2, 'spacectl version: ' + _version)
     return ''.join(LOGO_BASIC)
 
 
@@ -49,8 +50,7 @@ def _get_version_from_file():
     try:
         with open(os.path.join(SRC_DIR, 'VERSION'), 'r') as f:
             _version = f.read().strip()
-            f.close()
-            if(_version is not None):
+            if _version:
                 return _get_version_info(_version)
     except Exception:
         return None
