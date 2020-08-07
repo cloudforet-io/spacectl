@@ -1,0 +1,40 @@
+variable:
+  my_domain_name: homeplus
+env:
+  something: something
+
+resources:
+- my_domain:
+    resource_type: identity.Domain
+    #    matches:
+    #      name: ${ self.data.name } # Default
+    input:
+      name: ${ spaceone.env }-${ var.my_domain_name }
+      domain_name: ddddd
+
+# Domain Owner,
+- users_from_file:
+    resource_type: identity.User
+    for_each: ${ file("./user_data.csv", template = "csv", key = "data.users") }
+    matches:
+      name: ${ self.data.name }
+      domain_id: ${ resource.my_domain.data.domain_id }
+    input:
+      name: ${ item.username }
+      password: ${ item.password }
+      mobile: 010-1234-${ index }
+
+- first_repository:
+    resource_type: repository.Repository
+    on:
+      name: ${ self.data.repository_name }
+      domain_id: ${ self.data.domain_id }
+      repository_type: ${ self.data.repository_type }
+    input:
+      name: ${ var.repository_name }
+      domain_id: ${ resource.my_domain.data.domain_id }
+      repositoy_type: ${ "local" if env.environment == "dev" else "remote" }
+
+output:
+  template: yaml
+  path: ${ var.output_file_path } # or null
