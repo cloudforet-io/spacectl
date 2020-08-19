@@ -1,24 +1,21 @@
 import yaml
-from spacectl.command.apply.task import Task, TaskList
-from spacectl.modules.resource.resource_task import ResourceTask
-from spacectl.modules.shell.shell_task import ShellTask
+from resource import Resource
+from task import Task, TaskList
 class Manifest:
+    _dict = {}  # dict로 변환된 yaml
+
+    env = {}
+    var = {}
+    tasks = []  # or # TaskList [SpaceoneApplyResource]
+
+    output = {} # or SpaceoneApplyOutput 은 output.py를 이용할 수 있게..
 
     def __init__(self, manifest_dict):
 
         self._dict = manifest_dict
         self.env = manifest_dict["env"]
         self.var = manifest_dict["var"]
-        self.tasks = TaskList()
-
-        for task_dict in manifest_dict["tasks"]:
-            module = task_dict["uses"].split("/")[-1]
-            task = None
-            if module == "resource":
-                task = ResourceTask(self, task_dict)
-            elif module == "shell":
-                task = ShellTask(self, task_dict)
-            self.tasks.append(task)
+        self.tasks = TaskList([ Task(self, task_dict) for task_dict in manifest_dict["tasks"]])
 
         '''
         vars 오버라이딩, 설정
