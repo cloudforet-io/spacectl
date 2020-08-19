@@ -1,6 +1,6 @@
 import yaml, json
 from spacectl.command.apply.manifest import Manifest
-from spacectl.lib.parser import apply_template
+from spacectl.lib.parser import apply_manifest
 
 import click
 import fnmatch
@@ -34,8 +34,8 @@ def apply(file_path):
             "tasks": mf.tasks,
             "self": task,
         }
-        # print(context["var"])
-        apply_template.apply_template(context, task)
+        # print(context)
+        apply_manifest.apply_template(context, task)
         module = task.uses.split("/", 1)[-1]
         if module == "resource":  #resource인 경우
             resource.apply(task)

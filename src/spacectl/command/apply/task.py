@@ -1,11 +1,11 @@
 import yaml
-import spacectl.lib.parser.apply_template
+import spacectl.lib.parser.apply_manifest
 from spacectl.modules.resource.conf import get_verb
 class Task:
     fields_to_apply_template = ["id", "uses", "spec"]
     def __init__(self, manifest, resource_dict):
-
-        self.id = resource_dict["id"]
+        self.name = resource_dict.get("name")
+        self.id = resource_dict.get("id")
         self.uses = resource_dict.get("uses", "@modules/resource")
         self.spec = {}
 

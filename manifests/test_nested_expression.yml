@@ -1,0 +1,28 @@
+var:
+  a: AAA
+
+env:
+  environment: dev
+
+tasks:
+  - uses: "@modules/shell"
+    id: test1
+    spec:
+      data:
+        b: BBB-${{ var.a }}
+      run: |
+        echo ${{ self.spec.data.b }}
+  - uses: "@modules/shell"
+    id: test2
+    spec:
+      data:
+        c: CCC-${{ tasks.test1.spec.data.b }}
+      run: |
+        echo ${{ self.spec.data.c }}
+  - uses: "@modules/shell"
+    id: test3
+    spec:
+      data:
+        d: DDD-${{ tasks.test2.spec.data.c }}
+      run: |
+        echo ${{ self.spec.data.d }}

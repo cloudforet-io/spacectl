@@ -26,7 +26,7 @@
 import yaml
 from manifest import Manifest
 from spacectl.lib.dot_dict import get_dotted_value
-from spacectl.lib.parser.apply_template import get_dict_value
+from spacectl.lib.parser.apply_manifest import get_dict_value
 
 def apply(file_path):
     with open(file_path) as f:

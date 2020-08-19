@@ -240,8 +240,7 @@ def _call_api(client, resource, verb, params={}, **kwargs):
         params['domain_id'] = config.get('domain_id')
 
     try:
-        metadata = ((),) if api_key == None else (('token', api_key),)
-
+        metadata = (()) if api_key == None else (('token', api_key),)
         resource_client = getattr(client, resource)
         resource_verb = getattr(resource_client, verb)
         message = resource_verb(

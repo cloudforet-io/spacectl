@@ -1,18 +1,19 @@
 var:
-  my_domain_name: root2
+  my_domain_name: root
   my_username: puppy
 
 env:
   environment: dev
 
 tasks:
-#  - name: MY_SHELL
-#    id: shell
-#    uses: "@modules/shell"
-#    spec:
-#      run: |
-#        ls $HOME
-#        echo hello world
+  - name: Initialize Mongo
+    id: mongo
+    uses: "@modules/shell"
+    spec:
+      run: |
+        mongo --host mongo:27017 \
+        --username mongouser \
+        --password mongopassword < $HOME/dev-initializer/init_db.js
   - name: Create Domain
     id: my_domain
     uses: "@modules/resource"
@@ -24,7 +25,7 @@ tasks:
         - name
       verb:
         update:
-#
+
   - name: Create DomainOwner
     id: my_domain_owner
     uses: "@modules/resource"
@@ -32,15 +33,17 @@ tasks:
       resource_type: identity.DomainOwner
       data:
         name: My Domain Admin
-        owner_id: admin2
-        password: admin2
+        owner_id: admin
+        password: admin
         domain_id: ${{ tasks.my_domain.output.domain_id }}
       matches:
 #        - owner_id
         - domain_id
+      verb:
+        read: get
 
-  - name: Create API Key DomainOwner
-    id: my_domain_owner
+  - name: Create DomainOwner Token
+    id: my_domain_owner_api_key
     uses: "@modules/resource"
     spec:
       resource_type: identity.Token
@@ -55,80 +58,106 @@ tasks:
         read:
         create: issue
 
-  - name: MY_SHELL
+  - name: Update spacectl configure
     id: shell
     uses: "@modules/shell"
     spec:
       run: |
-        echo abcc>>~/.spaceone/environments/helm-root.yml
-#  - name: Create admin user
-##    if: ${{ tasks.excel_data.user.type }} ) == 'admin'
-#    id: admin_user
-#    uses: "@modules/resource"
-#    spec:
-#      resource_type: identity.User
-#      data:
-#        user_id: ${{ var.my_username }}
-#        domain_id: ${{ tasks.my_domain.output.domain_id }}
-#        email: siyeon@pu22ppy.com
-#      matches:
-#        - user_id
-#        - domain_id
+        spacectl config set api_key ${{ tasks.my_domain_owner_api_key.output.access_token }}
+
+  - name: Create admin user
+#    if: ${{ tasks.excel_data.user.type }} ) == 'admin'
+    id: admin_user
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.User
+      data:
+        user_id: ${{ var.my_username }}
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        email: siyeon@pu22ppy.com
+      matches:
+        - user_id
+        - domain_id
 #
-#  - name: Create admin user API(Domain) key
-#    id: admin_user_api_key
-#    uses: "@modules/resource"
-#    spec:
-#      resource_type: identity.APIKey
-#      data:
-#        user_id: ${{ tasks.admin_user.output.user_id }}
-#        domain_id: ${{ tasks.my_domain.output.domain_id }}
-#        api_key_type: DOMAIN
-#      matches:
-#        - user_id
-#        - domain_id
+  - name: Create admin user API(Domain) key
+    id: admin_user_api_key
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.APIKey
+      data:
+        user_id: ${{ tasks.admin_user.output.user_id }}
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        api_key_type: DOMAIN
+      matches:
+        - user_id
+        - domain_id
 #
-#  - name: Create Repository
-#    id: admin_user_api_key
-#    uses: "@modules/resource"
-#    spec:
-#      resource_type: repository.Repository
-#      data:
-#        domain_id: ${{ tasks.my_domain.output.domain_id }}
-#        name: root
-#        repository_type: local
-#      matches:
-#        - domain_id
-#        - name
-#      verb:
-#        update:
-#
-#  - name: Publish Supervisor
-#    id: supervisor
-#    uses: "@modules/resource"
-#    spec:
-#      resource_type: plugin.Supervisor
-#      data:
-#        domain_id: ${{ tasks.my_domain.output.domain_id }}
-#        name: root
-#        hostname: default.svc.cluster.local
-#      matches:
-#        - domain_id
-#        - name
-#  - name: Create Plugin
-#    id: plugin
-#    uses: "@modules/resource"
-#    spec:
-#      resource_type: repository.Plugin
-#      data:
-#        domain_id: ${{ tasks.my_domain.output.domain_id }}
-#        name: ec2
-#        service_type: inventory.collector
-#        image: spaceone/aws-ec2
-#      matches:
-#        - domain_id
-#        - name
-#      verb:
-#        read: get_plugin_endpoint
-#        create:
-#        update:
+  - name: Create Repository
+    id: repository
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Repository
+      data:
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        name: ${{ var.my_domain_name }}
+        repository_type: local
+      matches:
+        - domain_id
+        - name
+      verb:
+        update:
+
+  - name: Publish Supervisor
+    id: supervisor
+    uses: "@modules/resource"
+    spec:
+      resource_type: plugin.Supervisor
+      data:
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        name: ${{ var.my_domain_name }}
+        hostname: default.svc.cluster.local
+      matches:
+        - domain_id
+        - name
+      verb:
+        update:
+
+  - name: Create EC2 Plugin
+    id: ec2-plugin
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Plugin
+      data:
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        name: ec2
+        service_type: inventory.collector
+        image: spaceone/aws-ec2
+#        repository_id: ${{ tasks.repository.output.repository_id }}
+      matches:
+        - domain_id
+#        - repository_id
+        - name
+      verb:
+        read:
+        create: register
+        update:
+
+  - name: Create CloudService Plugin
+    id: cloudservice-plugin
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Plugin
+      data:
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        name: cs
+        service_type: inventory.collector
+        image: spaceone/aws-cloudservice
+#        repository_id: ${{ tasks.repository.output.repository_id }}
+      matches:
+        - domain_id
+#        - repository_id
+        - name
+      verb:
+        read:
+        create: register
+        update:

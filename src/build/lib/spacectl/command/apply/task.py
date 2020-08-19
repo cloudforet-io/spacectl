@@ -1,5 +1,5 @@
 import yaml
-import spacectl.lib.parser.apply_template
+import spacectl.lib.parser.apply_manifest
 
 class Task:
     output = {} # or SpaceoneApplyOutput 은 output.py를 이용할 수 있게..
