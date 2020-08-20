@@ -1,56 +1,165 @@
 var:
-  my_domain_name: homeplus
-  domain_owner_name: admin
-  domain_owner_password: adminpassowrd
+  my_domain_name: root
+  my_domain_owner: admin
+  my_username: puppy
 
 env:
   environment: dev
 
 tasks:
+  - name: Initialize Mongo
+    id: mongo
+    uses: "@modules/shell"
+    spec:
+      run: |
+        mongo --host mongo:27017 \
+        --username mongouser \
+        --password mongopassword < $HOME/dev-initializer/init_db.js
+
   - name: Create Domain
+#    if: ${{ var.my_domain_name }} == ${{ var.my_domain_name }}
     id: my_domain
     uses: "@modules/resource"
     spec:
       resource_type: identity.Domain
       data:
-        name: ${{ self.id }}
+        name: aa${{ var.my_domain_name }}-aa${{ self.spec.resource_type }}
       matches:
         - name
+      verb:
+        update:
 
-  - name: Create Domain Owner
+  - name: Create DomainOwner
     id: my_domain_owner
     uses: "@modules/resource"
     spec:
       resource_type: identity.DomainOwner
       data:
-        name: ${{ env.environment}}-${{ var.domain_owner_name }}
-        password: ${{ env.environment}}-${{ var.domain_owner_password }}
+        name: My Domain Admin
+        owner_id: ${{ var.my_domain_owner }}
+        password: ${{ var.my_domain_owner }}
         domain_id: ${{ tasks.my_domain.output.domain_id }}
       matches:
-        - name
         - domain_id
+      verb:
+        read: get
 
-  - name: Read user data from excel file
-    id: excel_data
-    uses: "@modules/excel" # 우리의 built-in의 modules/resource
-    # uses: https://github.com/spaceone/dev ... .py 등등
+  - name: Create DomainOwner Token
+    id: my_domain_owner_token
+    uses: "@modules/resource"
     spec:
-      action: load
-      file_path: user_info.svc
-      not_exists: error
+      resource_type: identity.Token
+      data:
+        credentials:
+          user_type: DOMAIN_OWNER
+          user_id: ${{ tasks.my_domain_owner.spec.data.owner_id }}
+          password: ${{ tasks.my_domain_owner.spec.data.password }}
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+      verb:
+        read:
+        create: issue
+
+  - name: Update spacectl configure
+    id: shell
+    uses: "@modules/shell"
+    spec:
+      run: |
+        spacectl config set api_key ${{ tasks.my_domain_owner_token.output.access_token }}
 
   - name: Create admin user
-    if: ${{ tasks.excel_data.user.type }} ) == 'admin'
+#    if: ${{ tasks.excel_data.user.type }} ) == 'admin'
     id: admin_user
     uses: "@modules/resource"
     spec:
       resource_type: identity.User
       data:
-        name: stark
+        user_id: ${{ var.my_username }}
         domain_id: ${{ tasks.my_domain.output.domain_id }}
-        description: my name is ${{ self.spec.data.name }}
-        tags:
-          created_by: ${{ self.name }}
+        email: siyeon@pu22ppy.com
       matches:
-        - name
+        - user_id
         - domain_id
+#
+  - name: Create admin user API(Domain) key
+    id: admin_user_api_key
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.APIKey
+      data:
+        user_id: ${{ tasks.admin_user.output.user_id }}
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        api_key_type: DOMAIN
+      matches:
+        - user_id
+        - domain_id
+      verb:
+        read:
+
+  - name: Create Repository
+    id: repository
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Repository
+      data:
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        name: ${{ var.my_domain_name }}
+        repository_type: local
+      matches:
+        - domain_id
+        - name
+      verb:
+        update:
+
+  - name: Publish Supervisor
+    id: supervisor
+    uses: "@modules/resource"
+    spec:
+      resource_type: plugin.Supervisor
+      data:
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        name: ${{ var.my_domain_name }}
+        hostname: default.svc.cluster.local
+      matches:
+        - domain_id
+      verb:
+        create: publish
+        update:
+
+  - name: Create EC2 Plugin
+    if:
+    id: ec2-plugin
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Plugin
+      data:
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        name: ec2
+        service_type: inventory.collector
+        image: spaceone/aws-ec2
+        repository_id: ${{ tasks.repository.output.repository_id }}
+      matches:
+        - domain_id
+        - repository_id
+        - name
+      verb:
+        create: register
+        update:
+
+  - name: Create CloudService Plugin
+    id: cloudservice-plugin
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Plugin
+      data:
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        name: cs
+        service_type: inventory.collector
+        image: spaceone/aws-cloudservice
+        repository_id: ${{ tasks.repository.output.repository_id }}
+      matches:
+        - domain_id
+        - repository_id
+        - name
+      verb:
+        create: register
+        update:

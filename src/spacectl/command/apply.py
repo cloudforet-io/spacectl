@@ -32,8 +32,8 @@ def apply(file_path, output):
             "tasks": mf.tasks,
             "self": task,
         }
-
         apply_manifest.apply_template(context, task)
         module = task.uses.split("/", 1)[-1]
-        task.apply()  # execute each overrided method.
-    print_data(mf.to_dict(), output)
+        if task.apply_if:
+            task.apply()  # execute each overrided method.
+    # print_data(mf.to_dict(), output)

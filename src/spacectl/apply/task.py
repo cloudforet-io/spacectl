@@ -17,14 +17,14 @@ def apply_wrapper(func):
 
 
 class Task:
-    fields_to_apply_template = ["id", "uses", "spec"]
+    fields_to_apply_template = ["name", "uses", "spec", "apply_if"]
 
     def __init__(self, manifest, resource_dict):
-        self.name = resource_dict.get("name")
-        self.id = resource_dict.get("id")
+        self.name = resource_dict.get("name", "Anonymous")
+        self.id = resource_dict.get("id", "no_id")
         self.uses = resource_dict.get("uses", "@modules/resource")
         self.spec = {}
-
+        self.apply_if = resource_dict.get("if", True)
         self.manifest = manifest
         self.set_spec(resource_dict.get("spec"))
 

@@ -7,16 +7,17 @@ env:
   environment: dev
 
 tasks:
-#  - name: Initialize Mongo
-#    id: mongo
-#    uses: "@modules/shell"
-#    spec:
-#      run: |
-#        mongo --host mongo:27017 \
-#        --username mongouser \
-#        --password mongopassword < $HOME/dev-initializer/init_db.js
+  - name: Initialize Mongo
+    id: mongo
+    uses: "@modules/shell"
+    spec:
+      run: |
+        mongo --host mongo:27017 \
+        --username mongouser \
+        --password mongopassword < $HOME/dev-initializer/init_db.js
 
   - name: Create Domain
+#    if: ${{ var.my_domain_name }} == ${{ var.my_domain_name }}
     id: my_domain
     uses: "@modules/resource"
     spec:
@@ -93,57 +94,76 @@ tasks:
         - domain_id
       verb:
         read:
-#
-#  - name: Create Repository
-#    id: repository
-#    uses: "@modules/resource"
-#    spec:
-#      resource_type: repository.Repository
-#      data:
-#        domain_id: ${{ tasks.my_domain.output.domain_id }}
-#        name: ${{ var.my_domain_name }}
-#        repository_type: local
-#      matches:
-#        - domain_id
-#        - name
-#      verb:
-#        update:
-#
-#  - name: Publish Supervisor
-#    id: supervisor
-#    uses: "@modules/resource"
-#    spec:
-#      resource_type: plugin.Supervisor
-#      data:
-#        domain_id: ${{ tasks.my_domain.output.domain_id }}
-#        name: ${{ var.my_domain_name }}
-#        hostname: default.svc.cluster.local
-#      matches:
-#        - domain_id
-#        - name
-#      verb:
-#        create: publish
-#        update:
-#
-#  - name: Create EC2 Plugin
-#    id: ec2-plugin
-#    uses: "@modules/resource"
-#    spec:
-#      resource_type: repository.Plugin
-#      data:
-#        domain_id: ${{ tasks.my_domain.output.domain_id }}
-#        name: ec2
-#        service_type: inventory.collector
-#        image: spaceone/aws-ec2
-#        repository_id: ${{ tasks.repository.output.repository_id }}
-#      matches:
-#        - domain_id
-#        - repository_id
-#        - name
-#      verb:
-#        create: register
-#        update:
-#
+
+  - name: Create Repository
+    id: repository
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Repository
+      data:
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        name: ${{ var.my_domain_name }}
+        repository_type: local
+      matches:
+        - domain_id
+        - name
+      verb:
+        create: register
+        update:
+
+  - name: Publish Supervisor
+    id: supervisor
+    uses: "@modules/resource"
+    spec:
+      resource_type: plugin.Supervisor
+      data:
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        name: ${{ var.my_domain_name }}
+        hostname: default.svc.cluster.local
+      matches:
+        - domain_id
+        - name
+      verb:
+        create: publish
+        update:
+
+  - name: Read EC2 Plugin
+    id: ec2_plugin_read
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Plugin
+      data:
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        name: ec2
+        service_type: inventory.collector
+        image: spaceone/aws-ec2
+        repository_id: ${{ tasks.repository.output.repository_id }}
+      matches:
+        - domain_id
+        - repository_id
+        - name
+      verb:
+        create:
+        update:
+
+  - name: Create EC2 Plugin
+    if: ${{ tasks.ec2_plugin_read.output.read_length }} == 0
+    id: ec2_plugin_read
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Plugin
+      data:
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        name: ec2
+        service_type: inventory.collector
+        image: spaceone/aws-ec2
+      matches:
+        - domain_id
+        - name
+      verb:
+        read:
+        create: register
+
 #  - name: Create CloudService Plugin
 #    id: cloudservice-plugin
 #    uses: "@modules/resource"

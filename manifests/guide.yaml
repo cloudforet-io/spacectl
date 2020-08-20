@@ -1,0 +1,20 @@
+var:
+  foo: bar
+tasks:
+  - name: Create a domain
+    id: foos_domain
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.Domain
+      data:
+        name: ${{ var.foo }}-domain
+      matches:
+        - name
+      verb:  # skip updating
+        update:
+  - name: Greet to the domain
+    id: script
+    uses: "@modules/shell"
+    spec:
+      run: |
+        echo "a domain (${{ tasks.foos_domain.output.domain_id}}) has been created!"

@@ -38,16 +38,25 @@ def apply_template(original_data, current_data):
             text = value.strip()
             open_index = text.find(OPEN)
             while open_index != -1:
-                close_index = text.find(CLOSE, open_index + OPEN_LEN)
+                close_index = text.find(CLOSE, open_index)
                 if close_index == -1:
                     click.echo(f'WRONG {OPEN} ... {CLOSE} Format', err=True)
 
                 expression = text[open_index+OPEN_LEN:close_index].strip()
                 evaluated_value = _get_value_by_dot(original_data, original_data, expression)
-                text = text[:open_index] + evaluated_value + text[close_index+CLOSE_LEN:]
-
-                open_index = text.find(OPEN, close_index)
-
+                if field == 'apply_if':
+                    if isinstance(evaluated_value, str):
+                        evaluated_value = '"'+evaluated_value+'"'
+                    if isinstance(evaluated_value, int) or isinstance(evaluated_value, float):
+                        evaluated_value = str(evaluated_value)
+                    text = text[:open_index]+evaluated_value+text[close_index+CLOSE_LEN:]
+                    close_index = open_index + len(evaluated_value)
+                else:
+                    text = text[:open_index]+evaluated_value+text[close_index+CLOSE_LEN:]
+                    close_index = open_index + len(evaluated_value) - CLOSE_LEN
+                open_index = text.find(OPEN, close_index+CLOSE_LEN)
+            if field == 'apply_if':
+                text = evaluate_if(text, **original_data)
             _update_obj(current_data, field, text)
         else:
             apply_template(original_data, _get_obj_value(current_data, field))
@@ -82,7 +91,11 @@ def _get_value_by_dot(original_data, current_data, dotted_key: str):
         key = dotted_key
         value = _get_obj_value(current_data, key)
 
-        if type(value) == str:
+        if type(value) == str or type(value) == int or type(value) == float:
             return value
         else:
             click.echo("You can use only text or number as a result of ${{ ... }}", err=True)
+
+def evaluate_if(statement, **ctx):
+    r = eval(statement)
+    return r

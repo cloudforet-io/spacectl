@@ -7,8 +7,8 @@ from spacectl.modules.shell.shell_task import ShellTask
 class Manifest:
 
     def __init__(self, manifest_dict):
-        self.var = manifest_dict["var"]
-        self.env = manifest_dict["env"]
+        self.var = manifest_dict.get("var", {})
+        self.env = manifest_dict.get("env", {})
         self.tasks = TaskList()
 
         for task_dict in manifest_dict["tasks"]:

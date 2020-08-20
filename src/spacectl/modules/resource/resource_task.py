@@ -10,7 +10,8 @@ from spacectl.apply.task import apply_wrapper
 class ResourceTask(Task):
     def __init__(self, manifest, resource_dict):
         super().__init__(manifest, resource_dict)
-        # self.set_spec(resource_dict)
+        self.executed_verbs = []
+
 
     def set_spec(self, spec):
         self.spec = spec
@@ -41,39 +42,52 @@ class ResourceTask(Task):
                 verb = self.spec["verb"]["read"]
                 # list를 지원안하면 exception
                 read_resources = _execute_api(service, resource, verb, read_params, api_version="v1", output="yaml", parser={})
+                self.executed_verbs.append(verb)
                 if isinstance(read_resources, list):
-                    self.output = read_resources[0]
-                else:  # like dict
+                    length = len(read_resources)
+                    if length == 0:
+                        self.output = {}
+                    elif length >= 1:
+                        self.output = read_resources[0]
+
+                    if length >= 2:
+                        click.echo("Multiple resources are searched so select the first one.")
+
+                    self.output["read_length"] = len(read_resources)
+                elif isinstance(read_resources, dict):  # like dict
                     self.output = read_resources
-                click.echo(f'### Read Response ###')
+                    if read_resources != {}: self.output["read_length"] = 1
+                click.echo(f'### {verb} Response ###')
                 click.echo(read_resources)
             except Exception as e:
-                print(e)
-                read_resources = []
+                click.echo(e, err=True)
 
         params = {key: value for key, value in self.spec["data"].items()}
 
         if len(read_resources) == 1 and self.spec["verb"]["update"]:
             try:
                 verb = self.spec["verb"]["update"]
-                print("Start", ".".join([service, resource, verb]))
+                click.echo("Start " + ".".join([service, resource, verb]))
                 _check_api_permissions(service, resource, verb)
                 self.output = _execute_api(service, resource, verb, params, api_version="v1", output="yaml", parser={})
-                print("Finish", ".".join([service, resource, verb]))
+                self.executed_verbs.append(verb)
+                click.echo("Finish " + ".".join([service, resource, verb]))
                 click.echo(f'### {verb} Response ###')
                 click.echo(self.output)
             except Exception as e:
-                print(e)
-                click.echo("Unavailable update field so Skip",
+                click.echo(e, err=True)
+                click.echo("Unavailable update field so Skip" +
                            ".".join([service, resource, "update"]),
                            err=True)
-                self.output = read_resources[0]
+                # self.output = read_resources[0]
+                # self.output["length"] = 0
 
         elif len(read_resources) == 0 and self.spec["verb"]["create"]:
             verb = self.spec["verb"]["create"]
-            print("Start", ".".join([service, resource, verb]))
+            click.echo("Start " + ".".join([service, resource, verb]))
             create_result = _execute_api(service, resource, verb, params, api_version="v1", output="yaml", parser={})
-            print("Finished", ".".join([service, resource, verb]))
+            self.executed_verbs.append(verb)
+            click.echo("Finished " + ".".join([service, resource, verb]))
             self.output = create_result
             click.echo(f'### {verb} Response ###')
             click.echo(self.output)
@@ -100,5 +114,5 @@ def _execute_api(service, resource, verb, params={}, api_version='v1', output='y
     elif verb == 'update':
         return response
     else:
-        print("Non-standard verb:", verb)
+        click.echo("Non-standard verb: "+ verb)
         return response
