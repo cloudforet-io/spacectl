@@ -1,5 +1,6 @@
 # from spacectl.modules.shell.conf import
-from spacectl.command.apply.task import Task
+import subprocess
+from spacectl.apply.task import Task
 
 class ShellTask(Task):
     def __init__(self, manifest, resource_dict):
@@ -8,3 +9,5 @@ class ShellTask(Task):
 
     def set_spec(self, spec):
         self.spec = spec
+    def apply(self):
+            subprocess.run(["/bin/bash", "-c", self.spec["run"]])

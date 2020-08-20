@@ -74,12 +74,10 @@ def _execute_api(service, resource, verb, params={}, api_version='v1', output='y
             Exception()
         else:
             return results
-    elif verb == 'get':
-        return response
     elif verb == 'create':
         return response
     elif verb == 'update':
         return response
     else:
-        print("Unknown verb", verb)
+        print("Non-standard verb:", verb)
         return response

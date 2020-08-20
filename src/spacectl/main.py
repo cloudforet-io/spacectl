@@ -11,8 +11,7 @@ except Exception:
     path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if path not in sys.path:
         sys.path.append(path)
-from spacectl.command.apply import cli as apply
-from spacectl.command import config, execute, version, api_resource, template
+from spacectl.command import apply, config, execute, version, api_resource, template
 
 _DEBUG = os.environ.get('SPACECTL_DEBUG', 'false')
 _HELP = """

@@ -1,19 +1,21 @@
 var:
   my_domain_name: root
+  my_domain_owner: admin
   my_username: puppy
 
 env:
   environment: dev
 
 tasks:
-  - name: Initialize Mongo
-    id: mongo
-    uses: "@modules/shell"
-    spec:
-      run: |
-        mongo --host mongo:27017 \
-        --username mongouser \
-        --password mongopassword < $HOME/dev-initializer/init_db.js
+#  - name: Initialize Mongo
+#    id: mongo
+#    uses: "@modules/shell"
+#    spec:
+#      run: |
+#        mongo --host mongo:27017 \
+#        --username mongouser \
+#        --password mongopassword < $HOME/dev-initializer/init_db.js
+
   - name: Create Domain
     id: my_domain
     uses: "@modules/resource"
@@ -33,17 +35,16 @@ tasks:
       resource_type: identity.DomainOwner
       data:
         name: My Domain Admin
-        owner_id: admin
-        password: admin
+        owner_id: ${{ var.my_domain_owner }}
+        password: ${{ var.my_domain_owner }}
         domain_id: ${{ tasks.my_domain.output.domain_id }}
       matches:
-#        - owner_id
         - domain_id
       verb:
         read: get
 
   - name: Create DomainOwner Token
-    id: my_domain_owner_api_key
+    id: my_domain_owner_token
     uses: "@modules/resource"
     spec:
       resource_type: identity.Token
@@ -53,7 +54,6 @@ tasks:
           user_id: ${{ tasks.my_domain_owner.spec.data.owner_id }}
           password: ${{ tasks.my_domain_owner.spec.data.password }}
         domain_id: ${{ tasks.my_domain.output.domain_id }}
-
       verb:
         read:
         create: issue
@@ -63,7 +63,7 @@ tasks:
     uses: "@modules/shell"
     spec:
       run: |
-        spacectl config set api_key ${{ tasks.my_domain_owner_api_key.output.access_token }}
+        spacectl config set api_key ${{ tasks.my_domain_owner_token.output.access_token }}
 
   - name: Create admin user
 #    if: ${{ tasks.excel_data.user.type }} ) == 'admin'
@@ -91,73 +91,74 @@ tasks:
       matches:
         - user_id
         - domain_id
+      verb:
+        read:
 #
-  - name: Create Repository
-    id: repository
-    uses: "@modules/resource"
-    spec:
-      resource_type: repository.Repository
-      data:
-        domain_id: ${{ tasks.my_domain.output.domain_id }}
-        name: ${{ var.my_domain_name }}
-        repository_type: local
-      matches:
-        - domain_id
-        - name
-      verb:
-        update:
-
-  - name: Publish Supervisor
-    id: supervisor
-    uses: "@modules/resource"
-    spec:
-      resource_type: plugin.Supervisor
-      data:
-        domain_id: ${{ tasks.my_domain.output.domain_id }}
-        name: ${{ var.my_domain_name }}
-        hostname: default.svc.cluster.local
-      matches:
-        - domain_id
-        - name
-      verb:
-        update:
-
-  - name: Create EC2 Plugin
-    id: ec2-plugin
-    uses: "@modules/resource"
-    spec:
-      resource_type: repository.Plugin
-      data:
-        domain_id: ${{ tasks.my_domain.output.domain_id }}
-        name: ec2
-        service_type: inventory.collector
-        image: spaceone/aws-ec2
+#  - name: Create Repository
+#    id: repository
+#    uses: "@modules/resource"
+#    spec:
+#      resource_type: repository.Repository
+#      data:
+#        domain_id: ${{ tasks.my_domain.output.domain_id }}
+#        name: ${{ var.my_domain_name }}
+#        repository_type: local
+#      matches:
+#        - domain_id
+#        - name
+#      verb:
+#        update:
+#
+#  - name: Publish Supervisor
+#    id: supervisor
+#    uses: "@modules/resource"
+#    spec:
+#      resource_type: plugin.Supervisor
+#      data:
+#        domain_id: ${{ tasks.my_domain.output.domain_id }}
+#        name: ${{ var.my_domain_name }}
+#        hostname: default.svc.cluster.local
+#      matches:
+#        - domain_id
+#        - name
+#      verb:
+#        create: publish
+#        update:
+#
+#  - name: Create EC2 Plugin
+#    id: ec2-plugin
+#    uses: "@modules/resource"
+#    spec:
+#      resource_type: repository.Plugin
+#      data:
+#        domain_id: ${{ tasks.my_domain.output.domain_id }}
+#        name: ec2
+#        service_type: inventory.collector
+#        image: spaceone/aws-ec2
 #        repository_id: ${{ tasks.repository.output.repository_id }}
-      matches:
-        - domain_id
+#      matches:
+#        - domain_id
 #        - repository_id
-        - name
-      verb:
-        read:
-        create: register
-        update:
-
-  - name: Create CloudService Plugin
-    id: cloudservice-plugin
-    uses: "@modules/resource"
-    spec:
-      resource_type: repository.Plugin
-      data:
-        domain_id: ${{ tasks.my_domain.output.domain_id }}
-        name: cs
-        service_type: inventory.collector
-        image: spaceone/aws-cloudservice
+#        - name
+#      verb:
+#        create: register
+#        update:
+#
+#  - name: Create CloudService Plugin
+#    id: cloudservice-plugin
+#    uses: "@modules/resource"
+#    spec:
+#      resource_type: repository.Plugin
+#      data:
+#        domain_id: ${{ tasks.my_domain.output.domain_id }}
+#        name: cs
+#        service_type: inventory.collector
+#        image: spaceone/aws-cloudservice
 #        repository_id: ${{ tasks.repository.output.repository_id }}
-      matches:
-        - domain_id
+#      matches:
+#        - domain_id
 #        - repository_id
-        - name
-      verb:
-        read:
-        create: register
-        update:
+#        - name
+#      verb:
+#        create: register
+#        update:
