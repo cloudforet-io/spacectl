@@ -39,13 +39,27 @@ Run it like this:
     ```commandline
     spacectl config init
     spacectl config set api_key <api_key>
+    spacectl config set domain_id <your domain_id>
     spacectl config endpoint add <service> <endpoint>
     ```
 
-- Import configuration file which was downloaded at SpaceONE console
+- (OR) Import configuration file which was downloaded at SpaceONE console
     ```commandline
     spacectl config init -f <import_file>
     ```
+
+The <import_file> looks like
+
+```
+api_key: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjYXQiOiJBUElfS0VZIiwidXNlcl90eXBlIjoiVVNFUiIsImRpZCI6ImRvbWFpbi1lOTFiNGY1ODY0M2UiLCJhdWQiOiJzdXBlcnZpc29yIiwiaWF0IjoxNTk3MTkwODg1LCJrZXkiOiI0YmVhMGMxOGEzZGM0NDUwYWM0ZGQ5ZDkxMWMxMzUyMCIsInZlciI6IjIwMjAtMDMtMDQifQ.P9a_ZGm3uPX9yaxg9WD2DXRoZGYLu5xnvkpXbnalTm63BMWO19F2rIM9DW3JRaIQxeT7qpy9eCtBzyGWmlfiFoYG9kQ6Wzj46Ml9IqhYGEfCIdyFDx4j_u6PHCB81fu9i0gPbRFhOvGVKlnueM6k4TPfB7m09o34NY0A1XtyFYqNnrfHES73p_NmasX41BDNCgPIVYjSV6Ts_qno24r7hPLsYbVwuXPs9exGtnl0uK9zEEol00XX2llIRx6OBWx5uJ-7kFAJMIZmFKXgNHulfp_BbBJZj2JjWFHkQJ47EWMZTZzdpjHS2QZyRXGXaU2Bx6Zd9MTeh9ojCGQsWSJYKw
+domain_id: domain-e91b4f58643e
+endpoints:
+  identity: grpc://identity:50051
+  inventory: grpc://inventory:50051
+  plugin: grpc://plugin:50051
+  repository: grpc://repository:50051
+  secret: grpc://secret:50051
+```
 
 ### Discovering builtin services:
 The following commands listing all spacectl APIs. 
