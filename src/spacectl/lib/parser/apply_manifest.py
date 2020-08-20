@@ -9,7 +9,10 @@ CLOSE_LEN = len(CLOSE)
 
 def apply_template(original_data, current_data):
     fields = []
-    if isinstance(current_data, str):
+    if isinstance(current_data, str) or \
+        isinstance(current_data, bool) or \
+        isinstance(current_data, int) or \
+        isinstance(current_data, float):
         return 0
     if isinstance(current_data, list):
         # 리스트면 바로 끝

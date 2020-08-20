@@ -175,23 +175,21 @@ tasks:
         - domain_id
 ```
 
-### change username
+### change phone
 
 ```yaml
 tasks:
-	- name: Update username
-		if: normal_user
-		uses: @modules/resource
-		resource_type: identity.User
-		spec:
-			name: stark
-			domain_id: domain-abcdefg
-			phone: 010-1234-1234
-			matches:
+  - name: Update username
+    if: normal_user
+    uses: @modules/resource
+    resource_type: identity.User
+    spec:
+      name: stark
+      domain_id: domain-abcdefg
+      phone: 010-1234-1234
+      matches:
         - name
         - domain_id
-      option:
-        if_not_exist: error
 ```
 
 

@@ -86,7 +86,7 @@ spacectl exec create project_group -p name=<project_group_name>
 - get: Show details of a specific resource
 - list: Display one or many resources
 
-- [apply](https://github.com/spaceone-dev/spacectl/docs/apply.md) : Get, list, create or update various resources and execute other tasks
+- [apply](https://github.com/spaceone-dev/spacectl/blob/master/docs/apply.md) : Get, list, create or update various resources and execute other tasks
 - stat: Querying statistics for resources
 - exec: Execute a method to resource
 - template: Manage resource templates

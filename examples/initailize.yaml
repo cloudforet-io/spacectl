@@ -17,13 +17,12 @@ tasks:
         --password mongopassword < $HOME/dev-initializer/init_db.js
 
   - name: Create Domain
-#    if: ${{ var.my_domain_name }} == ${{ var.my_domain_name }}
     id: my_domain
     uses: "@modules/resource"
     spec:
       resource_type: identity.Domain
       data:
-        name: aa${{ var.my_domain_name }}-aa${{ self.spec.resource_type }}
+        name: ${{ var.my_domain_name }}
       matches:
         - name
       verb:
@@ -104,10 +103,11 @@ tasks:
         domain_id: ${{ tasks.my_domain.output.domain_id }}
         name: ${{ var.my_domain_name }}
         repository_type: local
-      matches:
+      matches:~
         - domain_id
         - name
       verb:
+        create: register
         update:
 
   - name: Publish Supervisor
@@ -121,13 +121,27 @@ tasks:
         hostname: default.svc.cluster.local
       matches:
         - domain_id
+        - name
       verb:
         create: publish
         update:
 
-  - name: Create EC2 Plugin
-    if:
-    id: ec2-plugin
+  - name: Create a Supervisor API Key
+    id: supervisor_api_key
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.APIKey
+      data:
+        domain_id: ${{ tasks.my_domain.output.domain_id }}
+        user_id: ${{ var.my_username }}
+        api_key_type: USER
+      matches:
+        - domain_id
+      verb:
+        read:
+
+  - name: Read EC2 Plugin
+    id: ec2_plugin_read
     uses: "@modules/resource"
     spec:
       resource_type: repository.Plugin
@@ -142,24 +156,65 @@ tasks:
         - repository_id
         - name
       verb:
-        create: register
+        create:
         update:
 
-  - name: Create CloudService Plugin
-    id: cloudservice-plugin
+  - name: Create EC2 Plugin
+    if: ${{ tasks.ec2_plugin_read.output.read_length }} == 0
+    id: ec2_plugin_read
     uses: "@modules/resource"
     spec:
       resource_type: repository.Plugin
       data:
         domain_id: ${{ tasks.my_domain.output.domain_id }}
-        name: cs
+        name: ec2
         service_type: inventory.collector
-        image: spaceone/aws-cloudservice
-        repository_id: ${{ tasks.repository.output.repository_id }}
+        image: spaceone/aws-ec2
       matches:
         - domain_id
-        - repository_id
         - name
       verb:
+        read:
         create: register
-        update:
+
+#  - name: Install EC2 Plugin
+#    id: install_ec2_plugin
+#    uses: "@modules/resource"
+#    spec:
+#      resource_type: plugin.Plugin
+#      data:
+#        domain_id: ${{ tasks.my_domain.output.domain_id }}
+#        version: "1.3"
+#        labels:
+#          my_label: sup
+#        plugin_id: ${{ tasks.ec2_plugin_read.output.plugin_id }}
+#      matches:
+#        - domain_id
+#        - version
+#        - labels
+#        - plugin_id
+#      verb:
+#        read: get_plugin_endpoint
+#        create:
+#        update:
+#
+#  - name: Install EC2 Plugin
+#    id: install_ec2_plugin
+#    uses: "@modules/resource"
+#    spec:
+#      resource_type: plugin.Plugin
+#      data:
+#        domain_id: domain-5b1f725bb8e0
+#        version: "1.3"
+#        labels:
+#          my_label: sup
+#        plugin_id: plugin-351aa97d0970
+#      matches:
+#        - domain_id
+#        - version
+#        - labels
+#        - plugin_id
+#      verb:
+#        read: get_plugin_endpoint
+#        create:
+#        update:
