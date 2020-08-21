@@ -40,7 +40,7 @@ If you want to call API which is not a spacectl built-in API, you should use `ex
 $ spacectl exec create identity.ProjectGroup -p name=foobar -p domain_id=domain-123abc123
 ---
 name: foobar
-project_group_id: pg-487cd5b86e36
+project_group_id: pg-123abc123
 ...
 
 # example: call list_plugins of plugin.Supervisor
