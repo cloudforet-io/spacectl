@@ -65,7 +65,7 @@ $ spacectl list domain -o json
 $ spacectl list domain -o yaml
 ---
 results:
-- domain_id: domain-4c5259104ee4
+- domain_id: domain-123abc123
   ...
 total_count: 1
 ```
@@ -91,7 +91,7 @@ You can specify columns which you want to get in the api result with `-c`. Multi
 $ spacectl list domain -c domain_id
  domain_id
 ---------------------
- domain-6a6c60a1a1f3
+ domain-123abc123
 
 # multiple columns
 $ spacectl list domain -c domain_id,name,state
