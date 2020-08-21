@@ -96,7 +96,7 @@ spacectl exec create project_group -p domain_id=<domain_id> -p name=<project_gro
 
 - [apply](docs/apply.md) : Get, list, create or update various resources and execute other tasks
 - stat: Querying statistics for resources
-- [exec](docs/exec): Execute a method to resource
+- [exec](docs/exec.md): Execute a method to resource
 - template: Manage resource templates
 
 ## Configuration Details
