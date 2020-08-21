@@ -31,19 +31,18 @@ spacectl --help
 
 ## Accessing for the first time with spacectl:
 
-The following commands run spacectl to set own configurations and endpoints. 
+The following commands run spacectl to set your own configurations and endpoints. 
 It handles setting the environments, authenticating and targets. 
-Run it like this:
+Run it like these:
 
 - Set up spacectl configuration
     ```commandline
-    spacectl config init
+    spacectl config init # input environment on shell
     spacectl config set api_key <api_key>
-    spacectl config set domain_id <your domain_id>
     spacectl config endpoint add <service> <endpoint>
     ```
-
-- (OR) Import configuration file which was downloaded at SpaceONE console
+    
+- (OR) Import a configuration file which you downloaded at SpaceONE console
     ```commandline
     spacectl config init -f <import_file>
     ```
@@ -51,9 +50,10 @@ Run it like this:
 The <import_file> looks like
 
 ```
-api_key: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjYXQiOiJBUElfS0VZIiwidXNlcl90eXBlIjoiVVNFUiIsImRpZCI6ImRvbWFpbi1lOTFiNGY1ODY0M2UiLCJhdWQiOiJzdXBlcnZpc29yIiwiaWF0IjoxNTk3MTkwODg1LCJrZXkiOiI0YmVhMGMxOGEzZGM0NDUwYWM0ZGQ5ZDkxMWMxMzUyMCIsInZlciI6IjIwMjAtMDMtMDQifQ.P9a_ZGm3uPX9yaxg9WD2DXRoZGYLu5xnvkpXbnalTm63BMWO19F2rIM9DW3JRaIQxeT7qpy9eCtBzyGWmlfiFoYG9kQ6Wzj46Ml9IqhYGEfCIdyFDx4j_u6PHCB81fu9i0gPbRFhOvGVKlnueM6k4TPfB7m09o34NY0A1XtyFYqNnrfHES73p_NmasX41BDNCgPIVYjSV6Ts_qno24r7hPLsYbVwuXPs9exGtnl0uK9zEEol00XX2llIRx6OBWx5uJ-7kFAJMIZmFKXgNHulfp_BbBJZj2JjWFHkQJ47EWMZTZzdpjHS2QZyRXGXaU2Bx6Zd9MTeh9ojCGQsWSJYKw
-domain_id: domain-e91b4f58643e
+api_key: xxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxx
+domain_id: domain-123asd123
 endpoints:
+  ...
   identity: grpc://identity:50051
   inventory: grpc://inventory:50051
   plugin: grpc://plugin:50051
@@ -61,8 +61,11 @@ endpoints:
   secret: grpc://secret:50051
 ```
 
+if you want to see a sample configuration file, try [examples/configuration.yaml](examples/configuration.yaml).
+
 ### Discovering builtin services:
-The following commands listing all spacectl APIs. 
+
+The following commands list all available spacectl APIs. 
 Run it like this:
 
 ```commandline
@@ -72,12 +75,12 @@ spacectl api-resources
 # Examples
 ### Case 1: List Servers:
 ```commandline
-spacectl list server
+spacectl list server -p domain_id=<domain_id>
 ```
 
 ### Case 2: Create Project Group:
 ```commandline
-spacectl exec create project_group -p name=<project_group_name>
+spacectl exec create project_group -p domain_id=<domain_id> -p name=<project_group_name>
 ```
 
 # Advanced Guides
@@ -89,7 +92,18 @@ spacectl exec create project_group -p name=<project_group_name>
 
 ## Command Details
 - get: Show details of a specific resource
-- list: Display one or many resources
+- [list](docs/list.md): Display one or many resources
+
+- [apply](docs/apply.md) : Get, list, create or update various resources and execute other tasks
 - stat: Querying statistics for resources
-- exec: Execute a method to resource
+- [exec](docs/exec): Execute a method to resource
 - template: Manage resource templates
+
+## Configuration Details
+
+The following details are documented in [docs/configuration.md](docs/configuration.md)
+
+- Config Concept
+- Quick Start
+- Manage Endpoints
+- Switch the Environment
