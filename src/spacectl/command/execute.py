@@ -217,6 +217,8 @@ def _get_client(service, api_version):
         client.service = service
         client.api_version = api_version
         return client
+    except ERROR_BASE as e:
+        raise e
     except Exception:
         raise ValueError(f'Endpoint is invalid. (endpoint={endpoint})')
 
