@@ -18,7 +18,7 @@ tasks:
 
   - name: Create Domain
     id: my_domain
-    uses: "@modules/resource"
+    uses: "@modules/spaceone-resource"
     spec:
       resource_type: identity.Domain
       data:
@@ -30,7 +30,7 @@ tasks:
 
   - name: Create DomainOwner
     id: my_domain_owner
-    uses: "@modules/resource"
+    uses: "@modules/spaceone-resource"
     spec:
       resource_type: identity.DomainOwner
       data:
@@ -45,7 +45,7 @@ tasks:
 
   - name: Create DomainOwner Token
     id: my_domain_owner_token
-    uses: "@modules/resource"
+    uses: "@modules/spaceone-resource"
     spec:
       resource_type: identity.Token
       data:
@@ -68,7 +68,7 @@ tasks:
   - name: Create admin user
 #    if: ${{ tasks.excel_data.user.type }} ) == 'admin'
     id: admin_user
-    uses: "@modules/resource"
+    uses: "@modules/spaceone-resource"
     spec:
       resource_type: identity.User
       data:
@@ -81,7 +81,7 @@ tasks:
 #
   - name: Create admin user API(Domain) key
     id: admin_user_api_key
-    uses: "@modules/resource"
+    uses: "@modules/spaceone-resource"
     spec:
       resource_type: identity.APIKey
       data:
@@ -96,14 +96,14 @@ tasks:
 
   - name: Create Repository
     id: repository
-    uses: "@modules/resource"
+    uses: "@modules/spaceone-resource"
     spec:
       resource_type: repository.Repository
       data:
         domain_id: ${{ tasks.my_domain.output.domain_id }}
         name: ${{ var.my_domain_name }}
         repository_type: local
-      matches:~
+      matches:
         - domain_id
         - name
       verb:
@@ -112,7 +112,7 @@ tasks:
 
   - name: Publish Supervisor
     id: supervisor
-    uses: "@modules/resource"
+    uses: "@modules/spaceone-resource"
     spec:
       resource_type: plugin.Supervisor
       data:
@@ -128,7 +128,7 @@ tasks:
 
   - name: Create a Supervisor API Key
     id: supervisor_api_key
-    uses: "@modules/resource"
+    uses: "@modules/spaceone-resource"
     spec:
       resource_type: identity.APIKey
       data:
@@ -142,7 +142,7 @@ tasks:
 
   - name: Read EC2 Plugin
     id: ec2_plugin_read
-    uses: "@modules/resource"
+    uses: "@modules/spaceone-resource"
     spec:
       resource_type: repository.Plugin
       data:
@@ -162,7 +162,7 @@ tasks:
   - name: Create EC2 Plugin
     if: ${{ tasks.ec2_plugin_read.output.read_length }} == 0
     id: ec2_plugin_read
-    uses: "@modules/resource"
+    uses: "@modules/spaceone-resource"
     spec:
       resource_type: repository.Plugin
       data:
@@ -179,7 +179,7 @@ tasks:
 
 #  - name: Install EC2 Plugin
 #    id: install_ec2_plugin
-#    uses: "@modules/resource"
+#    uses: "@modules/spaceone-resource"
 #    spec:
 #      resource_type: plugin.Plugin
 #      data:
@@ -200,7 +200,7 @@ tasks:
 #
 #  - name: Install EC2 Plugin
 #    id: install_ec2_plugin
-#    uses: "@modules/resource"
+#    uses: "@modules/spaceone-resource"
 #    spec:
 #      resource_type: plugin.Plugin
 #      data:

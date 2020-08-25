@@ -36,4 +36,5 @@ def apply(file_path, output):
         module = task.uses.split("/", 1)[-1]
         if task.apply_if:
             task.apply()  # execute each overrided method.
+
     # print_data(mf.to_dict(), output)

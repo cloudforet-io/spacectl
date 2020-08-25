@@ -22,7 +22,7 @@ class Task:
     def __init__(self, manifest, resource_dict):
         self.name = resource_dict.get("name", "Anonymous")
         self.id = resource_dict.get("id", "no_id")
-        self.uses = resource_dict.get("uses", "@modules/resource")
+        self.uses = resource_dict.get("uses")
         self.spec = {}
         self.apply_if = resource_dict.get("if", True)
         self.manifest = manifest
