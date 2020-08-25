@@ -9,24 +9,30 @@ def apply_wrapper(func):
     # the instance which calls this func is bounded as self
     @wraps(func)
     def apply_inner(self):
-        click.echo("##### Start: {task_name} #####".format(task_name=self.name))
-        func(self)
-        click.echo("##### Finish: {task_name} #####".format(task_name=self.name))
-        click.echo("")
+        if self.apply_if:
+            click.echo("##### Start: {task_name} #####".format(task_name=self.name))
+            func(self)
+            click.echo("##### Finish: {task_name} #####".format(task_name=self.name))
+            click.echo("")
+        else:
+            click.echo("##### Skip: {task_name} #####".format(task_name=self.name))
+            click.echo("[INFO] {condition_statement} is not True".format(condition_statement = self.task_dict["if"]))
     return apply_inner
 
 
 class Task:
     fields_to_apply_template = ["name", "uses", "spec", "apply_if"]
 
-    def __init__(self, manifest, resource_dict):
-        self.name = resource_dict.get("name", "Anonymous")
-        self.id = resource_dict.get("id", "no_id")
-        self.uses = resource_dict.get("uses")
+    def __init__(self, manifest, task_dict):
+        self.name = task_dict.get("name", "Anonymous")
+        self.id = task_dict.get("id", "no_id")
+        self.uses = task_dict.get("uses")
         self.spec = {}
-        self.apply_if = resource_dict.get("if", True)
+        self.apply_if = task_dict.get("if", True)
         self.manifest = manifest
-        self.set_spec(resource_dict.get("spec"))
+        self.task_dict = task_dict
+        self.output = {}
+        self.set_spec(task_dict.get("spec"))
 
     def to_dict(self):
         fields = self.__dict__

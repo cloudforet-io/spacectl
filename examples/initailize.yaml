@@ -7,30 +7,29 @@ env:
   environment: dev
 
 tasks:
-  - name: Initialize Mongo
-    id: mongo
-    uses: "@modules/shell"
-    spec:
-      run: |
-        mongo --host mongo:27017 \
-        --username mongouser \
-        --password mongopassword < $HOME/dev-initializer/init_db.js
+#  - name: Initialize Mongo
+#    id: mongo
+#    uses: "@modules/shell"
+#    spec:
+#      run: |
+#        mongo --host mongo:27017 \
+#        --username mongouser \
+#        --password mongopassword < $HOME/dev-initializer/init_db.js
 
   - name: Create Domain
     id: my_domain
-    uses: "@modules/spaceone-resource"
+    uses: "@modules/resource"
     spec:
       resource_type: identity.Domain
       data:
         name: ${{ var.my_domain_name }}
       matches:
         - name
-      verb:
-        update:
+      mode: NO_UPDATE
 
   - name: Create DomainOwner
     id: my_domain_owner
-    uses: "@modules/spaceone-resource"
+    uses: "@modules/resource"
     spec:
       resource_type: identity.DomainOwner
       data:
@@ -40,12 +39,14 @@ tasks:
         domain_id: ${{ tasks.my_domain.output.domain_id }}
       matches:
         - domain_id
+      mode: NO_UPDATE
       verb:
         read: get
 
+
   - name: Create DomainOwner Token
     id: my_domain_owner_token
-    uses: "@modules/spaceone-resource"
+    uses: "@modules/resource"
     spec:
       resource_type: identity.Token
       data:
@@ -54,9 +55,9 @@ tasks:
           user_id: ${{ tasks.my_domain_owner.spec.data.owner_id }}
           password: ${{ tasks.my_domain_owner.spec.data.password }}
         domain_id: ${{ tasks.my_domain.output.domain_id }}
+      mode: EXEC
       verb:
-        read:
-        create: issue
+        exec: issue
 
   - name: Update spacectl configure
     id: shell
@@ -66,9 +67,8 @@ tasks:
         spacectl config set api_key ${{ tasks.my_domain_owner_token.output.access_token }}
 
   - name: Create admin user
-#    if: ${{ tasks.excel_data.user.type }} ) == 'admin'
     id: admin_user
-    uses: "@modules/spaceone-resource"
+    uses: "@modules/resource"
     spec:
       resource_type: identity.User
       data:
@@ -78,10 +78,10 @@ tasks:
       matches:
         - user_id
         - domain_id
-#
+
   - name: Create admin user API(Domain) key
     id: admin_user_api_key
-    uses: "@modules/spaceone-resource"
+    uses: "@modules/resource"
     spec:
       resource_type: identity.APIKey
       data:
@@ -91,12 +91,13 @@ tasks:
       matches:
         - user_id
         - domain_id
+      mode: EXEC
       verb:
-        read:
-
+        exec: create
+#
   - name: Create Repository
     id: repository
-    uses: "@modules/spaceone-resource"
+    uses: "@modules/resource"
     spec:
       resource_type: repository.Repository
       data:
@@ -106,29 +107,31 @@ tasks:
       matches:
         - domain_id
         - name
+      mode: NO_UPDATE
       verb:
         create: register
-        update:
+
 
   - name: Publish Supervisor
     id: supervisor
-    uses: "@modules/spaceone-resource"
+    uses: "@modules/resource"
     spec:
       resource_type: plugin.Supervisor
       data:
         domain_id: ${{ tasks.my_domain.output.domain_id }}
         name: ${{ var.my_domain_name }}
         hostname: default.svc.cluster.local
+        tags:
       matches:
         - domain_id
         - name
+      mode: NO_UPDATE
       verb:
         create: publish
-        update:
 
   - name: Create a Supervisor API Key
     id: supervisor_api_key
-    uses: "@modules/spaceone-resource"
+    uses: "@modules/resource"
     spec:
       resource_type: identity.APIKey
       data:
@@ -137,12 +140,13 @@ tasks:
         api_key_type: USER
       matches:
         - domain_id
+      mode: EXEC
       verb:
-        read:
+        exec: create
 
   - name: Read EC2 Plugin
     id: ec2_plugin_read
-    uses: "@modules/spaceone-resource"
+    uses: "@modules/resource"
     spec:
       resource_type: repository.Plugin
       data:
@@ -153,16 +157,13 @@ tasks:
         repository_id: ${{ tasks.repository.output.repository_id }}
       matches:
         - domain_id
-        - repository_id
         - name
-      verb:
-        create:
-        update:
+        - repository_id
+      mode: READ_ONLY
 
   - name: Create EC2 Plugin
-    if: ${{ tasks.ec2_plugin_read.output.read_length }} == 0
-    id: ec2_plugin_read
-    uses: "@modules/spaceone-resource"
+    if: ${{ tasks.ec2_plugin_read.output | bool }} == False
+    uses: "@modules/resource"
     spec:
       resource_type: repository.Plugin
       data:
@@ -170,16 +171,13 @@ tasks:
         name: ec2
         service_type: inventory.collector
         image: spaceone/aws-ec2
-      matches:
-        - domain_id
-        - name
+      mode: EXEC
       verb:
-        read:
-        create: register
-
+        exec: register
+#
 #  - name: Install EC2 Plugin
 #    id: install_ec2_plugin
-#    uses: "@modules/spaceone-resource"
+#    uses: "@modules/resource"
 #    spec:
 #      resource_type: plugin.Plugin
 #      data:
@@ -193,14 +191,12 @@ tasks:
 #        - version
 #        - labels
 #        - plugin_id
+#      mode: EXEC
 #      verb:
-#        read: get_plugin_endpoint
-#        create:
-#        update:
-#
+#        exec: get_plugin_endpoint
 #  - name: Install EC2 Plugin
 #    id: install_ec2_plugin
-#    uses: "@modules/spaceone-resource"
+#    uses: "@modules/resource"
 #    spec:
 #      resource_type: plugin.Plugin
 #      data:

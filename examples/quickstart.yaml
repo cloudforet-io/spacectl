@@ -3,7 +3,7 @@ var:
 tasks:
   - name: Create a domain
     id: foos_domain
-    uses: "@modules/spaceone-resource"
+    uses: "@modules/resource"
     spec:
       resource_type: identity.Domain
       data:

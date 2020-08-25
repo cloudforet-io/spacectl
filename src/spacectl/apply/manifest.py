@@ -24,13 +24,10 @@ class Manifest:
     def _create_task(self, task_dict):
         module = task_dict["uses"].split("/")[-1]
         task = None
-        if module == "spaceone-resource":
+        if module == "resource":
             task = ResourceTask(self, task_dict)
         elif module == "shell":
             task = ShellTask(self, task_dict)
-        elif module == "spaceone-api":
-            click.echo('spaceone-api is not valid yet.')
-            pass
         else:
             click.echo('{uses} is not a valid "uses" type.'.format(uses=task_dict["uses"]), err=True)
         return task
