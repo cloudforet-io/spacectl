@@ -1,0 +1,32 @@
+var:
+  domain_name: root
+  mock_true: True
+tasks:
+  - if: True == ${{ var.mock_true }}
+    uses: "@modules/shell"
+    spec:
+      run: |
+        echo IF True
+        echo "True" == ${{ var.mock_true }}
+
+  - name: List Domain
+    id: list_domain
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.Domain
+      data:
+        name: ${{ var.domain_name }}
+      matches:
+        - name
+      mode: READ_ONLY
+
+  - name: Execute "create" if ${{ var.domain_name }} doesn't exist
+    if: not ${{ tasks.list_domain.output | bool }}
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.Domain
+      data:
+        name: ${{ var.domain_name }}
+      mode: EXEC
+      verb:
+        exec: create

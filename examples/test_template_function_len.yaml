@@ -1,0 +1,8 @@
+var:
+  mock: [a, b, c, d]
+tasks:
+  - name: Echo Length
+    uses: "@modules/shell"
+    spec:
+      run: |
+        echo The length of ${{ var.mock }}: ${{ var.mock | len }}

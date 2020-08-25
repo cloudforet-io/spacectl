@@ -33,35 +33,14 @@ def apply_template(original_data, current_data):
     for field in fields:
         value = _get_obj_value(current_data, field)
         if type(value) == str:
+            # if the value you got is str, you should check whether it contains ${{ ... }} expressions
             text = value.strip()
             open_index = text.find(OPEN)
             while open_index != -1:
+                # remained translated text, next open_index
                 text, open_index = _parse_expression(text, open_index, original_data, field)
-
-                # text, open_index, context, field
-
-                # close_index = text.find(CLOSE, open_index)
-                # if close_index == -1:
-                #     click.echo(f'WRONG {OPEN} ... {CLOSE} Format', err=True)
-                #
-                # expression = text[open_index+OPEN_LEN:close_index].strip()
-                # evaluated_value = _get_value_by_dot(original_data, original_data, expression)
-                # if field == 'apply_if':
-                #     if isinstance(evaluated_value, str):
-                #         evaluated_value = '"'+evaluated_value+'"'
-                #     if isinstance(evaluated_value, int) or isinstance(evaluated_value, float):
-                #         evaluated_value = str(evaluated_value)
-                #     text = text[:open_index]+evaluated_value+text[close_index+CLOSE_LEN:]
-                #     close_index = open_index + len(evaluated_value)
-                # else:
-                #     text = text[:open_index]+evaluated_value+text[close_index+CLOSE_LEN:]
-                #     close_index = open_index + len(evaluated_value) - CLOSE_LEN
-                # open_index = text.find(OPEN, close_index+CLOSE_LEN)
-
-
-
             if field == 'apply_if':
-                text = _evaluate_if(text, **original_data)
+                text = _evaluate_if_statement(text, **original_data)
             _update_obj(current_data, field, text)
         else:
             apply_template(original_data, _get_obj_value(current_data, field))
@@ -69,8 +48,12 @@ def apply_template(original_data, current_data):
 def _apply_template_func(template_func, parsed_expression):
     if template_func == 'bool':
         return bool(parsed_expression)
+    elif template_func == 'len':
+        return len(parsed_expression)
     else:
         click.echo("No such template function-{func}".format(func=template_func), err=True)
+
+
 def _parse_expression(text, open_index, context, field):
     # expression e.g. ${{ tasks.my_name.output | isFalse }}
     close_index = text.find(CLOSE, open_index)
@@ -96,6 +79,7 @@ def _parse_expression(text, open_index, context, field):
         text = text[:open_index] + evaluated_value + text[close_index + CLOSE_LEN:]
         close_index = open_index + len(evaluated_value)
     else:
+        evaluated_value = str(evaluated_value)
         text = text[:open_index] + evaluated_value + text[close_index + CLOSE_LEN:]
         close_index = open_index + len(evaluated_value) - CLOSE_LEN
     next_open_index = text.find(OPEN, close_index + CLOSE_LEN)
@@ -137,13 +121,7 @@ def _get_value_by_dot(original_data, current_data, dotted_key: str):
         key = dotted_key
         value = _get_obj_value(current_data, key)
         return value
-        # if isinstance(value, (str, int, float, bool)):
-        #     return value
-        # else:
-        #     click.echo("You can use only text or number as a result of ${{ ... }}", err=True)
-        #     click.echo("current_data: {current_data}".format(current_data=current_data), err=True)
-        #     click.echo("key: {key}".format(key=key), err=True)
 
-def _evaluate_if(statement, **ctx):
+def _evaluate_if_statement(statement, **ctx):
     r = bool(eval(statement))
     return r
