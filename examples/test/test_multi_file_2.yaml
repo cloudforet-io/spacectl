@@ -1,0 +1,10 @@
+var:
+  var2: two
+  var3: three
+tasks:
+  - uses: "@modules/shell"
+    spec:
+      run: |
+        echo var1: ${{ var.var1 }}
+        echo var2: ${{ var.var2 }}
+        echo var3: ${{ var.var3 }}
