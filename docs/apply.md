@@ -56,6 +56,8 @@ Tasks is a list which contains the configuration of each Task. Task is written a
 | `<Task>.spec`   | This is whole configuration of the operation, not the task itself,  mentioned in uses. | a dictionary                                                 | O            |
 | `<Task>.output` | The output of the task. How to set output can be differ depending on which operation the task executed. | a dictionary or a list                                       | X            |
 
+
+
 ## @module/resource
 
 you can use @module/resource for querying, creating, updating SpaceONE resources. 
@@ -78,23 +80,17 @@ Mode means how you will call APIs
 - update - If there is a resource queried, spacectl will update the resource.
 - exec - execute a configured API.
 
-If you have some resources which should override those default apis( list,  create, update), you can configure those in \<Task\>.spec.verbs.
-
-- case 1. set verb read as None - skips reading and creates resource. No update.
-- case 2. set verb update as None - if there is a queried resource, skips updating. No create.
-- case 3. set verb read as None and create as issue - if you’re applying an identity.Token , you will skip reading and execute issue as a create verb.
-
-| **field**                   | **description**                                              | **examples**                                    | **required** |
-| --------------------------- | ------------------------------------------------------------ | ----------------------------------------------- | ------------ |
-| `<Task>.spec.resource_type` | Which resource type you’re applying                          | identity.User, repsitory.Repository             | O            |
-| `<Task>.spec.data`          | A dictionary which will be used as parameters when you create or update resources. | a dictionary                                    | X            |
-| `<Task>.spec.matches`       | Fields which will be used as parameters when you read resources. | a list. [“domain_id”, “name”]                   | X            |
-| `<Task>.spec.verb`          | Overrides default verbs to customize the execution.          | a dictionary. {“read”: None, “create”: "issue"} | X            |
-| `<Task>.spec.mode`          | How your apply process will be executed.                     | `DEFAULT`, `READ_ONLY`, `NO_UPDATE`, `EXEC`     | X            |
+| **field**                    | **description**                                              | **examples**                                    | **required** |
+| ---------------------------- | ------------------------------------------------------------ | ----------------------------------------------- | ------------ |
+| `<Task\>.spec.resource_type` | Which resource type you’re applying                          | identity.User, repsitory.Repository             | O            |
+| `<Task\>.spec.data`          | A dictionary which will be used as parameters when you create or update resources. | a dictionary                                    | X            |
+| `<Task\>.spec.matches`       | Fields which will be used as parameters when you read resources. | a list. [“domain_id”, “name”]                   | X            |
+| `<Task\>.spec.verb`          | Overrides default verbs to customize the execution.          | a dictionary. {“read”: None, “create”: "issue"} | X            |
+| `<Task\>.spec.mode`          | How your apply process will be executed.                     | `DEFAULT`, `READ_ONLY`, `NO_UPDATE`, `EXEC`     | X            |
 
 ### Example cases
 
-#### simple `DEFAULT` mode - Read then create or update.
+#### simple `DEFAULT` mode
 
 ```yaml
 var:
@@ -141,6 +137,8 @@ tasks:
 
 #### simple `EXEC` mode - Execute an API once.
 
+Configure an API name in `tasks.<id>.spec.verb.exec` then `spacectl` will execute the api with data as params.
+
 ```yaml
 var:
   domain_name: foo
@@ -157,7 +155,7 @@ tasks:
         exec: create
 ```
 
-Configure an API name in `tasks.<id>.spec.verb.exec` then `spacectl` will execute the api with data as params.
+
 
 ## @modules/shell
 
@@ -166,6 +164,8 @@ You can run shell script with @modules/shell. This can look like Github action.
 | **field**         | **description**                 | **examples**            | **is required** |
 | ----------------- | ------------------------------- | ----------------------- | --------------- |
 | `<Task>.spec.run` | Defines the script you will run | curl https://google.com | O               |
+
+
 
 ## Options
 

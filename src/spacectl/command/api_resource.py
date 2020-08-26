@@ -1,5 +1,6 @@
 import click
 
+from spaceone.core.error import ERROR_BASE
 from spaceone.core import pygrpc
 from spaceone.core.utils import parse_endpoint
 
@@ -38,7 +39,8 @@ def _get_resources_from_client(endpoints, api_version='v1'):
                     'alias': [],
                     'verb': verb
                 }
-
+        except ERROR_BASE as e:
+            raise e
         except Exception:
             raise ValueError(f'Endpoint is invalid. (endpoint={endpoint})')
 
