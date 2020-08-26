@@ -1,0 +1,10 @@
+api_key: xxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxx
+endpoints:
+  config: grpc://config:50051
+  identity: grpc://identity:50051
+  inventory: grpc://inventory:50051
+  monitoring: grpc://monitoring:50051
+  plugin: grpc://plugin:50051
+  repository: grpc://repository:50051
+  secret: grpc://secret:50051
+  statistics: grpc://statistics:50051
