@@ -21,7 +21,7 @@ This is just a sample for my local environment. I installed SpaceONE by helm3 on
 # default.yml
 
 # You should change the api_key. This is just a sample api_key
-api_key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhlbGxvLCBTcGFjZU9ORSIsImlhdCI6MTUxNjIzOTAyMn0.LeHQfxomlRzvdDHUOFnUXTd-G9-F3v-J6NIL6Vx0lCc
+api_key: api_key: xxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxx
 
 endpoints:
   config: grpc://config:50051
@@ -47,7 +47,7 @@ Environment [default]:
 $ spacectl config init
 Environment [default]:
 
-$ spacectl config set api_key eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhlbGxvLCBTcGFjZU9ORSIsImlhdCI6MTUxNjIzOTAyMn0.LeHQfxomlRzvdDHUOFnUXTd-G9-F3v-J6NIL6Vx0lCc
+$ spacectl config set api_key api_key: xxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxx
 
 $ spacectl config endpoint add config grpc://config:50051
 $ spacectl config endpoint add identity grpc://identity:50051

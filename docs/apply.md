@@ -75,17 +75,98 @@ If you have some resources which should override those default apis( list,  crea
 - case 2. set verb update as None - if there is a queried resource, skips updating. No create.
 - case 3. set verb read as None and create as issue - if you’re applying an identity.Token , you will skip reading and execute issue as a create verb.
 
-| **field**                 | **description**                                              | **examples**                                    | **required** |
-| ------------------------- | ------------------------------------------------------------ | ----------------------------------------------- | ------------ |
-| <Task>.spec.resource_type | Which resource type you’re applying                          | identity.User, repsitory.Repository             | O            |
-| <Task>.spec.data          | A dictionary which will be used as parameters when you create or update resources. | a dictionary                                    | X            |
-| <Task>.spec.matches       | Fields which will be used as parameters when you read resources. | a list. [“domain_id”, “name”]                   | X            |
-| <Task>.spec.verb          | Overrides default verbs to customize the execution.          | a dictionary. {“read”: None, “create”: "issue"} | X            |
+| **field**                   | **description**                                              | **examples**                                    | **required** |
+| --------------------------- | ------------------------------------------------------------ | ----------------------------------------------- | ------------ |
+| `<Task>.spec.resource_type` | Which resource type you’re applying                          | identity.User, repsitory.Repository             | O            |
+| `<Task>.spec.data`          | A dictionary which will be used as parameters when you create or update resources. | a dictionary                                    | X            |
+| `<Task>.spec.matches`       | Fields which will be used as parameters when you read resources. | a list. [“domain_id”, “name”]                   | X            |
+| `<Task>.spec.verb`          | Overrides default verbs to customize the execution.          | a dictionary. {“read”: None, “create”: "issue"} | X            |
+| `<Task>.spec.mode`          | How your apply process will be executed.                     | `DEFAULT`, `READ_ONLY`, `NO_UPDATE`, `EXEC`     | X            |
+
+### Example cases
+
+#### simple `DEFAULT` mode - Read then create or update.
+
+```yaml
+var:
+  domain_name: foo
+tasks:
+  - name: Create or Update a Domain
+    id: foo_user
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.Domain
+      data:
+        name: ${{ var.domain_name }}
+#      You can comment out mode because DEFAULT is the default value of mode.
+#      mode: DEFAULT
+      matches:
+        - name
+```
+
+#### simple `READ_ONLY` mode - Read once.
+
+```yaml
+# same as DEFAULT mode execpt for tasks.<id>.spec.mode
+...
+tasks:
+  - ...
+    spec:
+      mode: READ_ONLY
+      ...
+```
+
+#### simple `NO_UPDATE` mode - Read then create or ignore updaing.
+
+`NO_UPDATE` doesn't update if a resource exists.
+
+```yaml
+# same as DEFAULT mode execpt for tasks.<id>.spec.mode
+...
+tasks:
+  - ...
+    spec:
+      mode: READ_ONLY
+      ...
+```
+
+#### simple `EXEC` mode - Execute an API once.
+
+```yaml
+var:
+  domain_name: foo
+tasks:
+  - name: Create or Update a Domain
+    id: foo_user
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.Domain
+      data:
+        name: ${{ var.domain_name }}
+      mode: EXEC
+      verb:
+        exec: create
+```
+
+Configure an API name in `tasks.<id>.spec.verb.exec` then `spacectl` will execute the api with data as params.
 
 ## @modules/shell
 
 You can run shell script with @modules/shell. This can look like Github action.
 
-| **field**       | **description**                 | **examples**            | **is required** |
-| --------------- | ------------------------------- | ----------------------- | --------------- |
-| <Task>.spec.run | Defines the script you will run | curl https://google.com | O               |
+| **field**         | **description**                 | **examples**            | **is required** |
+| ----------------- | ------------------------------- | ----------------------- | --------------- |
+| `<Task>.spec.run` | Defines the script you will run | curl https://google.com | O               |
+
+## Options
+
+* `-f`, `--file-path` - Manifest file paths like `kubectl apply -f `
+  * Multiple manifests are available and they will be overidden and appended by order.
+  * examples
+    * `spacectl apply -f manifest.yaml`
+    * `spacectl apply -f env.yaml -f var.yaml -f manifest.yaml`
+    * `spacectl apply -f manifest_1.yaml -f manifest_2.yaml`
+* `-o`, `--output` - Output format (e.g. `json`,  `yaml` )
+* `-e`, -`--env` - Configure envrionmental. This can override `env` of manifests from the `-f` option.
+*  `--set` - Configure variables. This can override `var` of manifests from the `-f` option.
+* `--no-progress` - omit the output of each progress.
