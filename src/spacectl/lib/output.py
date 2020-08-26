@@ -61,3 +61,10 @@ def _print_quiet(data, **kwargs):
         values = list(map(str, items))
         click.echo(" ".join(values), nl=False)
     click.echo()
+
+
+def echo(message, flag=True, err=False, terminate=False):
+    if flag:
+        click.echo(message, err=err)
+    if terminate:
+        exit(1)

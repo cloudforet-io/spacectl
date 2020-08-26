@@ -6,12 +6,19 @@ import click
 
 class Manifest:
 
-    def __init__(self, manifest_dict):
+    def __init__(self, manifest_dict, no_progress):
         self.var = manifest_dict.get("var", {})
         self.env = manifest_dict.get("env", {})
         self.tasks = TaskList()
 
-        for task_dict in manifest_dict["tasks"]:
+        for task_dict in manifest_dict.get("tasks", []):
+            task = self._create_task(task_dict, no_progress)
+            self.tasks.append(task)
+
+    def add(self, manifest_dict):
+        self.var.update(manifest_dict.get("var", {}))
+        self.env.update(manifest_dict.get("env", {}))
+        for task_dict in manifest_dict.get("tasks", []):
             task = self._create_task(task_dict)
             self.tasks.append(task)
 
@@ -19,15 +26,16 @@ class Manifest:
         return {
             "var": self.var,
             "env": self.env,
-            "tasks": self.tasks.to_dict_list()
+            "tasks": self.tasks.to_list()
         }
-    def _create_task(self, task_dict):
+
+    def _create_task(self, task_dict, no_progress):
         module = task_dict["uses"].split("/")[-1]
         task = None
         if module == "resource":
-            task = ResourceTask(self, task_dict)
+            task = ResourceTask(self, task_dict, no_progress)
         elif module == "shell":
-            task = ShellTask(self, task_dict)
+            task = ShellTask(self, task_dict, no_progress)
         else:
             click.echo('{uses} is not a valid "uses" type.'.format(uses=task_dict["uses"]), err=True)
         return task

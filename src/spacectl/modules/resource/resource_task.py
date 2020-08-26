@@ -3,15 +3,14 @@ import copy
 
 from spacectl.command.execute import _check_api_permissions, _get_service_and_resource, _get_client,_call_api, _parse_parameter
 from spacectl.conf.my_conf import get_config, get_endpoint, get_template
-
-from spacectl.modules.resource.conf import get_verb
 from spacectl.apply.task import Task
 from spacectl.apply.task import apply_wrapper
 from spacectl.modules.resource import validate
+from spacectl.lib.output import echo
 
 class ResourceTask(Task):
-    def __init__(self, manifest, resource_dict):
-        super().__init__(manifest, resource_dict)
+    def __init__(self, manifest, resource_dict, no_progress):
+        super().__init__(manifest, resource_dict, no_progress)
 
     def set_spec(self, spec_dict):
         self.spec = spec_dict
@@ -62,22 +61,21 @@ class ResourceTask(Task):
     def _exec(self, service, resource):
         try:
             verb = self.spec["verb"]["exec"]
-            click.echo("Start " + ".".join([service, resource, verb]))
+            echo("Start " + ".".join([service, resource, verb]), flag=not self.no_progress)
             _check_api_permissions(service, resource, verb)
-            self.output = _execute_api(service, resource, verb, self.spec.get("data", {}), api_version="v1", output="yaml", parser={})
-            click.echo("Finish " + ".".join([service, resource, verb]))
-            click.echo(f'### {verb} Response ###')
-            click.echo(self.output)
+            self.output = _execute_api(service, resource, verb, self.spec.get("data", {}), api_version="v1", output="yaml", parser={}, no_progress=self.no_progress)
+            echo("Finish " + ".".join([service, resource, verb]), flag=not self.no_progress)
+            echo(f'### {verb} Response ###', flag=not self.no_progress)
+            echo(self.output, flag=not self.no_progress)
         except Exception as e:
-            click.echo(e, err=True)
-            exit(1)
+            echo(e, err=True, terminate=True)
 
     def _read(self, service, resource):
         try:
             read_params = {match: self.spec["data"][match] for match in self.spec["matches"]}
             verb = self.spec["verb"]["read"]
             # list를 지원안하면 exception
-            read_resources = _execute_api(service, resource, verb, read_params, api_version="v1", output="yaml", parser={})
+            read_resources = _execute_api(service, resource, verb, read_params, api_version="v1", output="yaml", parser={}, no_progress=self.no_progress)
             if isinstance(read_resources, list):
                 length = len(read_resources)
                 if length == 0:
@@ -90,39 +88,44 @@ class ResourceTask(Task):
 
             elif isinstance(read_resources, dict):  # like dict
                 self.output = read_resources
-            click.echo(f'### {verb} Response ###')
-            click.echo(read_resources)
+            echo(f'### {verb} Response ###', flag=not self.no_progress)
+            echo(read_resources, flag=not self.no_progress)
         except Exception as e:
             click.echo(e, err=True)
     def _update(self, service, resource):
         try:
             verb = self.spec["verb"]["update"]
-            click.echo("Start " + ".".join([service, resource, verb]))
+            echo("Start " + ".".join([service, resource, verb]), flag=not self.no_progress)
             _check_api_permissions(service, resource, verb)
-            self.output = _execute_api(service, resource, verb, self.spec['data'], api_version="v1", output="yaml", parser={})
-            click.echo("Finish " + ".".join([service, resource, verb]))
-            click.echo(f'### {verb} Response ###')
-            click.echo(self.output)
+            self.output = _execute_api(service, resource, verb, self.spec['data'], api_version="v1", output="yaml", parser={}, no_progress=self.no_progress)
+            echo("Finish " + ".".join([service, resource, verb]), flag=not self.no_progress)
+            echo(f'### {verb} Response ###', flag=not self.no_progress)
+            echo(self.output, flag=not self.no_progress)
         except Exception as e:
-            click.echo(e, err=True)
-            click.echo("Unavailable update field so Skip" +
-                       ".".join([service, resource, "update"]),
-                       err=True)
+            echo(e, flag=True, err=True)
+            echo(
+                "Unavailable update field so Skip" +
+                ".".join([service, resource, "update"]),
+                flag=True, err=True, terminate=True
+            )
+
     def _create(self, service, resource):
         verb = self.spec["verb"]["create"]
-        click.echo("Start " + ".".join([service, resource, verb]))
-        create_result = _execute_api(service, resource, verb, self.spec['data'], api_version="v1", output="yaml", parser={})
-        click.echo("Finished " + ".".join([service, resource, verb]))
+        echo("Start " + ".".join([service, resource, verb]), flag=not self.no_progress)
+        create_result = _execute_api(service, resource, verb, self.spec['data'], api_version="v1", output="yaml", parser={}, no_progress=self.no_progress)
+        echo("Finished " + ".".join([service, resource, verb]), flag=not self.no_progress)
         self.output = create_result
-        click.echo(f'### {verb} Response ###')
-        click.echo(self.output)
+        echo(f'### {verb} Response ###', flag=not self.no_progress)
+        echo(self.output, flag=not self.no_progress)
 
     def __str__(self):
         result_dict = {}
         for field in self.fields_to_apply_template:
             result_dict[field] = getattr(self, field)
         return str(field)
-def _execute_api(service, resource, verb, params={}, api_version='v1', output='yaml', parser=None):
+
+
+def _execute_api(service, resource, verb, params={}, api_version='v1', output='yaml', parser=None, no_progress=False):
 
     config = get_config()
     _check_api_permissions(service, resource, verb)
@@ -145,5 +148,5 @@ def _execute_api(service, resource, verb, params={}, api_version='v1', output='y
     elif verb == 'update':
         return response
     else:
-        click.echo("Non-standard verb: " + verb)
+        echo("[INFO] Non-standard verb: " + verb, flag=not no_progress)
         return response
