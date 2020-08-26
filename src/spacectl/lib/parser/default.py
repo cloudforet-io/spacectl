@@ -1,5 +1,5 @@
 from spacectl.lib.parser import BaseParser
-
+from spacectl.lib.output import echo
 
 class DefaultParser(BaseParser):
 
@@ -141,6 +141,19 @@ def _check_condition(match_option: str, val1, val2):
 
     return False
 
+
+def parse_key_value(inputs):
+    result = {}
+    for data in inputs:
+        try:
+            key, value = data.split("=", 1)
+            if value.find("=") != -1: raise ValueError
+            result[key] = value
+        except ValueError:
+            echo(f'[Error] input should be like <key>=<value>, not {data}',
+                 err=True, terminate=True)
+
+    return result
 
 if __name__ == '__main__':
     pass

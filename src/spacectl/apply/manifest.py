@@ -2,6 +2,8 @@ import yaml
 from spacectl.apply.task import Task, TaskList
 from spacectl.modules.resource.resource_task import ResourceTask
 from spacectl.modules.shell.shell_task import ShellTask
+from spacectl.lib.output import echo
+
 import click
 
 class Manifest:
@@ -14,18 +16,25 @@ class Manifest:
         for task_dict in manifest_dict.get("tasks", []):
             task = self._create_task(task_dict, no_progress)
             self.tasks.append(task)
+        self.no_progress = no_progress
 
     def add(self, manifest_dict):
         self.var.update(manifest_dict.get("var", {}))
         self.env.update(manifest_dict.get("env", {}))
         for task_dict in manifest_dict.get("tasks", []):
-            task = self._create_task(task_dict)
+            task = self._create_task(task_dict, self.no_progress)
             self.tasks.append(task)
+
+    def update(self, key, value_dict):
+        if not isinstance(getattr(self, key), dict):
+            echo(f'{key} is a valid update field of Manifest', err=True, terminate=True)
+        getattr(self, key).update(value_dict)
+
 
     def to_dict(self):
         return {
             "var": self.var,
-            "env": self.env,
+            # "env": self.env,
             "tasks": self.tasks.to_list()
         }
 

@@ -1,19 +1,13 @@
 var:
-  domain_id: bar
-  user_id: test-user
-  name: foo
+  domain_name: foo2
 tasks:
-  - name: Create or Update a domain
-    id: foos_domain
+  - name: Create or Update a Domain
+    id: foo_user
     uses: "@modules/resource"
     spec:
       resource_type: identity.Domain
       data:
-        domain_id: ${{ var.domain_id }}
-        user_id: ${{ var.user_id }}
-        name: ${{ var.name }}
-#      You can comment out mode because DEFAULT is the default value of mode.
-#      mode: DEFAULT
-      matches:
-        - domain_id
-        - user_id
+        name: ${{ var.domain_name }}
+      mode: EXEC
+      verb:
+        exec: create
