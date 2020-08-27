@@ -3,14 +3,15 @@ import copy
 
 from spacectl.command.execute import _check_api_permissions, _get_service_and_resource, _get_client,_call_api, _parse_parameter
 from spacectl.conf.my_conf import get_config, get_endpoint, get_template
-from spacectl.apply.task import Task
-from spacectl.apply.task import apply_wrapper
+from spacectl.lib.apply.task import Task
+from spacectl.lib.apply.task import execute_wrapper
 from spacectl.modules.resource import validate
 from spacectl.lib.output import echo
 
+
 class ResourceTask(Task):
-    def __init__(self, manifest, resource_dict, no_progress):
-        super().__init__(manifest, resource_dict, no_progress)
+    def __init__(self, task_dict, silent):
+        super().__init__(task_dict, silent)
 
     def set_spec(self, spec_dict):
         self.spec = spec_dict
@@ -42,8 +43,8 @@ class ResourceTask(Task):
         self.spec["verb"].update(custom_verb)
 
 
-    @apply_wrapper
-    def apply(self):
+    @execute_wrapper
+    def execute(self):
         # spaceone api 실행
         service, resource = self.spec["resource_type"].split(".")
         if self.spec['mode'] == 'EXEC':
@@ -61,12 +62,12 @@ class ResourceTask(Task):
     def _exec(self, service, resource):
         try:
             verb = self.spec["verb"]["exec"]
-            echo("Start " + ".".join([service, resource, verb]), flag=not self.no_progress)
+            echo("Start " + ".".join([service, resource, verb]), flag=not self.silent)
             _check_api_permissions(service, resource, verb)
-            self.output = _execute_api(service, resource, verb, self.spec.get("data", {}), api_version="v1", output="yaml", parser={}, no_progress=self.no_progress)
-            echo("Finish " + ".".join([service, resource, verb]), flag=not self.no_progress)
-            echo(f'### {verb} Response ###', flag=not self.no_progress)
-            echo(self.output, flag=not self.no_progress)
+            self.output = _execute_api(service, resource, verb, self.spec.get("data", {}), api_version="v1", output="yaml", parser={}, silent=self.silent)
+            echo("Finish " + ".".join([service, resource, verb]), flag=not self.silent)
+            echo(f'### {verb} Response ###', flag=not self.silent)
+            echo(self.output, flag=not self.silent)
         except Exception as e:
             echo(e, err=True, terminate=True)
 
@@ -75,7 +76,7 @@ class ResourceTask(Task):
             read_params = {match: self.spec["data"][match] for match in self.spec["matches"]}
             verb = self.spec["verb"]["read"]
             # list를 지원안하면 exception
-            read_resources = _execute_api(service, resource, verb, read_params, api_version="v1", output="yaml", parser={}, no_progress=self.no_progress)
+            read_resources = _execute_api(service, resource, verb, read_params, api_version="v1", output="yaml", parser={}, silent=self.silent)
             if isinstance(read_resources, list):
                 length = len(read_resources)
                 if length == 0:
@@ -88,19 +89,19 @@ class ResourceTask(Task):
 
             elif isinstance(read_resources, dict):  # like dict
                 self.output = read_resources
-            echo(f'### {verb} Response ###', flag=not self.no_progress)
-            echo(read_resources, flag=not self.no_progress)
+            echo(f'### {verb} Response ###', flag=not self.silent)
+            echo(read_resources, flag=not self.silent)
         except Exception as e:
             click.echo(e, err=True)
     def _update(self, service, resource):
         try:
             verb = self.spec["verb"]["update"]
-            echo("Start " + ".".join([service, resource, verb]), flag=not self.no_progress)
+            echo("Start " + ".".join([service, resource, verb]), flag=not self.silent)
             _check_api_permissions(service, resource, verb)
-            self.output = _execute_api(service, resource, verb, self.spec['data'], api_version="v1", output="yaml", parser={}, no_progress=self.no_progress)
-            echo("Finish " + ".".join([service, resource, verb]), flag=not self.no_progress)
-            echo(f'### {verb} Response ###', flag=not self.no_progress)
-            echo(self.output, flag=not self.no_progress)
+            self.output = _execute_api(service, resource, verb, self.spec['data'], api_version="v1", output="yaml", parser={}, silent=self.silent)
+            echo("Finish " + ".".join([service, resource, verb]), flag=not self.silent)
+            echo(f'### {verb} Response ###', flag=not self.silent)
+            echo(self.output, flag=not self.silent)
         except Exception as e:
             echo(e, flag=True, err=True)
             echo(
@@ -111,12 +112,12 @@ class ResourceTask(Task):
 
     def _create(self, service, resource):
         verb = self.spec["verb"]["create"]
-        echo("Start " + ".".join([service, resource, verb]), flag=not self.no_progress)
-        create_result = _execute_api(service, resource, verb, self.spec['data'], api_version="v1", output="yaml", parser={}, no_progress=self.no_progress)
-        echo("Finished " + ".".join([service, resource, verb]), flag=not self.no_progress)
+        echo("Start " + ".".join([service, resource, verb]), flag=not self.silent)
+        create_result = _execute_api(service, resource, verb, self.spec['data'], api_version="v1", output="yaml", parser={}, silent=self.silent)
+        echo("Finished " + ".".join([service, resource, verb]), flag=not self.silent)
         self.output = create_result
-        echo(f'### {verb} Response ###', flag=not self.no_progress)
-        echo(self.output, flag=not self.no_progress)
+        echo(f'### {verb} Response ###', flag=not self.silent)
+        echo(self.output, flag=not self.silent)
 
     def __str__(self):
         result_dict = {}
@@ -125,7 +126,7 @@ class ResourceTask(Task):
         return str(field)
 
 
-def _execute_api(service, resource, verb, params={}, api_version='v1', output='yaml', parser=None, no_progress=False):
+def _execute_api(service, resource, verb, params={}, api_version='v1', output='yaml', parser=None, silent=False):
 
     config = get_config()
     _check_api_permissions(service, resource, verb)
@@ -148,5 +149,5 @@ def _execute_api(service, resource, verb, params={}, api_version='v1', output='y
     elif verb == 'update':
         return response
     else:
-        echo("[INFO] Non-standard verb: " + verb, flag=not no_progress)
+        echo("[INFO] Non-standard verb: " + verb, flag=not silent)
         return response

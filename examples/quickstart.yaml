@@ -1,5 +1,6 @@
 var:
   foo: bar
+  is_true: {}
 tasks:
   - name: Create a domain
     id: foos_domain
@@ -13,8 +14,9 @@ tasks:
       verb:  # skip updating
         update:
   - name: Greet to the domain
+    if: ${{ var.is_true | bool }}
     id: script
     uses: "@modules/shell"
     spec:
       run: |
-        echo "a domain (${{ tasks.foos_domain.output.domain_id}}) has been created!"
+        echo "a domain (${{ tasks.foos_domain.outputs.domain_id }}) has been created!"

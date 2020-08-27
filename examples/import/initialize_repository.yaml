@@ -1,0 +1,71 @@
+tasks:
+  - name: Create Repository
+    id: repository
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Repository
+      data:
+        domain_id: ${{ tasks.domain.output.domain_id }}
+        name: ${{ var.domain_name }}
+        repository_type: local
+      matches:
+        - domain_id
+        - name
+      mode: NO_UPDATE
+      verb:
+        create: register
+
+  - name: Publish Supervisor
+    id: supervisor
+    uses: "@modules/resource"
+    spec:
+      resource_type: plugin.Supervisor
+      data:
+        domain_id: ${{ tasks.domain.output.domain_id }}
+        name: ${{ var.domain_name }}
+        hostname: default.svc.cluster.local
+        tags:
+      matches:
+        - domain_id
+        - name
+      mode: NO_UPDATE
+      verb:
+        create: publish
+
+  - name: Create a Supervisor API Key
+    id: supervisor_api_key
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.APIKey
+      data:
+        domain_id: ${{ tasks.domain.output.domain_id }}
+        user_id: ${{ var.username }}
+        api_key_type: USER
+      matches:
+        - domain_id
+      mode: EXEC
+      verb:
+        exec: create
+
+  - name: Consul Supervisor API Key
+    uses: "@modules/shell"
+    spec:
+      run: |
+        curl -X PUT http://consul/v1/kv/debug/supervisor/TOKEN -d '${{ tasks.supervisor_api_key.output.api_key }}'
+
+  - name: Read EC2 Plugin
+    id: ec2_plugin_read
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Plugin
+      data:
+        domain_id: ${{ tasks.domain.output.domain_id }}
+        name: ec2
+        service_type: inventory.collector
+        image: spaceone/aws-ec2
+        repository_id: ${{ tasks.repository.output.repository_id }}
+      matches:
+        - domain_id
+        - name
+        - repository_id
+      mode: READ_ONLY

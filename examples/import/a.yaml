@@ -1,0 +1,13 @@
+var:
+  foo: a
+
+import:
+  - b.yaml
+
+tasks:
+  - name: a
+    id: script
+    uses: "@modules/shell"
+    spec:
+      run: |
+        echo "${{ var.foo }}"

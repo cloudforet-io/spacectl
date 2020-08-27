@@ -9,6 +9,25 @@ var:
 
 env:
   environment: dev
+
+tasks:
+  - name: Initialize Mongo
+    id: mongo
+    uses: "@modules/shell"
+    spec:
+      run: |
+        mongo --host mongo:27017 \
+        --username mongouser \
+        --password mongopassword < $HOME/dev-initializer/init_db.js
+
+  - name: Create Domain
+    id: my_domain
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.Domain
+      data:
+        name: ${{ var.my_domain_name }}
+      matches:
         - name
       mode: NO_UPDATE
 

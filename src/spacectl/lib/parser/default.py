@@ -155,5 +155,11 @@ def parse_key_value(inputs):
 
     return result
 
+
+def parse_uses(uses):
+    uses = uses.strip()
+    _, module = uses.split("/")
+
+    return module
 if __name__ == '__main__':
     pass
