@@ -11,7 +11,7 @@ class Manifest:
     def __init__(self, manifest_dict, no_progress):
         self.var = manifest_dict.get("var", {})
         self.env = manifest_dict.get("env", {})
-        self.tasks = TaskList()
+        self.tasks = TaskList() # Task Queue
 
         for task_dict in manifest_dict.get("tasks", []):
             task = self._create_task(task_dict, no_progress)
