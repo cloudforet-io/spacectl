@@ -5,5 +5,5 @@
 __pycache__
 venv
 *.DS_Store
-spacectl/src/build
-spacectl/src/dist
+./src/build
+./src/dist
