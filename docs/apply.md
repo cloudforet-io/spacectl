@@ -9,8 +9,8 @@ After the initial configuration for spacectl, you can apply the below manifest.
 var:
   foo: bar
 tasks:
-  - name: Create a domain
-    id: foos_domain
+  - name: Create or Update a domain
+    id: foo_domain
     uses: "@modules/resource"
     spec:
       resource_type: identity.Domain
@@ -18,13 +18,12 @@ tasks:
         name: ${{ var.foo }}-domain
       matches:
         - name
-      mode: NO_UPDATE
   - name: Greet to the domain
     id: script
     uses: "@modules/shell"
     spec:
       run: |
-        echo "a domain (${{ tasks.foos_domain.output.domain_id}}) has been created!"
+        echo "There is a domain (${{ tasks.foos_domain.output.domain_id}})."
 ```
 
 ```bash
@@ -45,7 +44,7 @@ You will create a new domain named `bar` and can see its `domain_id`.
 
 ## Tasks
 
-Tasks is a list which contains the configuration of each Task. Task is written as \<Task> in the following table.
+Tasks is a list which contains the configuration of each Task. Task is written as `<Task>` in the following table.
 
 | **field**       | **description**                                              | **examples**                                                 | **required** |
 | --------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------ |
@@ -60,7 +59,7 @@ Tasks is a list which contains the configuration of each Task. Task is written a
 
 ## @module/resource
 
-you can use @module/resource for querying, creating, updating SpaceONE resources. 
+you can use `@module/resource` for querying, creating, updating SpaceONE resources. 
 
 By default, spacectl apply will execute list api to read, create api to create, update api to update. 
 
@@ -68,25 +67,25 @@ By default, spacectl apply will execute list api to read, create api to create, 
 
 Mode means how you will call APIs
 
-* (Default) DEFAULT: Read => create or update
-* READ_ONLY: Read and the `Task` will be completed.
-* NO_UPDATE: Read then create a new resource if the resources doesn't exist.
-* EXEC: Just execute an API configured in `<Task>.spec.verb.exec`.
+* (Default) `DEFAULT`: Read => create or update
+* `READ_ONLY`: Read and the `Task` will be completed.
+* `NO_UPDATE:` Read then create a new resource if the resources doesn't exist.
+* `EXEC`: Just execute an API configured in `<Task>.spec.verb.exec`.
 
 ### Verb types
 
-- read - Query resources with the fields in \<Task\>.spec.data which are listed in \<Task\>.spec.matches.
-- create - If there is no resources queried, spacectl will create a new resource.
-- update - If there is a resource queried, spacectl will update the resource.
-- exec - execute a configured API.
+- `read` - Query resources with the fields in `<Task>.spec.data` which are listed in `<Task>.spec.matches.`
+- `create` - If there is no resources queried, spacectl will create a new resource.
+- `update` - If there is a resource queried, spacectl will update the resource.
+- `exec` - execute a configured API.
 
-| **field**                    | **description**                                              | **examples**                                    | **required** |
-| ---------------------------- | ------------------------------------------------------------ | ----------------------------------------------- | ------------ |
-| `<Task\>.spec.resource_type` | Which resource type you’re applying                          | identity.User, repsitory.Repository             | O            |
-| `<Task\>.spec.data`          | A dictionary which will be used as parameters when you create or update resources. | a dictionary                                    | X            |
-| `<Task\>.spec.matches`       | Fields which will be used as parameters when you read resources. | a list. [“domain_id”, “name”]                   | X            |
-| `<Task\>.spec.verb`          | Overrides default verbs to customize the execution.          | a dictionary. {“read”: None, “create”: "issue"} | X            |
-| `<Task\>.spec.mode`          | How your apply process will be executed.                     | `DEFAULT`, `READ_ONLY`, `NO_UPDATE`, `EXEC`     | X            |
+| **field**                   | **description**                                              | **examples**                                      | **required** |
+| --------------------------- | ------------------------------------------------------------ | ------------------------------------------------- | ------------ |
+| `<Task>.spec.resource_type` | Which resource type you’re applying                          | `identity.User`, `repsitory.Repository`           | O            |
+| `<Task>.spec.data`          | A dictionary which will be used as parameters when you create or update resources. | a dictionary                                      | X            |
+| `<Task>.spec.matches`       | Fields which will be used as parameters when you read resources. | a list. `[“domain_id”, “name”]`                   | X            |
+| `<Task>.spec.verb`          | Overrides default verbs to customize the execution.          | a dictionary. `{“read”: None, “create”: "issue"}` | X            |
+| `<Task>.spec.mode`          | How your apply process will be executed.                     | `DEFAULT`, `READ_ONLY`, `NO_UPDATE`, `EXEC`       | X            |
 
 ### Example cases
 
@@ -143,7 +142,7 @@ Configure an API name in `tasks.<id>.spec.verb.exec` then `spacectl` will execut
 var:
   domain_name: foo
 tasks:
-  - name: Create or Update a Domain
+  - name: Execute a task to create a Domain
     id: foo_user
     uses: "@modules/resource"
     spec:
@@ -175,7 +174,7 @@ You can run shell script with @modules/shell. This can look like Github action.
     * `spacectl apply -f manifest.yaml`
     * `spacectl apply -f env.yaml -f var.yaml -f manifest.yaml`
     * `spacectl apply -f manifest_1.yaml -f manifest_2.yaml`
-* `-o`, `--output` - Output format (e.g. `json`,  `yaml` )
+* `-o`, `--output` - Output format (e.g. `json`,  `yaml` ). Output contains `var` and `tasks`.
 * `-e`, -`--env` - Configure envrionmental. This can override `env` of manifests from the `-f` option.
 *  `--set` - Configure variables. This can override `var` of manifests from the `-f` option.
 * `--no-progress` - omit the output of each progress.
