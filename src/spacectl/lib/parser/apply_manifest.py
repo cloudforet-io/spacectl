@@ -1,9 +1,11 @@
 import click
 from spacectl.lib.apply import store
 from spacectl.lib.parser.apply_jinja import jinja_env
+import jinja2.exceptions
+from spacectl.lib.output import echo
 
 
-def apply_template(obj):
+def apply_template(obj, task_id):
     fields = []
     if isinstance(obj, (str, bool, int, float, bool)):
         return 0
@@ -12,7 +14,7 @@ def apply_template(obj):
     elif isinstance(obj, list):
         # if it's a list, apply template to its items
         for item in obj:
-            apply_template(item)
+            apply_template(item, task_id)
         return 0
 
     elif isinstance(obj, dict):
@@ -30,17 +32,24 @@ def apply_template(obj):
         value = _get_obj_value(obj, field)
         if isinstance(value, str):
             template = jinja_env.from_string(value)
-            template_applied_value = template.render(
-                var=store.get_var(),
-                env=store.get_env(),
-                tasks=store.get_task_results()
-            )
-            if field == 'if':
-                obj[field] = _evaluate_if_statement(template_applied_value)
-            else:
-                obj[field] = template_applied_value
+            try:
+                template_applied_value = template.render(
+                    var=store.get_var(),
+                    env=store.get_env(),
+                    tasks=store.get_task_results()
+                )
+                if field == 'if':
+                    obj[field] = _evaluate_if_statement(template_applied_value)
+                else:
+                    obj[field] = template_applied_value
+            except jinja2.exceptions.UndefinedError as e:
+                echo(
+                    "While applying templates for Task(id={task_id}), an undefined error has occurred\n{error_message}".format(
+                        error_message=e.message,
+                        task_id=task_id
+                    ), err=True, terminate=True)
         else:
-            apply_template(value)
+            apply_template(value, task_id)
 
 
 def _get_obj_value(obj, key):

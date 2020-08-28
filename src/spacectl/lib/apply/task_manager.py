@@ -2,7 +2,6 @@ import yaml
 from spacectl.lib.apply.task import Task
 from spacectl.lib.apply import store
 from spacectl.lib.parser import apply_manifest
-from spacectl.lib.parser.default import parse_key_value
 from spacectl.modules.resource.resource_task import ResourceTask
 from spacectl.modules.shell.shell_task import ShellTask
 from spacectl.lib.output import echo
@@ -24,7 +23,6 @@ class TaskManager:
         data = utils.load_yaml_from_file(file_path)
         # data = yaml.safe_load(file_path)
         if "import" in data:
-            print(data)
             for import_file in data["import"]:
                 # import file path is relative to current file_path
                 absolute_location = Path(file_path).parent
@@ -35,26 +33,15 @@ class TaskManager:
         for task in data.get("tasks", []):
             self.task_queue.append(task)
 
-    def set_input(self, env, var, var_file):
-        data = {}
-        if var_file is not None:
-            data = utils.load_yaml_from_file(var_file)
-        store.set_var(data.get("var", {}))
-        store.set_var(parse_key_value(var))
-
-        store.set_env(os.environ)
-        store.set_env(data.get("var", {}))
-        store.set_env(parse_key_value(env))
-
     def run(self):
         for task in self.task_queue:
             context = {
                 "var": store.get_var(),
                 "env": store.get_env(),
                 "tasks": store.get_task_results(),
-                "self": task,
+                # "self": task,
             }
-            apply_manifest.apply_template(task)
+            apply_manifest.apply_template(task, task.get("id", "anonymous_task_id"))
             t = None
             module = parse_uses(task["uses"])
             if module == 'resource':

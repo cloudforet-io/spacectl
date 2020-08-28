@@ -1,11 +1,27 @@
-from spacectl.lib.apply.dot_dict_list import DotDictList
+from spacectl.lib.apply.dot_dict_list import TaskResultList
 from spacectl.lib.output import echo
+from spacectl.lib.parser.default import parse_key_value
+from spaceone.core import utils
+import os
+
+
 _DATA = {
     "var": {},
     "env": {},
-    "tasks": DotDictList()
+    "tasks": TaskResultList()
 }
 
+
+def initialize(env, var, var_file):
+    data = {}
+    if var_file is not None:
+        data = utils.load_yaml_from_file(var_file)
+    set_var(data.get("var", {}))
+    set_var(parse_key_value(var))
+
+    set_env(os.environ)
+    set_env(data.get("var", {}))
+    set_env(parse_key_value(env))
 
 def get_var(key=None):
     if key is None:
