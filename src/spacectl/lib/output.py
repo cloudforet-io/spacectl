@@ -7,7 +7,7 @@ def print_data(data, output, **kwargs):
     if output == 'quiet':
         _print_quiet(data, **kwargs)
     elif len(data) == 0:
-        print('NO DATA')
+        echo('NO DATA')
     elif output == 'table':
         _print_table(data, **kwargs)
     elif output == 'json':
