@@ -9,15 +9,15 @@ def execute_wrapper(func):
     def apply_inner(self):
         if self.apply_if:
             if not self.silent:
-                click.echo("##### Start: {task_name} #####".format(task_name=self.name))
+                click.echo("\n##### Start: {task_name} #####".format(task_name=self.name))
             func(self)
             if not self.silent:
-                click.echo("##### Finish: {task_name} #####".format(task_name=self.name))
+                click.echo("##### Finish: {task_name} #####\n".format(task_name=self.name))
                 click.echo("")
         else:
             if not self.silent:
-                click.echo("##### Skip: {task_name} #####".format(task_name=self.name))
-                click.echo("[INFO] {condition_statement} is not True".format(condition_statement = self.task_dict["if"]))
+                click.echo("\n##### Skip: {task_name} #####".format(task_name=self.name))
+                click.echo("[INFO] {condition_statement} is not True\n".format(condition_statement = self.task_dict["if"]))
         store.append_task_result(self)
     return apply_inner
 

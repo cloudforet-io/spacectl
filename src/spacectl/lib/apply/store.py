@@ -3,7 +3,7 @@ from spacectl.lib.output import echo
 from spacectl.lib.parser.default import parse_key_value
 from spaceone.core import utils
 import os
-
+import copy
 
 _DATA = {
     "var": {},
@@ -12,15 +12,14 @@ _DATA = {
 }
 
 
-def initialize(env, var, var_file):
+def apply_input(env, var, var_file):
     data = {}
     if var_file is not None:
         data = utils.load_yaml_from_file(var_file)
     set_var(data.get("var", {}))
     set_var(parse_key_value(var))
 
-    set_env(os.environ)
-    set_env(data.get("var", {}))
+    set_env(data.get("env", {}))
     set_env(parse_key_value(env))
 
 def get_var(key=None):
@@ -46,8 +45,10 @@ def get_env(key=None):
         return _DATA["env"]["key"]
 
 
-def set_env(key, value=None):
-    if value is None:
+def set_env(key=None, value=None):
+    if key is None:  # initial
+        _DATA["env"] = copy.deepcopy(os.environ)
+    elif value is None:
         env = key
         for k, v in env.items():
             _DATA["env"][k] = v

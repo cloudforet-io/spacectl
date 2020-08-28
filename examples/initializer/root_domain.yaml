@@ -49,15 +49,22 @@ tasks:
       run: |
         spacectl config set api_key ${{ tasks.domain_owner_token.output.access_token }}
 
+  - name: List Provider
+    id: list_provider
+    uses: "@modules/shell"
+    spec:
+      run: |
+        spacectl list provider -p domain_id=${{ tasks.domain.output.domain_id }}
+
   - name: Create admin user
     id: admin_user
     uses: "@modules/resource"
     spec:
       resource_type: identity.User
       data:
-        user_id: ${{ var.username }}
+        user_id: ${{ var.admin_username }}
+        password: ${{ var.admin_password }}
         domain_id: ${{ tasks.domain.output.domain_id }}
-        email: siyeon@pu22ppy.com
       matches:
         - user_id
         - domain_id

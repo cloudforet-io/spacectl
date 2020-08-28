@@ -1,0 +1,68 @@
+tasks:
+  - name: Create AWS Access Key Schema
+    id: schema
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Schema
+      data:
+        domain_id: ${{ tasks.domain.output.domain_id }}
+#        repository_id: ${{ var.repository_id }}
+        name: aws_access_key
+        service_type: secret.credentials
+        schema:
+          required: [aws_access_key_id, aws_secret_access_key]
+          properties:
+            aws_access_key_id:
+              title: AWS Access Key ID
+              type: string
+              minLength: 4
+            aws_secret_access_key:
+              title: AWS Secret Access Key
+              type: string
+              minLength: 4
+            region_name:
+              title: Region
+              type: string
+              minLength: 4
+              examples: [ap-northeast-2]
+          type: object
+        labels: [AWS]
+        tags:
+          description: AWS Access Key
+      mode: EXEC
+      verb:
+        exec: create
+
+  - name: Create AWS Assume Role Schema
+    id: schema
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Schema
+      data:
+        domain_id: ${{ tasks.domain.output.domain_id }}
+        #        repository_id: ${{ var.repository_id }}
+        name: aws_assume_role
+        service_type: secret.credentials
+        schema:
+          required: [aws_access_key_id, aws_secret_access_key]
+          properties:
+            aws_access_key_id:
+              title: AWS Access Key ID
+              type: string
+              minLength: 4
+            aws_secret_access_key:
+              title: AWS Secret Access Key
+              type: string
+              minLength: 4
+            region_name:
+              title: Region
+              type: string
+              minLength: 4
+              examples: [ap-northeast-2]
+          type: object
+        labels: [AWS]
+        tags:
+          description: AWS Access Key
+      mode: EXEC
+      verb:
+        exec: create

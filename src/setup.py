@@ -34,7 +34,8 @@ setup(
         'spaceone-core',
         'spaceone-api',
         'Click',
-        'tabulate'
+        'tabulate',
+        'jinja2'
     ],
     package_data={
         'spacectl': ['template/*.yml']

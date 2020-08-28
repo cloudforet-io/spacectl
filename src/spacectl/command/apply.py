@@ -25,10 +25,11 @@ def cli():
 @click.option('--var-file', help='Input yaml file to configure var and env')
 @click.option('-s', '--silent', is_flag=True, default=False, show_default=True)
 def apply(file_path, output, env, var, var_file, silent):
-    store.initialize(env, var, var_file)
+    store.set_env()
 
     task_manager = TaskManager(silent)
     task_manager.load(file_path)
+    store.apply_input(env, var, var_file)
     task_manager.run()
 
     if not output == 'none':
