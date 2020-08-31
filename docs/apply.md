@@ -9,8 +9,8 @@ After the initial configuration for spacectl, you can apply the below manifest.
 var:
   foo: bar
 tasks:
-  - name: Create a domain
-    id: foos_domain
+  - name: Create or Update a domain
+    id: foo_domain
     uses: "@modules/resource"
     spec:
       resource_type: identity.Domain
@@ -24,7 +24,7 @@ tasks:
     uses: "@modules/shell"
     spec:
       run: |
-        echo "a domain (${{ tasks.foos_domain.output.domain_id}}) has been created!"
+        echo "There is a domain (${{ tasks.foos_domain.output.domain_id}})."
 ```
 
 ```bash
@@ -60,7 +60,7 @@ Tasks is a list which contains the configuration of each Task. Task is written a
 
 ## @module/resource
 
-you can use @module/resource for querying, creating, updating SpaceONE resources. 
+you can use `@module/resource` for querying, creating, updating SpaceONE resources. 
 
 By default, spacectl apply will execute list api to read, create api to create, update api to update. 
 
@@ -143,7 +143,7 @@ Configure an API name in `tasks.<id>.spec.verb.exec` then `spacectl` will execut
 var:
   domain_name: foo
 tasks:
-  - name: Create or Update a Domain
+  - name: Execute a task to create a Domain
     id: foo_user
     uses: "@modules/resource"
     spec:
@@ -175,7 +175,7 @@ You can run shell script with @modules/shell. This can look like Github action.
     * `spacectl apply -f manifest.yaml`
     * `spacectl apply -f env.yaml -f var.yaml -f manifest.yaml`
     * `spacectl apply -f manifest_1.yaml -f manifest_2.yaml`
-* `-o`, `--output` - Output format (e.g. `json`,  `yaml` )
+* `-o`, `--output` - Output format (e.g. `json`,  `yaml` ). Output contains `var` and `tasks`.
 * `-e`, -`--env` - Configure envrionmental. This can override `env` of manifests from the `-f` option.
 *  `--set` - Configure variables. This can override `var` of manifests from the `-f` option.
 * `--no-progress` - omit the output of each progress.
