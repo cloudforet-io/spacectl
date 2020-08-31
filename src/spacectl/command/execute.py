@@ -242,10 +242,14 @@ def _call_api(client, resource, verb, params={}, **kwargs):
         params['domain_id'] = config.get('domain_id')
 
     try:
-        message = getattr(getattr(client, resource), verb)(
+        metadata = (()) if api_key == None else (('token', api_key),)
+        resource_client = getattr(client, resource)
+        resource_verb = getattr(resource_client, verb)
+        message = resource_verb(
             params,
-            metadata=(('token', api_key),)
+            metadata = metadata
         )
+
         return _change_message(message)
     except ERROR_BASE as e:
         if e.error_code == 'ERROR_AUTHENTICATE_FAILURE':

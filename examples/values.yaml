@@ -1,0 +1,6 @@
+variable:
+  output_file_path: output.yaml
+  repository_name: hello
+
+env:
+  environment: dev

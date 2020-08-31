@@ -1,0 +1,9 @@
+var:
+  foo: bar
+tasks:
+  - name: Greet
+    id: script
+    uses: "@modules/shell"
+    spec:
+      run: |
+        echo "foo's friend is ${{ var.foo }}"

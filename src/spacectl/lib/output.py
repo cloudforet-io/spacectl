@@ -53,5 +53,18 @@ def _print_yaml(data, **kwargs):
 
 def _print_quiet(data, **kwargs):
     results = data["results"]
-    for item in results:
-        click.echo(" ".join(item.values()))
+    for result in results:
+        items = list(result.values())
+        if len(items) > 1:
+            click.echo("Please Selector only one column for quiet output.", err=True)
+            exit(1)
+        values = list(map(str, items))
+        click.echo(" ".join(values), nl=False)
+    click.echo()
+
+
+def echo(message, flag=True, err=False, terminate=False):
+    if flag:
+        click.echo(message, err=err)
+    if terminate:
+        exit(1)

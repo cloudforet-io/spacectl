@@ -57,7 +57,7 @@ RESOURCE_ALIAS = {
 }
 
 EXCLUDE_APIS = [
-    'identity.Domain.create',
+    # 'identity.Domain.create',
     'identity.Domain.update',
     '*.delete'
 ]

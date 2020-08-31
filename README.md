@@ -1,5 +1,5 @@
 <h1 align="center">spacectl</h1>  
-  
+
 <br/>  
 <div align="center" style="display:flex;">  
   <img width="245" src="https://user-images.githubusercontent.com/35549653/76694897-de236300-66bb-11ea-9ace-b9edde9c12da.png">  
@@ -11,7 +11,7 @@
     </a> 
     </p> 
 </div>    
-  
+
 # Getting Started with spacectl
 The SpaceONE command-line tool, spacectl, allows you to run commands against resources managed by SpaceONE.     
 
@@ -85,12 +85,7 @@ spacectl exec create project_group -p domain_id=<domain_id> -p name=<project_gro
 
 # Advanced Guides
 
-## Configuration
-- Config Settings
-- Manage Endpoints
-- Switch the Environment
-
-## Command Details
+## Command Details and Guides
 - get: Show details of a specific resource
 - [list](docs/list.md): Display one or many resources
 

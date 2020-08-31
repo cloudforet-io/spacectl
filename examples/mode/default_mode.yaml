@@ -1,0 +1,13 @@
+var:
+  domain_name: foo2
+tasks:
+  - name: Create or Update a Domain
+    id: foo_user
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.Domain
+      data:
+        name: ${{ var.domain_name }}
+      mode: EXEC
+      verb:
+        exec: create
