@@ -1,0 +1,86 @@
+tasks:
+  - name: Create Domain
+    id: domain
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.Domain
+      data:
+        name: ${{ var.domain_name }}
+      matches:
+        - name
+      mode: NO_UPDATE
+
+  - name: Create DomainOwner
+    id: domain_owner
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.DomainOwner
+      data:
+        name: Domain Admin
+        owner_id: ${{ var.domain_owner }}
+        password: ${{ var.domain_owner }}
+        domain_id: ${{ tasks.domain.output.domain_id }}
+      matches:
+        - domain_id
+      mode: NO_UPDATE
+      verb:
+        read: get
+
+
+  - name: Create DomainOwner Token
+    id: domain_owner_token
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.Token
+      data:
+        credentials:
+          user_type: DOMAIN_OWNER
+          user_id: ${{ tasks.domain_owner.spec.data.owner_id }}
+          password: ${{ tasks.domain_owner.spec.data.password }}
+        domain_id: ${{ tasks.domain.output.domain_id }}
+      mode: EXEC
+      verb:
+        exec: issue
+
+  - name: Update spacectl configure
+    id: shell
+    uses: "@modules/shell"
+    spec:
+      run: |
+        spacectl config set api_key ${{ tasks.domain_owner_token.output.access_token }}
+
+  - name: List Provider
+    id: list_provider
+    uses: "@modules/shell"
+    spec:
+      run: |
+        spacectl list provider -p domain_id=${{ tasks.domain.output.domain_id }}
+
+  - name: Create admin user
+    id: admin_user
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.User
+      data:
+        user_id: ${{ var.admin_username }}
+        password: ${{ var.admin_password }}
+        domain_id: ${{ tasks.domain.output.domain_id }}
+      matches:
+        - user_id
+        - domain_id
+
+  - name: Create admin user API(Domain) key
+    id: admin_user_api_key
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.APIKey
+      data:
+        user_id: ${{ tasks.admin_user.output.user_id }}
+        domain_id: ${{ tasks.domain.output.domain_id }}
+        api_key_type: DOMAIN
+      matches:
+        - user_id
+        - domain_id
+      mode: EXEC
+      verb:
+        exec: create

@@ -1,0 +1,9 @@
+var:
+  foo: bar
+tasks:
+  - name: Greet to the domain
+    id: script
+    uses: "@modules/shell"
+    spec:
+      run: |
+        echo "IMPORTED - ${{ var.foo }}"

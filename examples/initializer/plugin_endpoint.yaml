@@ -1,0 +1,27 @@
+tasks:
+  - name: Install AWS EC2 Plugin
+    id: install_ec2_plugin
+    uses: "@modules/resource"
+    spec:
+      resource_type: plugin.Plugin
+      data:
+        domain_id: ${{ tasks.domain.output.domain_id }}
+        version: "1.3"
+        plugin_id: ${{ tasks.ec2_plugin.output.plugin_id }}
+        labels: {}
+      mode: EXEC
+      verb:
+        exec: get_plugin_endpoint
+  - name: Install AWS Cloud Service Plugin
+    id: install_cloud_service_plugin
+    uses: "@modules/resource"
+    spec:
+      resource_type: plugin.Plugin
+      data:
+        domain_id: ${{ tasks.domain.output.domain_id }}
+        version: "1.1"
+        plugin_id: ${{ tasks.cloud_service_plugin.output.plugin_id }}
+        labels: {}
+      mode: EXEC
+      verb:
+        exec: get_plugin_endpoint

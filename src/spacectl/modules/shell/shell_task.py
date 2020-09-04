@@ -1,20 +1,20 @@
 import click
 import subprocess
-from spacectl.apply.task import Task
-from spacectl.apply.task import apply_wrapper
+from spacectl.lib.apply.task import Task
+from spacectl.lib.apply.task import execute_wrapper
 from spacectl.lib.output import echo
-
+from spacectl.lib.apply import store
 
 class ShellTask(Task):
-    def __init__(self, manifest, resource_dict, no_progress):
-        super().__init__(manifest, resource_dict, no_progress)
+    def __init__(self, task_dict,silent):
+        super().__init__(task_dict, silent)
         # self.set_spec(resource_dict)
 
     def set_spec(self, spec_dict):
         self.spec = spec_dict
 
-    @apply_wrapper
-    def apply(self):
+    @execute_wrapper
+    def execute(self):
         stdout = subprocess.PIPE
         stderr = subprocess.STDOUT
         completed_process = subprocess.run(
@@ -30,4 +30,4 @@ class ShellTask(Task):
             "result": completed_process.stdout.decode("utf-8"),
             "return_code": completed_process.returncode
         }
-        echo(self.output["result"], flag=not self.no_progress, err=bool(self.output["return_code"]))
+        echo(self.output["result"], flag=not self.silent, err=bool(self.output["return_code"]))

@@ -1,0 +1,102 @@
+tasks:
+  - name: Create Repository
+    id: repository
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Repository
+      data:
+        domain_id: ${{ tasks.domain.output.domain_id }}
+        name: ${{ var.domain_name }}
+        repository_type: local
+      matches:
+        - domain_id
+        - name
+      mode: NO_UPDATE
+      verb:
+        create: register
+
+  - name: Publish Supervisor
+    id: supervisor
+    uses: "@modules/resource"
+    spec:
+      resource_type: plugin.Supervisor
+      data:
+        domain_id: ${{ tasks.domain.output.domain_id }}
+        name: ${{ var.domain_name }}
+        hostname: default.svc.cluster.local
+        tags:
+      matches:
+        - domain_id
+        - name
+      mode: NO_UPDATE
+      verb:
+        create: publish
+
+  - name: Create a Supervisor API Key
+    id: supervisor_api_key
+    uses: "@modules/resource"
+    spec:
+      resource_type: identity.APIKey
+      data:
+        domain_id: ${{ tasks.domain.output.domain_id }}
+        user_id: ${{ var.admin_username }}
+        api_key_type: USER
+      matches:
+        - domain_id
+      mode: EXEC
+      verb:
+        exec: create
+
+  - name: Consul Supervisor API Key
+    uses: "@modules/shell"
+    spec:
+      run: |
+        curl -X PUT http://consul/v1/kv/debug/supervisor/TOKEN -d '${{ tasks.supervisor_api_key.output.api_key }}'
+
+  - name: Create AWS EC2 Plugin
+    id: ec2_plugin
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Plugin
+      data:
+        domain_id: ${{ tasks.domain.output.domain_id }}
+        name: ec2
+        service_type: inventory.collector
+        image: spaceone/aws-ec2
+        labels: ['Server']
+        provider: 'aws'
+        capability:
+          supported_schema: ['aws_access_key']
+#        plugin_id: plugin-019719d23f7c
+        tags:
+          icon: https://assets-console-spaceone-stg.s3.ap-northeast-2.amazonaws.com/console-assets/icons/aws-ec2.svg
+          description: AWS EC2 Compute collector
+          spaceone:plugin_name: aws-ec2
+      mode: EXEC
+      verb:
+        exec: register
+
+  - name: Create AWS CloudService Plugin
+    id: cloud_service_plugin
+    uses: "@modules/resource"
+    spec:
+      resource_type: repository.Plugin
+      data:
+        domain_id: ${{ tasks.domain.output.domain_id }}
+        name: cloud_service
+        service_type: inventory.collector
+        image: spaceone/aws-cloud-services
+        labels: ['DynamoDB', 'S3', 'ElastiCache', 'AutoScaling Group', 'DirectConnector', 'RDS', 'DocumentDB',
+                 'EKS', 'Redshift', 'EFS', 'ECS', 'Workspace', 'API Gateway', 'Route53',
+                 'SQS', 'ECR', 'CloudTrail', 'SNS', 'SecretManager', 'AmazonAthena', 'KMS', 'Kinesis']
+        provider: 'aws'
+        capability:
+          supported_schema: ['aws_access_key']
+#        plugin_id: plugin-019719d23f7c
+        tags:
+          icon: https://assets-console-spaceone-stg.s3.ap-northeast-2.amazonaws.com/console-assets/icons/aws-cloudservice.svg
+          description: AWS Cloud Services collector
+          spaceone:plugin_name: aws-cloud-services
+      mode: EXEC
+      verb:
+        exec: register

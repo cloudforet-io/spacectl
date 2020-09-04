@@ -1,0 +1,11 @@
+var:
+  mongo_init_path: xxx
+tasks:
+  - name: Initialize Mongo
+    id: mongo
+    uses: "@modules/shell"
+    spec:
+      run: |
+        mongo --host mongo:27017 \
+        --username mongouser \
+        --password mongopassword < ${{ var.mongo_init_path }}

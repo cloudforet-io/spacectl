@@ -1,3 +1,7 @@
+import:
+  - modules/domain.yml
+  - modules/project.yml
+
 var:
   my_domain_name: root
   my_domain_owner: admin

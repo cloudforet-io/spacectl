@@ -1,0 +1,16 @@
+import:
+  - mongo.yaml
+  - root_domain.yaml
+  - repository.yaml
+  - schema.yaml
+  - plugin_endpoint.yaml
+
+
+var:
+  domain_name: root
+  domain_owner: admin
+  admin_username: admin
+  admin_password: admin
+  mongo_init_path: $HOME/dev-initializer/init_db.js
+
+tasks: []
