@@ -89,17 +89,25 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
 
 @cli.command()
 @click.argument('resource')
+@click.option('-p', '--parameter', multiple=True, help='Input Parameter (-p <key>=<value> -p ...)')
 @click.option('-j', '--json-parameter', help='JSON type parameter')
 @click.option('-f', '--file-parameter', 'file_path', type=click.Path(exists=True), help='YAML file only')
+@click.option('-c', '--columns', help='Specific columns (-c id,name)')
 @click.option('-l', '--limit', type=int, help='Number of rows')
 @click.option('-s', '--sort', help="Sorting by given key (-s [-]<key>)")
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='table', help='Output format',
               type=click.Choice(['table', 'json', 'yaml']), show_default=True)
-def stat(resource, json_parameter, file_path, limit, sort, api_version, output):
+def stat(resource, parameter, json_parameter, file_path, columns, limit, sort, api_version, output):
     """Querying statistics for resources"""
     service, resource = _get_service_and_resource(resource)
-    params = _parse_parameter(file_path, json_parameter)
+    parser = None
+
+    if columns:
+        template = _load_template(service, resource, columns)
+        parser = _load_parser(service, resource, template)
+
+    params = _parse_parameter(file_path, json_parameter, parameter)
     params['query'] = params.get('query', {})
 
     if limit:
@@ -118,7 +126,7 @@ def stat(resource, json_parameter, file_path, limit, sort, api_version, output):
             'desc': desc
         }
 
-    _execute_api(service, resource, 'stat', params=params, api_version=api_version, output=output)
+    _execute_api(service, resource, 'stat', params=params, api_version=api_version, output=output, parser=parser)
 
 
 @cli.command()
@@ -163,7 +171,7 @@ def _execute_api(service, resource, verb, params={}, api_version='v1', output='y
     client = _get_client(service, api_version)
     response = _call_api(client, resource, verb, params, config=config)
 
-    if verb == 'list' and parser:
+    if verb in ['list', 'stat'] and parser:
         results = []
         try:
             for result in response.get('results', []):
@@ -264,17 +272,18 @@ def _change_message(message):
     return MessageToDict(message, preserving_proto_field_name=True)
 
 
-def _load_template(service, resource, columns, template_path):
+def _load_template(service, resource, columns, template_path=None):
     if columns:
         template = {
             'template': {
                 'list': columns.split(',')
             }
         }
-    elif template_path:
-        template = load_yaml_from_file(template_path)
     else:
-        template = get_template(service, resource)
+        if template_path is not None:
+            template = load_yaml_from_file(template_path)
+        else:
+            template = get_template(service, resource)
     return template
 
 
