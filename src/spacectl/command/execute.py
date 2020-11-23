@@ -145,7 +145,10 @@ def exec(verb, resource, parameter, json_parameter, file_path, api_version, outp
     _execute_api(service, resource, verb, params=params, api_version=api_version, output=output)
 
 
-def _parse_parameter(file_parameter=None, json_parameter=None, parameter=[]):
+def _parse_parameter(file_parameter=None, json_parameter=None, parameter=None):
+    if parameter is None:
+        parameter = []
+
     if file_parameter:
         params = load_yaml_from_file(file_parameter)
     else:
@@ -165,7 +168,10 @@ def _parse_parameter(file_parameter=None, json_parameter=None, parameter=[]):
     return params
 
 
-def _execute_api(service, resource, verb, params={}, api_version='v1', output='yaml', parser=None):
+def _execute_api(service, resource, verb, params=None, api_version='v1', output='yaml', parser=None):
+    if params is None:
+        params = {}
+
     config = get_config()
     _check_api_permissions(service, resource, verb)
     client = _get_client(service, api_version)
@@ -239,7 +245,10 @@ def _check_resource_and_verb(client, resource, verb):
         raise Exception(f"'{client.service}.{client.api_version}.{resource}' resource does not have a '{verb}' verb.")
 
 
-def _call_api(client, resource, verb, params={}, **kwargs):
+def _call_api(client, resource, verb, params=None, **kwargs):
+    if params is None:
+        params = {}
+
     _check_resource_and_verb(client, resource, verb)
 
     config = kwargs.get('config', {})
@@ -250,12 +259,12 @@ def _call_api(client, resource, verb, params={}, **kwargs):
         params['domain_id'] = config.get('domain_id')
 
     try:
-        metadata = (()) if api_key == None else (('token', api_key),)
+        metadata = (()) if api_key is None else (('token', api_key),)
         resource_client = getattr(client, resource)
         resource_verb = getattr(resource_client, verb)
         message = resource_verb(
             params,
-            metadata = metadata
+            metadata=metadata
         )
 
         return _change_message(message)
