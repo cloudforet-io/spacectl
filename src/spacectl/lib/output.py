@@ -55,12 +55,11 @@ def _print_quiet(data, **kwargs):
     results = data["results"]
     for result in results:
         items = list(result.values())
-        if len(items) > 1:
+        if len(items) > 1 or len(items) == 0:
             click.echo("Please Selector only one column for quiet output.", err=True)
             exit(1)
-        values = list(map(str, items))
-        click.echo(" ".join(values), nl=False)
-    click.echo()
+
+        click.echo(items[0])
 
 
 def echo(message, flag=True, err=False, terminate=False):
