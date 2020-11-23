@@ -4,64 +4,43 @@ on:
     branches:
       - master
       - action/tag-trigger
+    paths-ignore:
+      - '.github/**'
   workflow_dispatch:
 
+env:
+  IMAGE_PREFIX: pyengine
+  # LOCATION points the parent directory
+  LOCATION_SETUP_PY: src # optional. for pypi upload
+  LOCATION_VERSION: src # the location for VERSION file (ex- . means the location of VERSION is ./VERSION)
+  SERVICE: spacectl
+  LOCATION_DOCKERFILE: .
+
 jobs:
-  initialize:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set environment virables
-        env:
-          IMAGE_PREFIX: pyengine
-          # LOCATION points the parent directory
-          LOCATION_SETUP_PY: src # optional. for pypi upload
-          LOCATION_VERSION: src # the location for VERSION file (ex- . means the location of VERSION is ./VERSION)
-          LOCATION_DOCKERFILE: .
-
-        run: |
-          cat <<EOF>set_env.sh
-          echo "::set-env name=SERVICE::$(cut -d'/' -f2 <<<${{github.repository}})"
-          echo "::set-env name=IMAGE_PREFIX::$IMAGE_PREFIX"
-          echo "::set-env name=LOCATION_SETUP_PY::$LOCATION_SETUP_PY"
-          echo "::set-env name=LOCATION_VERSION::$LOCATION_VERSION"
-          echo "::set-env name=LOCATION_DOCKERFILE::$LOCATION_DOCKERFILE"
-          echo "::set-env name=VERSION::$(cat $LOCATION_VERSION/VERSION).${{ github.run_id }}"
-          echo "$(cat $LOCATION_VERSION/VERSION).${{ github.run_id }}">$LOCATION_VERSION/VERSION
-          EOF
-          bash set_env.sh
-
-      - name: save envs
-        uses: actions/upload-artifact@v2
-        with:
-          name: set_env.sh
-          path: set_env.sh
-
-      - run: |
-          cat set_env.sh
-
   docker:
     if: github.repository_owner == 'spaceone-dev'
-    needs: initialize
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - run: |
+          echo "$(cat $LOCATION_VERSION/VERSION).${{ github.run_id }}">$LOCATION_VERSION/VERSION
+          echo "VERSION=$(cat $LOCATION_VERSION/VERSION).${{ github.run_id }}" >> $GITHUB_ENV
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
         with:
-          name: set_env.sh
-
-      - name: Set environment variables
-        run: |
-          bash set_env.sh
-      - name: Upload docker
-        uses: docker/build-push-action@v1
-        with:
-          path: ${{ env.LOCATION_DOCKERFILE }}
-          repository: ${{ env.IMAGE_PREFIX }}/${{ env.SERVICE }}
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          tags: latest,${{ env.VERSION }}
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/${{ env.SERVICE }}:latest
+            ${{ env.IMAGE_PREFIX }}/${{ env.SERVICE }}:${{ env.VERSION }}
 
       - name: Slack
         if: always()
