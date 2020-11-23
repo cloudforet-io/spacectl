@@ -18,29 +18,33 @@ DEFAULT_PARSER = 'spacectl.lib.parser.default.DefaultParser'
 RESOURCE_ALIAS = {
     # Identity
     'domain': ['identity', 'Domain'],
+    'domain_owner': ['identity', 'Domain'],
     'project': ['identity', 'Project'],
     'project_group': ['identity', 'ProjectGroup'],
     'pg': ['identity', 'ProjectGroup'],
     'user': ['identity', 'User'],
     'api_key': ['identity', 'APIKey'],
+    'policy': ['identity', 'Policy'],
     'role': ['identity', 'Role'],
     'provider': ['identity', 'Provider'],
     'service_account': ['identity', 'ServiceAccount'],
     'sa': ['identity', 'ServiceAccount'],
 
     # Inventory
+    'region': ['inventory', 'Region'],
     'server': ['inventory', 'Server'],
     'sv': ['inventory', 'Server'],
+    'cloud_service_type': ['inventory', 'CloudServiceType'],
     'cloud_service': ['inventory', 'CloudService'],
     'cs': ['inventory', 'CloudService'],
-    'cloud_service_type': ['inventory', 'CloudServiceType'],
+    'resource_type': ['inventory', 'ResourceType'],
+    'rt': ['inventory', 'ResourceType'],
     'collector': ['inventory', 'Collector'],
-    'region': ['inventory', 'Region'],
-    'pool': ['inventory', 'Pool'],
+
 
     # Config
-    'config_map': ['config', 'ConfigMap'],
-    'cm': ['config', 'ConfigMap'],
+    'user_config': ['config', 'UserConfig'],
+    'domain_config': ['config', 'UserConfig'],
 
     # Plugin
     'supervisor': ['plugin', 'Supervisor'],
@@ -54,6 +58,11 @@ RESOURCE_ALIAS = {
 
     # Secret
     'secret': ['secret', 'Secret'],
+
+    # Monitoring
+    'data_source': ['monitoring', 'DataSource'],
+    'metric': ['monitoring', 'Metric'],
+    'log': ['monitoring', 'Log'],
 }
 
 EXCLUDE_APIS = [
