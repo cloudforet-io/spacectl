@@ -1,12 +1,16 @@
 import click
+import csv
+import sys
 from tabulate import tabulate
 from spaceone.core import utils
 
 
 def print_data(data, output, **kwargs):
-    if output == 'quiet':
-        _print_quiet(data, **kwargs)
-    elif len(data) == 0:
+    if 'root_key' in kwargs:
+        data = utils.get_dict_value(data, kwargs['root_key'], [])
+        del kwargs['root_key']
+
+    if len(data) == 0:
         echo('NO DATA')
     elif output == 'table':
         _print_table(data, **kwargs)
@@ -14,26 +18,50 @@ def print_data(data, output, **kwargs):
         _print_json(data, **kwargs)
     elif output == 'yaml':
         _print_yaml(data, **kwargs)
+    elif output == 'csv':
+        _print_csv(data, **kwargs)
+    elif output == 'quiet':
+        _print_quiet(data, **kwargs)
 
 
 def _print_table(data, **kwargs):
-    if 'root_key' in kwargs:
-        data = utils.get_dict_value(data, kwargs['root_key'], [])
-        del kwargs['root_key']
-    headers = kwargs.get('headers', 'keys')
-    total_count = kwargs.get('total_count')
+    data, headers, total_count = _parse_data_by_options(data, **kwargs)
+
     if isinstance(data, dict):
         _print_yaml(data)
     else:
-        if len(data) > 0 and not isinstance(data[0], (dict, list, tuple)):
-            data = [[v] for v in data]
-            click.echo(tabulate(data, tablefmt='presto', headers=['Values']))
-        else:
-            click.echo(tabulate(data, tablefmt='presto', headers=headers))
+        click.echo(tabulate(data, tablefmt='presto', headers=headers or 'keys'))
 
         if total_count:
             click.echo()
             click.echo(f' Count: {len(data)} / {int(total_count)}')
+
+
+def _print_csv(data, **kwargs):
+    data, headers, total_count = _parse_data_by_options(data, **kwargs)
+
+    if isinstance(data, dict):
+        _print_yaml(data)
+    else:
+        if headers:
+            writer = csv.writer(sys.stdout)
+            writer.writerow(headers)
+            writer.writerows(data)
+        else:
+            writer = csv.DictWriter(sys.stdout, fieldnames=data[0].keys())
+            writer.writeheader()
+            writer.writerows(data)
+
+
+def _parse_data_by_options(data, **kwargs):
+    headers = kwargs.get('headers')
+    total_count = kwargs.get('total_count')
+
+    if len(data) > 0 and not isinstance(data[0], (dict, list, tuple)):
+        headers = ['Values']
+        data = [[v] for v in data]
+
+    return data, headers, total_count
 
 
 def _print_json(data, **kwargs):
@@ -55,7 +83,7 @@ def _print_quiet(data, **kwargs):
     results = data["results"]
     for result in results:
         items = list(result.values())
-        if len(items) > 1 or len(items) == 0:
+        if len(items) != 1:
             click.echo("Please Selector only one column for quiet output.", err=True)
             exit(1)
 
