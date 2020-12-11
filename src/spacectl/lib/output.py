@@ -80,9 +80,8 @@ def _print_yaml(data, **kwargs):
 
 
 def _print_quiet(data, **kwargs):
-    results = data["results"]
-    for result in results:
-        items = list(result.values())
+    for d in data:
+        items = list(d.values())
         if len(items) != 1:
             click.echo("Please Selector only one column for quiet output.", err=True)
             exit(1)
