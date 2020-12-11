@@ -46,7 +46,7 @@ def get(resource, parameter, json_parameter, file_path, api_version, output):
 @click.option('-s', '--sort', help="Sorting by given key (-s [-]<key>)")
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='table', help='Output format',
-              type=click.Choice(['table', 'json', 'yaml', 'quiet']), show_default=True)
+              type=click.Choice(['table', 'json', 'yaml', 'csv', 'quiet']), show_default=True)
 def list(resource, parameter, json_parameter, file_path, minimal_columns, all_columns, columns, template_path,
          limit, sort, api_version, output):
     """Display one or many resources"""
@@ -97,7 +97,7 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
 @click.option('-s', '--sort', help="Sorting by given key (-s [-]<key>)")
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='table', help='Output format',
-              type=click.Choice(['table', 'json', 'yaml']), show_default=True)
+              type=click.Choice(['table', 'json', 'yaml', 'csv', 'quiet']), show_default=True)
 def stat(resource, parameter, json_parameter, file_path, columns, limit, sort, api_version, output):
     """Querying statistics for resources"""
     service, resource = _get_service_and_resource(resource)
