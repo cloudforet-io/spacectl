@@ -1,6 +1,7 @@
 from spacectl.lib.parser import BaseParser
 from spacectl.lib.output import echo
 
+
 class DefaultParser(BaseParser):
 
     def load_template(self, template):
@@ -147,7 +148,9 @@ def parse_key_value(inputs):
     for data in inputs:
         try:
             key, value = data.split("=", 1)
-            if value.find("=") != -1: raise ValueError
+            if value.find("=") != -1:
+                raise ValueError
+
             result[key] = value
         except ValueError:
             echo(f'[Error] input should be like <key>=<value>, not {data}',
@@ -161,5 +164,7 @@ def parse_uses(uses):
     _, module = uses.split("/")
 
     return module
+
+
 if __name__ == '__main__':
     pass

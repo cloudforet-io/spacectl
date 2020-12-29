@@ -18,7 +18,7 @@ DEFAULT_PARSER = 'spacectl.lib.parser.default.DefaultParser'
 RESOURCE_ALIAS = {
     # Identity
     'domain': ['identity', 'Domain'],
-    'domain_owner': ['identity', 'Domain'],
+    'domain_owner': ['identity', 'DomainOwner'],
     'project': ['identity', 'Project'],
     'project_group': ['identity', 'ProjectGroup'],
     'pg': ['identity', 'ProjectGroup'],
