@@ -126,7 +126,7 @@ def stat(resource, parameter, json_parameter, file_path, columns, limit, api_ver
 @click.option('-f', '--file-parameter', 'file_path', type=click.Path(exists=True), help='YAML file only')
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='yaml', help='Output format',
-              type=click.Choice(['table', 'json', 'yaml']), show_default=True)
+              type=click.Choice(['table', 'csv', 'json', 'yaml']), show_default=True)
 def exec(verb, resource, parameter, json_parameter, file_path, api_version, output):
     """Execute a method to resource"""
     service, resource = _get_service_and_resource(resource)
@@ -176,7 +176,7 @@ def _execute_api(service, resource, verb, params=None, api_version='v1', output=
 
         response['results'] = results
 
-    if verb in ['list', 'stat']:
+    if output in ['table', 'csv'] and 'results' in response:
         options = {
             'root_key': 'results'
         }
