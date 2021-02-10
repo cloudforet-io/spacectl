@@ -94,11 +94,10 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
 @click.option('-f', '--file-parameter', 'file_path', type=click.Path(exists=True), help='YAML file only')
 @click.option('-c', '--columns', help='Specific columns (-c id,name)')
 @click.option('-l', '--limit', type=int, help='Number of rows')
-@click.option('-s', '--sort', help="Sorting by given key (-s [-]<key>)")
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='table', help='Output format',
               type=click.Choice(['table', 'json', 'yaml', 'csv', 'quiet']), show_default=True)
-def stat(resource, parameter, json_parameter, file_path, columns, limit, sort, api_version, output):
+def stat(resource, parameter, json_parameter, file_path, columns, limit, api_version, output):
     """Querying statistics for resources"""
     service, resource = _get_service_and_resource(resource)
     parser = None
@@ -108,23 +107,13 @@ def stat(resource, parameter, json_parameter, file_path, columns, limit, sort, a
         parser = _load_parser(service, resource, template)
 
     params = _parse_parameter(file_path, json_parameter, parameter)
-    params['query'] = params.get('query', {})
 
     if limit:
-        params['query']['page'] = {'limit': limit}
-
-    if sort:
-        if sort.startswith('-'):
-            desc = True
-            sort_key = sort[1:]
+        if service == 'statistics' and resource == 'Resource':
+            params['page'] = {'limit': limit}
         else:
-            desc = False
-            sort_key = sort
-
-        params['query']['sort'] = {
-            'name': sort_key,
-            'desc': desc
-        }
+            params['query'] = params.get('query', {})
+            params['query']['page'] = {'limit': limit}
 
     _execute_api(service, resource, 'stat', params=params, api_version=api_version, output=output, parser=parser)
 
@@ -137,7 +126,7 @@ def stat(resource, parameter, json_parameter, file_path, columns, limit, sort, a
 @click.option('-f', '--file-parameter', 'file_path', type=click.Path(exists=True), help='YAML file only')
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='yaml', help='Output format',
-              type=click.Choice(['table', 'json', 'yaml']), show_default=True)
+              type=click.Choice(['table', 'csv', 'json', 'yaml']), show_default=True)
 def exec(verb, resource, parameter, json_parameter, file_path, api_version, output):
     """Execute a method to resource"""
     service, resource = _get_service_and_resource(resource)
@@ -187,7 +176,7 @@ def _execute_api(service, resource, verb, params=None, api_version='v1', output=
 
         response['results'] = results
 
-    if verb in ['list', 'stat']:
+    if output in ['table', 'csv'] and 'results' in response:
         options = {
             'root_key': 'results'
         }
