@@ -176,7 +176,7 @@ def _execute_api(service, resource, verb, params=None, api_version='v1', output=
 
         response['results'] = results
 
-    if output in ['table', 'csv'] and 'results' in response:
+    if output in ['table', 'csv', 'quiet'] and 'results' in response:
         options = {
             'root_key': 'results'
         }
