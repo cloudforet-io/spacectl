@@ -10,10 +10,11 @@ def print_data(data, output, **kwargs):
         data = utils.get_dict_value(data, kwargs['root_key'], [])
         del kwargs['root_key']
 
-    if len(data) == 0:
-        echo('NO DATA')
-    elif output == 'table':
-        _print_table(data, **kwargs)
+    if output == 'table':
+        if len(data) == 0:
+            echo('NO DATA')
+        else:
+            _print_table(data, **kwargs)
     elif output == 'json':
         _print_json(data, **kwargs)
     elif output == 'yaml':

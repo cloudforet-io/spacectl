@@ -8,7 +8,8 @@ class DefaultParser(BaseParser):
         keys = []
         for rule in template.get('list', []):
             key, name = get_key_and_name(rule)
-            key = self._check_condition(key)
+            key = self._check_index_and_condition(key)
+            print(key)
             keys.append(key)
             self._sort_map[name] = key
 
@@ -23,13 +24,23 @@ class DefaultParser(BaseParser):
         return parsed_data
 
     @staticmethod
-    def _check_condition(key):
-        condition_keys = key.split('$', 1)
+    def _check_index_and_condition(key):
+        index_keys = key.split('.')
 
-        if len(condition_keys) == 2:
-            return condition_keys[0]
-        else:
-            return key
+        i = 0
+        for key in index_keys:
+            try:
+                if len(key) > 1 and key[0] == "?":
+                    break
+                else:
+                    int(key)
+                    break
+            except Exception as e:
+                pass
+
+            i += 1
+
+        return '.'.join(index_keys[:i])
 
 
 def get_key_and_name(rule):
@@ -62,29 +73,11 @@ def get_dict_value(data: dict, dotted_key: str):
 
 
 def get_list_values(values: list, dotted_key: str):
-    list_values = []
-    try:
-        # Get value by index
-        if '.' in dotted_key:
-            index, rest = dotted_key.split('.', 1)
-            index = int(index)
-            if index >= len(values):
-                return None
-            else:
-                list_values.append(values[index])
-        else:
-            return values[int(dotted_key)]
-
-    except Exception:
-        list_values = values
-        rest = dotted_key
-
-    # Check condition (cond_key:cond_value=>get_key)
     match_option = 'contain'
-    if len(rest) > 1 and rest[0] == "$":
+    if len(dotted_key) > 1 and dotted_key[0] == "?":
         condition = True
         try:
-            cond_option, rest = rest[1:].split('=>', 1)
+            cond_option, rest = dotted_key[1:].split('=>', 1)
             cond_key, cond_value = cond_option.split(':')
         except Exception as e:
             # Syntax Error
@@ -99,14 +92,30 @@ def get_list_values(values: list, dotted_key: str):
             cond_value = cond_value[1:]
 
     else:
+        try:
+            # Get value by index
+            if '.' in dotted_key:
+                index, rest = dotted_key.split('.', 1)
+                index = int(index)
+                if index >= len(values):
+                    return None
+                else:
+                    values = values[index]
+            else:
+                return values[int(dotted_key)]
+
+        except Exception:
+            rest = dotted_key
+
         condition = False
         cond_key = None
         cond_value = None
 
     results = []
-    for value in list_values:
+    for value in values:
         # Get value from condition
-        if condition and not _check_condition(match_option, value[cond_key], cond_value):
+        if not isinstance(value, dict) \
+                or (condition and not _check_condition(match_option, value[cond_key], cond_value)):
             continue
 
         # Get value from dict key
@@ -119,7 +128,10 @@ def get_list_values(values: list, dotted_key: str):
                 results.append(result)
 
     try:
-        return list(set(results))
+        if len(results) > 0:
+            return list(set(results))
+        else:
+            return None
     except Exception:
         return results
 
