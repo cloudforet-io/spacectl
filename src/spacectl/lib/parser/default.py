@@ -9,7 +9,6 @@ class DefaultParser(BaseParser):
         for rule in template.get('list', []):
             key, name = get_key_and_name(rule)
             key = self._check_index_and_condition(key)
-            print(key)
             keys.append(key)
             self._sort_map[name] = key
 
