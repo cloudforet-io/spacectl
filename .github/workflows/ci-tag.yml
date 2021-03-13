@@ -10,7 +10,7 @@ on:
         default: 1.2.3
 
 env:
-  IMAGE_PREFIX: pyengine
+  IMAGE_PREFIX: spaceone
   # LOCATION points the parent directory
   LOCATION_SETUP_PY: src # optional. for pypi upload
   LOCATION_VERSION: src # the location for VERSION file (ex- . means the location of VERSION is ./VERSION)
