@@ -228,11 +228,31 @@ $ spacectl list service_account
 ```
 
 
-
 ## Plugins(Collector)
 
 
-### Create Plugins
+- To get a required parameter for collector plugin, Several parameter need to be obtained.
+- plugin_id, version, provider
+
+```bash
+# To get plugin_id, version
+$ spacectl list repository.Repository
+ repository_id     | name                 | repository_type   | endpoint                                    | version   | secret_id           | created_at
+-------------------+----------------------+-------------------+---------------------------------------------+-----------+---------------------+--------------------------
+ repo-xxxxxxxx | Official Marketplace | remote            | xxxxxx | v1        | secret-xxxxxxxx | 2021-03-17T03:57:19.159Z
+ repo-xxxxxxxx | root                 | local             |                                             |           |                     | 2021-03-17T03:57:15.679Z
+
+ Count: 2 / 2
+
+$ 
+
+```
+
+
+
+
+
+### Create Collector
 
 
 
