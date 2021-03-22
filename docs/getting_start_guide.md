@@ -97,17 +97,78 @@ $ spacectl list identity.Project -p project_group_id=pg-e487432ec820
 
 ## User
 
+- After creating user, role need to be binded to each user.
+- Role should be existed before creating user.
 
 ### Create User
 
+```bash
+# Create LOCAL type user
+$ spacectl exec create identity.User -p user_id=user2@example.com -p password=xxxxxxx -p name=williams -p backend=LOCAL
+---
+backend: LOCAL
+created_at: '2021-03-22T01:45:24.582896Z'
+domain_id: domain-xxxxxxx
+language: en
+name: williams
+state: ENABLED
+timezone: UTC
+user_id: user2@example.com
+user_type: USER
+```
 
 
+### List Role
+
+```bash
+# List all roles in domain
+$ spacectl list identity.Role
+ role_id           | name          | role_type   | policies                                                         | domain_id           | created_at
+-------------------+---------------+-------------+------------------------------------------------------------------+---------------------+--------------------------
+ role-xxxxxxxx | Domain Admin  | DOMAIN      | [{'policy_type': 'MANAGED', 'policy_id': 'policy-xxxxxxxx'}] | domain-xxxxxxxx | 2021-03-19T04:57:02.221Z
+ role-xxxxxxxx | Project Admin | PROJECT     | [{'policy_type': 'MANAGED', 'policy_id': 'policy-xxxxxxxx'}] | domain-xxxxxxxx | 2021-03-19T04:57:02.107Z
+
+ Count: 2 / 2
+
+```
+
+### Role binding to user
+
+```bash
+# To grand user domain admin permission
+$ spacectl exec create identity.RoleBinding -p resource_type=identity.User -p resource_id=user2@example.com -p role_id=role-xxxxxxxx
+---
+created_at: '2021-03-22T02:04:58.376098Z'
+domain_id: domain-4c23f4f97c8c
+resource_id: user2@example.com
+resource_type: identity.User
+role_binding_id: rb-xxxxxxxx
+role_info:
+  name: Domain Admin
+  role_id: role-xxxxxxxx
+  role_type: DOMAIN
+
+# To list user role binding status
+$ spacectl list identity.RoleBinding
+ role_binding_id   | resource_type   | resource_id       | role_info                                                                       | domain_id           | created_at
+-------------------+-----------------+-------------------+---------------------------------------------------------------------------------+---------------------+--------------------------
+ rb-xxxxxxxx   | identity.User   | user1@example.com | {'role_id': 'role-xxxxxxxx', 'name': 'Domain Admin', 'role_type': 'DOMAIN'} | domain-xxxxxxxx | 2021-03-19T04:57:02.314Z
+ rb-xxxxxxxx   | identity.User   | user2@example.com | {'role_id': 'role-xxxxxxxx', 'name': 'Domain Admin', 'role_type': 'DOMAIN'} | domain-xxxxxxxx | 2021-03-22T02:04:58.376Z
+
+ Count: 2 / 2
+```
 
 ### List User
 
+```bash
+$ spacectl list identity.User
+ user_id           | state   | user_type   | backend   | language   | timezone   | created_at               | domain_id           | name
+-------------------+---------+-------------+-----------+------------+------------+--------------------------+---------------------+----------
+ user1@example.com | ENABLED | USER        | LOCAL     | en         | UTC        | 2021-03-19T04:57:01.087Z | domain-xxxxxxxx |
+ user2@example.com | ENABLED | USER        | LOCAL     | en         | UTC        | 2021-03-22T01:45:24.582Z | domain-xxxxxxxx | williams
 
-
-
+ Count: 2 / 2
+```
 
 
 ## Service Account
