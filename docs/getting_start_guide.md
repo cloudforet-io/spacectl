@@ -173,18 +173,59 @@ $ spacectl list identity.User
 
 ## Service Account
 
+### Create Service Account & Secret
+
+- Service Account & Secret need to create together
+
+```bash
+# Create service account
+$ spacectl exec create service_account -p name=aws-service-test-account -j '{"data": {"account_id": "xxxxxxxx"}}' -p project_id=project-xxxxxxxx -p provider=aws
+---
+created_at: '2021-03-22T03:17:44.041313Z'
+data:
+  account_id: 'xxxxxxxx'
+domain_id: domain-xxxxxxxx
+name: aws-service-test-account
+project_info:
+  name: test-project-02
+  project_id: project-xxxxxxxx
+provider: aws
+service_account_id: sa-xxxxxxxx
 
 
-### Create Service Account
+# Create Secret
+$ spacectl exec create secret.Secret -p name=aws-service-test-account -p schema=aws_access_key -p project_id=project-xxxxxxxx -p secret_type=CREDENTIALS -p service_account_id=sa-xxxxxxxx -j '{"data": {"provider":"aws", "aws_access_key_id": "xxxxxxxx","aws_secret_access_key":"xxxxxxxx"}}'
 
+---
+created_at: '2021-03-22T03:31:08.888473Z'
+domain_id: domain-xxxxxxxx
+name: aws-service-test-account
+project_id: project-xxxxxxxx
+provider: aws
+schema: aws_access_key
+secret_id: secret-xxxxxxxx
+secret_type: CREDENTIALS
+service_account_id: sa-xxxxxxxx
+```
 
+### List Service Account & Secrets
 
+```bash
+# List all secret in domain
+$ spacectl list secret
+ secret_id           | name                     | secret_type   | schema         | provider   | service_account_id   | project_id           | domain_id           | created_at
+---------------------+--------------------------+---------------+----------------+------------+----------------------+----------------------+---------------------+--------------------------
+ secret-xxxxxxxx | aws-service-test-account | CREDENTIALS   | aws_access_key | aws        | sa-xxxxxxxx      | project-xxxxxxxx | domain-xxxxxxxx | 2021-03-22T03:31:08.888Z
 
+ Count: 1 / 1
+ # List all service account in domain
+$ spacectl list service_account
+ service_account_id   | name                     | data                           | provider   | project_info                                                      | domain_id           | created_at
+----------------------+--------------------------+--------------------------------+------------+-------------------------------------------------------------------+---------------------+--------------------------
+ sa-xxxxxxxx      | aws-service-test-account | {'account_id': 'xxxxxxxx'} | aws        | {'project_id': 'project-xxxxxxxx', 'name': 'test-project-02'} | domain-xxxxxxxx | 2021-03-22T03:17:44.041Z
 
-
-### List Service Account
-
-
+ Count: 1 / 1
+```
 
 
 
