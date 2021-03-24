@@ -1,6 +1,6 @@
 # How to configure spacectl
 
-This doc covers how to configure spaceone api endpoints and environements of spacectl.
+This doc covers how to configure spaceone api endpoints and environments of spacectl.
 
 ## Config Concept
 
@@ -21,7 +21,7 @@ This is just a sample for my local environment. I installed SpaceONE by helm3 on
 # default.yml
 
 # You should change the api_key. This is just a sample api_key
-api_key: api_key: xxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxx
+api_key: xxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxx
 
 endpoints:
   config: grpc://config:50051
