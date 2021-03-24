@@ -77,7 +77,7 @@ def get_list_values(values: list, dotted_key: str):
         condition = True
         try:
             cond_option, rest = dotted_key[1:].split('=>', 1)
-            cond_key, cond_value = cond_option.split(':')
+            cond_key, cond_value = cond_option.split(':', 1)
         except Exception as e:
             # Syntax Error
             return None
