@@ -1,0 +1,22 @@
+---
+aggregate:
+- query:
+    resource_type: inventory.Server
+    query:
+      aggregate:
+      - group:
+          keys:
+          - key: region_code
+            name: region_name
+          - key: provider
+            name: provider
+          fields:
+          - name: count
+            operator: count
+      filter:
+      - k: region_code
+        v: null
+        o: not
+- sort:
+    key: count
+    desc: true

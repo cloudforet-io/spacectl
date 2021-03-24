@@ -1,0 +1,11 @@
+template:
+    list:
+        - cloud_service_id
+        - cloud_service_type
+        - cloud_service_group
+        - provider
+        - data.vpc_id|vpc_id
+        - data.state
+        - data.cidr_block | cidr_block
+        - data.instance_tenancy | tenancy
+        - data.is_default

@@ -1,0 +1,22 @@
+---
+aggregate:
+- query:
+    resource_type: inventory.Server
+    query:
+        aggregate:
+        - group:
+            keys:
+            - name: region
+              key: region_code
+            fields:
+            - name: server_count
+              operator: count
+            - name: cpu_average
+              key: data.hardware.core
+              operator: average
+            - name: memory_average
+              key: data.hardware.memory
+              operator: average
+            - name: instance_type
+              key: data.compute.instance_type
+              operator: add_to_set

@@ -5,7 +5,7 @@
   <img width="245" src="https://user-images.githubusercontent.com/35549653/76694897-de236300-66bb-11ea-9ace-b9edde9c12da.png">  
   <p> 
    <br>
-    <img  alt="Version"  src="https://img.shields.io/badge/version-0.9.0-blue.svg?cacheSeconds=2592000"  />    
+    <img  alt="Version"  src="https://img.shields.io/badge/version-1.5.2.1-blue.svg?cacheSeconds=2592000"  />    
     <a  href="https://www.apache.org/licenses/LICENSE-2.0"  target="_blank">  
         <img  alt="License: Apache 2.0"  src="https://img.shields.io/badge/License-Apache 2.0-yellow.svg"  />  
     </a> 
@@ -50,15 +50,14 @@ Run it like these:
 The <import_file> looks like
 
 ```
-api_key: xxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxx
-domain_id: domain-123asd123
+api_key: <JWT_API_KEY>
 endpoints:
-  ...
   identity: grpc://identity:50051
   inventory: grpc://inventory:50051
   plugin: grpc://plugin:50051
   repository: grpc://repository:50051
   secret: grpc://secret:50051
+  ...
 ```
 
 if you want to see a sample configuration file, try [examples/configuration.yaml](examples/configuration.yaml).
@@ -75,7 +74,7 @@ spacectl api-resources
 # Examples
 ### Case 1: List Servers:
 ```commandline
-spacectl list server -p domain_id=<domain_id>
+spacectl list server
 ```
 
 ### Case 2: Create Project Group:
@@ -88,7 +87,6 @@ spacectl exec create project_group -p domain_id=<domain_id> -p name=<project_gro
 ## Command Details and Guides
 - get: Show details of a specific resource
 - [list](docs/list.md): Display one or many resources
-
 - [apply](docs/apply.md) : Get, list, create or update various resources and execute other tasks
 - stat: Querying statistics for resources
 - [exec](docs/exec.md): Execute a method to resource
