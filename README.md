@@ -20,7 +20,8 @@ API Reference: https://spaceone-dev.gitbook.io/spaceone-apis
 # Install and Set Up spacectl
 Install the latest release with the command from PyPI using pip:
 ```commandline
-pip install spacectl
+sudo pip install --upgrade pip 
+sudo pip install spacectl
 ```
 
 There are a few variants on getting helps. 
@@ -79,7 +80,7 @@ spacectl list server
 
 ### Case 2: Create Project Group:
 ```commandline
-spacectl exec create project_group -p domain_id=<domain_id> -p name=<project_group_name>
+spacectl exec create project_group -p name=<project_group_name>
 ```
 
 # Advanced Guides
@@ -87,7 +88,7 @@ spacectl exec create project_group -p domain_id=<domain_id> -p name=<project_gro
 ## Command Details and Guides
 - get: Show details of a specific resource
 - [list](docs/list.md): Display one or many resources
-- [apply](docs/apply.md) : Get, list, create or update various resources and execute other tasks
+- [apply](docs/apply.md): Get, list, create or update various resources and execute other tasks
 - stat: Querying statistics for resources
 - [exec](docs/exec.md): Execute a method to resource
 - template: Manage resource templates
