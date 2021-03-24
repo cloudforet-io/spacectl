@@ -1,0 +1,133 @@
+---
+aggregate:
+- query:
+    resource_type: inventory.Server
+    query:
+      aggregate:
+      - group:
+          fields:
+          - name: value
+            operator: count
+      filter:
+      - key: ref_cloud_service_type.is_primary
+        operator: eq
+        value: true
+    extend_data:
+      label: Compute
+- concat:
+    resource_type: inventory.CloudService
+    query:
+      aggregate:
+      - group:
+          fields:
+          - name: value
+            operator: count
+      filter:
+      - key: ref_cloud_service_type.is_primary
+        operator: eq
+        value: true
+      - key: ref_cloud_service_type.labels
+        operator: eq
+        value: Database
+    extend_data:
+      label: Database
+- concat:
+    resource_type: inventory.CloudService
+    query:
+      aggregate:
+      - group:
+          fields:
+          - name: value
+            operator: count
+      filter:
+      - key: ref_cloud_service_type.is_primary
+        operator: eq
+        value: true
+      - key: ref_cloud_service_type.labels
+        operator: eq
+        value: Container
+    extend_data:
+      label: Container
+- concat:
+    resource_type: inventory.CloudService
+    query:
+      aggregate:
+      - group:
+          fields:
+          - name: value
+            operator: count
+      filter:
+      - key: ref_cloud_service_type.is_primary
+        operator: eq
+        value: true
+      - key: ref_cloud_service_type.labels
+        operator: eq
+        value: Networking
+    extend_data:
+      label: Networking
+- concat:
+    resource_type: inventory.CloudService
+    query:
+      aggregate:
+      - group:
+          fields:
+          - name: value
+            operator: count
+      filter:
+      - key: ref_cloud_service_type.is_primary
+        operator: eq
+        value: true
+      - key: ref_cloud_service_type.labels
+        operator: eq
+        value: Security
+    extend_data:
+      label: Security
+- concat:
+    resource_type: inventory.CloudService
+    query:
+      aggregate:
+      - group:
+          fields:
+          - name: value
+            operator: count
+      filter:
+      - key: ref_cloud_service_type.is_primary
+        operator: eq
+        value: true
+      - key: ref_cloud_service_type.labels
+        operator: eq
+        value: Anlaytics
+    extend_data:
+      label: Anlaytics
+- concat:
+    resource_type: inventory.CloudService
+    query:
+      aggregate:
+      - group:
+          fields:
+          - name: value
+            operator: count
+      filter:
+      - key: ref_cloud_service_type.is_primary
+        operator: eq
+        value: true
+    extend_data:
+      label: All
+- concat:
+    resource_type: inventory.CloudService
+    query:
+      aggregate:
+      - group:
+          fields:
+          - key: data.size
+            name: value
+            operator: sum
+      filter:
+      - key: ref_cloud_service_type.is_major
+        operator: eq
+        value: true
+      - key: ref_cloud_service_type.labels
+        operator: eq
+        value: Storage
+    extend_data:
+      label: Storage

@@ -1,0 +1,94 @@
+---
+aggregate:
+- query:
+    resource_type: inventory.CloudServiceType
+    query:
+        aggregate:
+        - group:
+            keys:
+            - name: cloud_service_type_id
+              key: cloud_service_type_id
+            - name: cloud_service_type
+              key: name
+            - name: cloud_service_group
+              key: group
+            - name: provider
+              key: provider
+            - name: resource_type
+              key: resource_type
+            fields:
+            - name: tags
+              key: tags
+              operator: first
+            - name: labels
+              key: labels
+              operator: first
+        filter:
+        - k: is_primary
+          v: true
+          o: eq
+        - k: labels
+          v: ['Compute']
+          o: in
+        #- k: resource_type
+        #  v: inventory.Server
+        #  o: eq
+- join:
+    resource_type: inventory.CloudService
+    keys:
+    - cloud_service_type
+    - cloud_service_group
+    - provider
+    query:
+        aggregate:
+        - group:
+            keys:
+            - name: cloud_service_type
+              key: cloud_service_type
+            - name: cloud_service_group
+              key: cloud_service_group
+            - name: provider
+              key: provider
+            fields:
+            - name: cloud_service_count
+              operator: count
+
+- join:
+    resource_type: inventory.Server
+    keys:
+    - cloud_service_type
+    - cloud_service_group
+    - provider
+    query:
+        aggregate:
+        - group:
+            keys:
+            - name: cloud_service_type
+              key: cloud_service_type
+            - name: cloud_service_group
+              key: cloud_service_group
+            - name: provider
+              key: provider
+            fields:
+            - name: server_count
+              operator: count
+        #filter:
+        # Region Filter
+        #- key: region_code
+        #  operator: in
+        #  value:
+        #  - ap-northeast-2
+        # Project Filter
+        #- key: project_id
+        #  operator: in
+        #  value:
+        #  - project-18655561c535
+        #keyword: server-3957af8d8fa0
+- fill_na:
+    data:
+        cloud_service_count: 0
+        server_count: 0
+- formula:
+    eval: 'count = cloud_service_count + server_count'
+- formula:
+    query: 'count > 0'

@@ -1,0 +1,8 @@
+template:
+    list:
+        - project_id
+        - name
+        - project_group_info.name|project_group
+        - project_group_info.project_group_id|project_group_id
+        - tags
+        - created_at

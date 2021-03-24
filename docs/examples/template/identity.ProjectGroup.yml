@@ -1,0 +1,5 @@
+template:
+    list:
+        - project_group_id
+        - name
+        - parent_project_group_info.project_group_id|parent_project_group_id

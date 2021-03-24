@@ -1,0 +1,58 @@
+---
+aggregate:
+- query:
+    resource_type: inventory.Job
+    query:
+      aggregate:
+      - group:
+          keys:
+          - key: created_at
+            name: date
+            date_format: '%Y-%m-%d'
+          fields:
+          - name: success_count
+            operator: count
+      filter:
+      - k: status
+        v: SUCCESS
+        o: eq
+      - k: created_at
+        v: '2021-01-01T00:00:00Z'
+        o: datetime_gte
+      - k: created_at
+        v: '2021-01-31T00:00:00Z'
+        o: datetime_lte
+- join:
+    resource_type: inventory.Job
+    keys:
+    - date
+    type: OUTER
+    query:
+      aggregate:
+      - group:
+          keys:
+          - key: created_at
+            name: date
+            date_format: '%Y-%m-%d'
+          fields:
+          - name: fail_count
+            operator: count
+      filter:
+      - k: status
+        v:
+        - ERROR
+        - CANCELED
+        - TIMEOUT
+        o: in
+      - k: created_at
+        v: '2021-01-01T00:00:00Z'
+        o: datetime_gte
+      - k: created_at
+        v: '2021-01-31T00:00:00Z'
+        o: datetime_lte
+- fill_na:
+    data:
+        success_count: 0
+        fail_count: 0
+- sort:
+    key: date

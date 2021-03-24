@@ -1,0 +1,109 @@
+---
+aggregate:
+- query:
+    resource_type: inventory.CloudServiceType
+    query:
+        aggregate:
+        - group:
+            keys:
+            - name: cloud_service_type_id
+              key: cloud_service_type_id
+            - name: cloud_service_type
+              key: name
+            - name: cloud_service_group
+              key: group
+            - name: provider
+              key: provider
+            fields:
+            - name: tags
+              key: tags
+              operator: first
+
+        filter:
+        - key: is_major
+          operator: eq
+          value: true
+        - key: is_primary
+          operator: eq
+          value: true
+- join:
+    resource_type: inventory.CloudService
+    keys:
+    - cloud_service_type
+    - cloud_service_group
+    - provider
+    query:
+        aggregate:
+        - group:
+            keys:
+            - name: cloud_service_type
+              key: cloud_service_type
+            - name: cloud_service_group
+              key: cloud_service_group
+            - name: provider
+              key: provider
+            fields:
+            - name: total_count
+              operator: count
+- join:
+    resource_type: inventory.CloudService
+    keys:
+    - cloud_service_type
+    - cloud_service_group
+    - provider
+    query:
+        aggregate:
+        - group:
+            keys:
+            - name: cloud_service_type
+              key: cloud_service_type
+            - name: cloud_service_group
+              key: cloud_service_group
+            - name: provider
+              key: provider
+            fields:
+            - name: created_count
+              operator: count
+        filter:
+        - key: created_at
+          operator: timediff_gte
+          value: "now/d - 10d"
+- join:
+    resource_type: inventory.CloudService
+    keys:
+    - cloud_service_type
+    - cloud_service_group
+    - provider
+    query:
+        aggregate:
+        - group:
+            keys:
+            - name: cloud_service_type
+              key: cloud_service_type
+            - name: cloud_service_group
+              key: cloud_service_group
+            - name: provider
+              key: provider
+            fields:
+            - name: deleted_count
+              operator: count
+        filter:
+        - key: deleted_at
+          operator: timediff_gte
+          value: "now/d - 10d"
+        - key: state
+          operator: eq
+          value: DELETED
+- fill_na:
+    data:
+        total_count: 0
+        created_count: 0
+        deleted_count: 0
+- formula:
+    query: "created_count > 0 or deleted_count > 0"
+- formula:
+    eval: "create_warning = created_count >= total_count/100*100"
+- formula:
+    eval: "delete_warning = deleted_count >= total_count/100*50"
+- sort:
+    key: provider

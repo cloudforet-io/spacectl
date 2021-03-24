@@ -1,0 +1,14 @@
+---
+aggregate:
+- query:
+    resource_type: inventory.Server
+    query:
+        aggregate:
+        - group:
+            fields:
+            - name: cpu_average
+              key: data.hardware.core
+              operator: average
+            keys:
+            - name: project
+              key: project_id
