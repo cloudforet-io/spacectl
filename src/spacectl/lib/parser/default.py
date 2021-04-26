@@ -25,6 +25,9 @@ class DefaultParser(BaseParser):
 
     @staticmethod
     def _check_index_and_condition(key):
+        if key.startswith('tags'):
+            return 'tags'
+
         index_keys = key.split('.')
 
         i = 0
