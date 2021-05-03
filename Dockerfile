@@ -10,4 +10,5 @@ WORKDIR ${SRC_DIR}
 RUN python3 setup.py install && rm -rf /tmp/*
 WORKDIR /root
 # you can mount spacectl configurations on /root/.spaceone/
-ENTRYPOINT ["spacectl"]
+#ENTRYPOINT ["spacectl"]
+CMD ["tail", "-f", "/dev/null"]
