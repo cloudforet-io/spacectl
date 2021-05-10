@@ -19,15 +19,16 @@ class DefaultParser(BaseParser):
         parsed_data = {}
         for rule in self.template.get('list', []):
             key, name = get_key_and_name(rule)
-            parsed_data[name] = utils.get_dict_value(raw_data, key)
+
+            if key.startswith('tags.'):
+                parsed_data[name] = get_tags_value(raw_data, key)
+            else:
+                parsed_data[name] = utils.get_dict_value(raw_data, key)
 
         return parsed_data
 
     @staticmethod
     def _check_index_and_condition(key):
-        if key.startswith('tags'):
-            return 'tags'
-
         index_keys = key.split('.')
 
         i = 0
@@ -70,6 +71,12 @@ def parse_key_value(inputs):
                  err=True, terminate=True)
 
     return result
+
+
+def get_tags_value(data, key):
+    sub_key = key[5:]
+    tags = data.get('tags', {})
+    return tags.get(sub_key)
 
 
 def parse_uses(uses):
