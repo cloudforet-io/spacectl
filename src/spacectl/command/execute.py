@@ -215,8 +215,19 @@ def _get_client(service, api_version):
 
     try:
         e = parse_endpoint(endpoint)
+
+        protocol = e.get('scheme')
+
+        if protocol not in ['grpc', 'grpc+ssl']:
+            raise ValueError(f'Unsupported protocol. (supported protocol = grpc | grpc+ssl, endpoint={endpoint})')
+
+        if protocol == 'grpc+ssl':
+            ssl_enabled = True
+        else:
+            ssl_enabled = False
+
         client = pygrpc.client(endpoint=f'{e.get("hostname")}:{e.get("port")}',
-                               version=api_version, max_message_length=1024*1024*256)
+                               version=api_version, ssl_enabled=ssl_enabled, max_message_length=1024*1024*256)
         client.service = service
         client.api_version = api_version
         return client

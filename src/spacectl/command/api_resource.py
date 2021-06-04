@@ -31,7 +31,18 @@ def _get_resources_from_client(endpoints, api_version='v1'):
     for service, endpoint in endpoints.items():
         try:
             e = parse_endpoint(endpoint)
-            client = pygrpc.client(endpoint=f'{e.get("hostname")}:{e.get("port")}', version=api_version)
+            protocol = e.get('scheme')
+
+            if protocol not in ['grpc', 'grpc+ssl']:
+                raise ValueError(f'Unsupported protocol. (supported_protocol=grpc|grpc+ssl, endpoint={endpoint})')
+
+            if protocol == 'grpc+ssl':
+                ssl_enabled = True
+            else:
+                ssl_enabled = False
+
+            client = pygrpc.client(endpoint=f'{e.get("hostname")}:{e.get("port")}',
+                                   version=api_version, ssl_enabled=ssl_enabled)
 
             resources[service] = {}
             for api_resource, verb in client.api_resources.items():
@@ -40,6 +51,8 @@ def _get_resources_from_client(endpoints, api_version='v1'):
                     'verb': verb
                 }
         except ERROR_BASE as e:
+            raise e
+        except ValueError as e:
             raise e
         except Exception:
             raise ValueError(f'Endpoint is invalid. (endpoint={endpoint})')
