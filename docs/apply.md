@@ -50,13 +50,15 @@ Tasks is a list which contains the configuration of each Task. Task is written a
 | **field**       | **description**                                              | **examples**                                                 | **required** |
 | --------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------ |
 | `<Task>.name`   | The name of the task.                                        | `Create a Domain`, `Temporary Task`, …                       | X            |
-| `<Task>.if`     | the conditional statement if the task will be executed or not. | `${{ var.my_name }} == “SpaceONE”`, `${{ tasks.example.output | len }}< 1` |              |
+| `<Task>.if`     | the conditional statement if the task will be executed or not. | `${{ var.my_name | quote }} == “SpaceONE”`                 | X            |
 | `<Task>.id`     | The ID of the task.                                          | `my_domain`, `test_user`, `issued_token`                     | X            |
 | `<Task>.uses`   | This determines what operation the task execution. If this use spacectl-built-in module, you can use @modules/MODULE_NAME annotation. | `@modules/resource`, `@modules/shell`                        | O            |
 | `<Task>.spec`   | This is whole configuration of the operation, not the task itself,  mentioned in uses. | a dictionary                                                 | O            |
 | `<Task>.output` | The output of the task. How to set output can be differ depending on which operation the task executed. | a dictionary or a list                                       | X            |
 
 
+| :point_up:    | **if** evaluates statement, use jinja filter to make string |
+|---------------|:------------------------|
 
 ## @module/resource
 

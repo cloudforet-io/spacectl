@@ -30,6 +30,7 @@ def apply_template(obj, task_id):
 
     for field in fields:
         value = _get_obj_value(obj, field)
+
         if isinstance(value, str):
             template = jinja_env.from_string(value)
             try:

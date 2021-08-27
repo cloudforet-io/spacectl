@@ -12,6 +12,9 @@ CLOSE_LEN = len(CLOSE)
 def bool_filter(value):
     return bool(value)
 
+def quote(value):
+    return "\"%s\"" % value
 
 jinja_env = Environment(loader=jinja2.BaseLoader(), variable_start_string=OPEN, variable_end_string=CLOSE)
 jinja_env.filters['bool'] = bool_filter
+jinja_env.filters['quote'] = quote
