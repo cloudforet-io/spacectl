@@ -29,6 +29,7 @@ RESOURCE_ALIAS = {
     'provider': ['identity', 'Provider'],
     'service_account': ['identity', 'ServiceAccount'],
     'sa': ['identity', 'ServiceAccount'],
+    'endpoint': ['identity', 'Endpoint'],
 
     # Inventory
     'region': ['inventory', 'Region'],
@@ -37,18 +38,14 @@ RESOURCE_ALIAS = {
     'cloud_service_type': ['inventory', 'CloudServiceType'],
     'cloud_service': ['inventory', 'CloudService'],
     'cs': ['inventory', 'CloudService'],
-    'resource_type': ['inventory', 'ResourceType'],
-    'rt': ['inventory', 'ResourceType'],
+    'resource_group': ['inventory', 'ResourceGroup'],
+    'rg': ['inventory', 'ResourceGroup'],
     'collector': ['inventory', 'Collector'],
 
 
     # Config
     'user_config': ['config', 'UserConfig'],
     'domain_config': ['config', 'UserConfig'],
-
-    # Plugin
-    'supervisor': ['plugin', 'Supervisor'],
-    'sup': ['plugin', 'Supervisor'],
 
     # Repository
     'repository': ['repository', 'Repository'],
@@ -60,13 +57,31 @@ RESOURCE_ALIAS = {
     'secret': ['secret', 'Secret'],
 
     # Monitoring
-    'data_source': ['monitoring', 'DataSource'],
     'metric': ['monitoring', 'Metric'],
     'log': ['monitoring', 'Log'],
+    'project_alert_config': ['monitoring', 'ProjectAlertConfig'],
+    'escalation_policy': ['monitoring', 'EscalationPolicy'],
+    'webhook': ['monitoring', 'Webhook'],
+    'maintenance_window': ['monitoring', 'MaintenanceWindow'],
+    'alert': ['monitoring', 'Alert'],
+    'event': ['monitoring', 'Event'],
+
+    # Notification
+    'protocol': ['notification', 'Protocol'],
+    'project_channel': ['notification', 'ProjectChannel'],
+    'ph': ['notification', 'ProjectChannel'],
+    'user_channel': ['notification', 'UserChannel'],
+    'uh': ['notification', 'UserChannel'],
+    'notification': ['notification', 'Notification'],
+    'noti': ['notification', 'Notification'],
+
+    # Cost Analysis
+    'cost': ['cost_analysis', 'Cost'],
+    'budget': ['cost_analysis', 'Budget'],
+    'budget_usage': ['cost_analysis', 'BudgetUsage'],
 }
 
 EXCLUDE_APIS = [
     # 'identity.Domain.create',
-    'identity.Domain.update',
-    '*.delete'
+    # 'identity.Domain.update',
 ]
