@@ -10,6 +10,6 @@ template:
         - data.os.os_distro|os_distro
         - nics.public_ip_address|public_ip_addresses
         - provider
-        - data.compute.account_id|account_id
+        - account|account_id
         - project_id
         - updated_at
