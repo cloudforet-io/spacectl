@@ -141,9 +141,9 @@ def _execute_api(service, resource, verb, params={}, api_version='v1', output='y
         if len(results) == 0:
             return []
         elif len(results) > 1:
-            Exception()
-        else:
             return results
+        else:
+            Exception()
     elif verb == 'create':
         return response
     elif verb == 'update':
