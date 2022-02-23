@@ -7,6 +7,7 @@ from spaceone.core import pygrpc
 from spaceone.core.utils import parse_endpoint, load_json, load_yaml_from_file
 
 from spacectl.lib.output import print_data
+from spacectl.lib.template import *
 from spacectl.conf.global_conf import RESOURCE_ALIAS, EXCLUDE_APIS, DEFAULT_PARSER
 from spacectl.conf.my_conf import get_config, get_endpoint, get_template
 
@@ -51,7 +52,7 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
          limit, sort, api_version, output):
     """Display one or many resources"""
     service, resource = _get_service_and_resource(resource)
-    template = _load_template(service, resource, columns, template_path)
+    template = load_template(service, resource, columns, template_path)
     parser = None
 
     params = _parse_parameter(file_path, json_parameter, parameter)
@@ -62,7 +63,7 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
     elif minimal_columns:
         params['query']['minimal'] = True
     elif template:
-        parser = _load_parser(service, resource, template)
+        parser = load_parser(service, resource, template)
         params['query']['only'] = parser.keys
 
     if limit:
@@ -103,8 +104,8 @@ def stat(resource, parameter, json_parameter, file_path, columns, limit, api_ver
     parser = None
 
     if columns:
-        template = _load_template(service, resource, columns)
-        parser = _load_parser(service, resource, template)
+        template = load_template(service, resource, columns)
+        parser = load_parser(service, resource, template)
 
     params = _parse_parameter(file_path, json_parameter, parameter)
 
@@ -279,40 +280,3 @@ def _call_api(client, resource, verb, params=None, **kwargs):
 
 def _change_message(message):
     return MessageToDict(message, preserving_proto_field_name=True)
-
-
-def _load_template(service, resource, columns, template_path=None):
-    if columns:
-        template = {
-            'template': {
-                'list': columns.split(',')
-            }
-        }
-    else:
-        if template_path is not None:
-            template = load_yaml_from_file(template_path)
-        else:
-            template = get_template(service, resource)
-    return template
-
-
-def _load_parser(service, resource, template):
-    parser = template.get('parser', DEFAULT_PARSER)
-    template = template.get('template')
-
-    if parser is None:
-        raise Exception(f"'parser' is undefined in {service}.{resource} template.")
-
-    if template is None:
-        raise Exception(f"'template' is undefined in {service}.{resource} template.")
-
-    try:
-        module_name, class_name = parser.rsplit('.', 1)
-        parser_module = __import__(module_name, fromlist=[class_name])
-    except Exception:
-        raise Exception(f'Parser is invalid. ({parser})')
-
-    try:
-        return getattr(parser_module, class_name)(template)
-    except Exception:
-        raise Exception(f'{service}.{resource} template format is invalid.')
