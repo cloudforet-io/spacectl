@@ -2,8 +2,7 @@ import yaml
 from spacectl.lib.apply.task import Task
 from spacectl.lib.apply import store
 from spacectl.lib.parser import apply_manifest
-from spacectl.modules.resource.resource_task import ResourceTask
-from spacectl.modules.shell.shell_task import ShellTask
+from spacectl.modules import MODULES
 from spacectl.lib.output import echo
 import click
 from pathlib import Path
@@ -42,10 +41,11 @@ class TaskManager:
                 # "self": task,
             }
             apply_manifest.apply_template(task, task.get("id", "anonymous_task_id"))
-            t = None
             module = parse_uses(task["uses"])
-            if module == 'resource':
-                t = ResourceTask(task, silent=self.silent)
-            elif module == 'shell':
-                t = ShellTask(task, silent=self.silent)
-            t.execute()
+            task_module = MODULES.get(module)
+
+            if task_module:
+                t = task_module(task, silent=self.silent)
+                t.execute()
+            else:
+                raise Exception(f'Not found Module: {module}')
