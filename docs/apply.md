@@ -84,11 +84,14 @@ Mode means how you will call APIs
 
 | **field**                    | **description**                                              | **examples**                                    | **required** |
 | ---------------------------- | ------------------------------------------------------------ | ----------------------------------------------- | ------------ |
-| `<Task\>.spec.resource_type` | Which resource type you’re applying                          | identity.User, repsitory.Repository             | O            |
-| `<Task\>.spec.data`          | A dictionary which will be used as parameters when you create or update resources. | a dictionary                                    | X            |
-| `<Task\>.spec.matches`       | Fields which will be used as parameters when you read resources. | a list. [“domain_id”, “name”]                   | X            |
-| `<Task\>.spec.verb`          | Overrides default verbs to customize the execution.          | a dictionary. {“read”: None, “create”: "issue"} | X            |
-| `<Task\>.spec.mode`          | How your apply process will be executed.                     | `DEFAULT`, `READ_ONLY`, `NO_UPDATE`, `EXEC`     | X            |
+| `<Task\>.spec.resource_type`    | Which resource type you’re applying                          | identity.User, repsitory.Repository             | O            |
+| `<Task\>.spec.data`             | A dictionary which will be used as parameters when you create or update resources. | a dictionary                                    | X            |
+| `<Task\>.spec.matches`          | Fields which will be used as parameters when you read resources. | a list. [“domain_id”, “name”]                   | X            |
+| `<Task\>.spec.verb`             | Overrides default verbs to customize the execution.          | a dictionary. {“read”: None, “create”: "issue"} | X            |
+| `<Task\>.spec.mode`             | How your apply process will be executed.                     | `DEFAULT`, `READ_ONLY`, `NO_UPDATE`, `EXEC`     | X            |
+| `<Task\>.spec.output.template`          | Defines the format for the execution result. Supports `metadata` and `file` type. <br> In the `metadta` in the options, Get the metadata value of the specified `cloud service type` and output using the value specified in table as it is. <br> If `file` is specified, If file is specified, the template yaml file in the path of  specified in options is read. | `metadata`<br>`file`    | X            |
+| `<Task\>.spec.output.options.file`      | If `file` is specified in `output.template`, set the path to the yaml file to be used as template in file in options.                     |  template.yaml   | X            |
+| `<Task\>.spec.output.options.metadata`  | If `metadata` is specified in `output.template`, Specifies the cloud service type with metadata to use as a template. The format is `<provider>`.`<cloud_service_group>`.`<cloud_service_type>` |  `aws.EC2.Volume` <br> `aws.DocumentDB.Cluster`   | X            |
 
 ### Example cases
 
@@ -168,6 +171,55 @@ You can run shell script with @modules/shell. This can look like Github action.
 | `<Task>.spec.run` | Defines the script you will run | curl https://google.com | O               |
 
 
+## @modules/export-google-sheets
+
+You can export the execution results to google sheets with @modules/export-google-sheets. How to use is as follows.
+
+| **field**         | **description**                 | **examples**            | **is required** |
+| ----------------- | ------------------------------- | ----------------------- | --------------- |
+| `<Task>.spec.service_account_json` | This is a google account json file for accessing google sheets. The json file is available at https://console.cloud.google.com. | /Users/xx/google_account/service_account.json | O               |
+| `<Task>.spec.sheet_id`             | The ID of google sheet to export | 1xk0wZHxfW9crcyOAJse_nY_Nd_30M5tlwP56wcwSD1A | O               |
+| `<Task>.spec.worksheet_index`      | The Index of worksheet to be written the data. Default is 0. | 1  | X               |
+| `<Task>.spec.header_start_at`      | The cell position to start writing the header. Default is A3. | 'A3' <br> 'B10' | X               |
+| `<Task>.spec.data.input_data`      | The list of data to be exported to the specified worksheet. This is a list of data to be exported to the specified sheet. <br> The data format is a list of the dictionary, the key of the dictionary is the header of data, and the value is recorded in the column. |  | O               |
+
+### Example cases
+
+This example is the YAML file was be used @module/resource to get EBS Volume data through the SpaceONE inventory API and export it to Google Sheets.
+
+```yaml
+var:
+  service_account_json_path: '/Users/user/google_cloud/service_account.json'
+  sheet_id: '1xk0wZHxfW9crcyOAJse_nY_Nd_30M5tlwP56wcwSD1A'
+tasks:
+  - name: EBS Volume
+    id: ebs_volume
+    uses: "@modules/resource"
+    spec:
+      resource_type: inventory.CloudService
+      data:
+        cloud_service_group: EC2
+        cloud_service_type: Volume
+      mode: EXEC
+      verb:
+        exec: list
+      output:
+        template: metadata
+        options:
+          metadata: "aws.EC2.Volume"
+  - name: Export EBS Volume to Spread Sheets
+    id: ebs_vol_export
+    uses: "@modules/export-google-sheets"
+    spec:
+      service_account_json: ${{ var.service_account_json_path }}
+      sheet_id: ${{ var.sheet_id }}
+      worksheet_index: 0
+      header_start_at: A3
+      data:
+        input_data: ${{ tasks.ebs_volume.output }}
+```
+
+
 
 ## Options
 
@@ -181,3 +233,4 @@ You can run shell script with @modules/shell. This can look like Github action.
 * `-e`, -`--env` - Configure envrionmental. This can override `env` of manifests from the `-f` option.
 *  `--set` - Configure variables. This can override `var` of manifests from the `-f` option.
 * `--no-progress` - omit the output of each progress.
+
