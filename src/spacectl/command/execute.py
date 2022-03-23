@@ -45,11 +45,12 @@ def get(resource, parameter, json_parameter, file_path, api_version, output):
 @click.option('-t', '--template-file', 'template_path', type=click.Path(exists=True), help='Template file (YAML)')
 @click.option('-l', '--limit', type=int, help='Number of rows')
 @click.option('-s', '--sort', help="Sorting by given key (-s [-]<key>)")
+@click.option('-m', '--method', default='list', help='List API method', show_default=True)
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='table', help='Output format',
               type=click.Choice(['table', 'json', 'yaml', 'csv', 'quiet']), show_default=True)
 def list(resource, parameter, json_parameter, file_path, minimal_columns, all_columns, columns, template_path,
-         limit, sort, api_version, output):
+         limit, sort, method, api_version, output):
     """Display one or many resources"""
     service, resource = _get_service_and_resource(resource)
     template = load_template(service, resource, columns, template_path)
@@ -85,7 +86,7 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
             'desc': desc
         }
 
-    _execute_api(service, resource, 'list', params=params, api_version=api_version, output=output, parser=parser)
+    _execute_api(service, resource, method, params=params, api_version=api_version, output=output, parser=parser)
 
 
 @cli.command()
@@ -95,10 +96,11 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
 @click.option('-f', '--file-parameter', 'file_path', type=click.Path(exists=True), help='YAML file only')
 @click.option('-c', '--columns', help='Specific columns (-c id,name)')
 @click.option('-l', '--limit', type=int, help='Number of rows')
+@click.option('-m', '--method', default='stat', help='Stat API method', show_default=True)
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='table', help='Output format',
               type=click.Choice(['table', 'json', 'yaml', 'csv', 'quiet']), show_default=True)
-def stat(resource, parameter, json_parameter, file_path, columns, limit, api_version, output):
+def stat(resource, parameter, json_parameter, file_path, columns, limit, method, api_version, output):
     """Querying statistics for resources"""
     service, resource = _get_service_and_resource(resource)
     parser = None
@@ -116,7 +118,7 @@ def stat(resource, parameter, json_parameter, file_path, columns, limit, api_ver
             params['query'] = params.get('query', {})
             params['query']['page'] = {'limit': limit}
 
-    _execute_api(service, resource, 'stat', params=params, api_version=api_version, output=output, parser=parser)
+    _execute_api(service, resource, method, params=params, api_version=api_version, output=output, parser=parser)
 
 
 @cli.command()
