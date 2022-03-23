@@ -86,7 +86,7 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
             'desc': desc
         }
 
-    _execute_api(service, resource, method, params=params, api_version=api_version, output=output, parser=parser)
+    _execute_api(service, resource, method, 'list', params=params, api_version=api_version, output=output, parser=parser)
 
 
 @cli.command()
@@ -118,7 +118,7 @@ def stat(resource, parameter, json_parameter, file_path, columns, limit, method,
             params['query'] = params.get('query', {})
             params['query']['page'] = {'limit': limit}
 
-    _execute_api(service, resource, method, params=params, api_version=api_version, output=output, parser=parser)
+    _execute_api(service, resource, method, 'stat', params=params, api_version=api_version, output=output, parser=parser)
 
 
 @cli.command()
@@ -134,7 +134,7 @@ def exec(verb, resource, parameter, json_parameter, file_path, api_version, outp
     """Execute a method to resource"""
     service, resource = _get_service_and_resource(resource)
     params = _parse_parameter(file_path, json_parameter, parameter)
-    _execute_api(service, resource, verb, params=params, api_version=api_version, output=output)
+    _execute_api(service, resource, verb, 'exec', params=params, api_version=api_version, output=output)
 
 
 def _parse_parameter(file_parameter=None, json_parameter=None, parameter=None):
@@ -160,7 +160,7 @@ def _parse_parameter(file_parameter=None, json_parameter=None, parameter=None):
     return params
 
 
-def _execute_api(service, resource, verb, params=None, api_version='v1', output='yaml', parser=None):
+def _execute_api(service, resource, verb, command, params=None, api_version='v1', output='yaml', parser=None):
     if params is None:
         params = {}
 
@@ -169,7 +169,7 @@ def _execute_api(service, resource, verb, params=None, api_version='v1', output=
     client = _get_client(service, api_version)
     response = _call_api(client, resource, verb, params, config=config)
 
-    if verb in ['list', 'stat'] and parser:
+    if command in ['list', 'stat'] and parser:
         results = []
         try:
             for result in response.get('results', []):
