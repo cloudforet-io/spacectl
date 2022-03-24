@@ -31,7 +31,7 @@ def get(resource, parameter, json_parameter, file_path, api_version, output):
     """Show details of a specific resource"""
     service, resource = _get_service_and_resource(resource)
     params = _parse_parameter(file_path, json_parameter, parameter)
-    _execute_api(service, resource, 'get', params=params, api_version=api_version, output=output)
+    _execute_api(service, resource, 'get', 'get', params=params, api_version=api_version, output=output)
 
 
 @cli.command()
