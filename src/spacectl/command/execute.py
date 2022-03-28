@@ -31,7 +31,7 @@ def get(resource, parameter, json_parameter, file_path, api_version, output):
     """Show details of a specific resource"""
     service, resource = _get_service_and_resource(resource)
     params = _parse_parameter(file_path, json_parameter, parameter)
-    _execute_api(service, resource, 'get', params=params, api_version=api_version, output=output)
+    _execute_api(service, resource, 'get', 'get', params=params, api_version=api_version, output=output)
 
 
 @cli.command()
@@ -45,11 +45,12 @@ def get(resource, parameter, json_parameter, file_path, api_version, output):
 @click.option('-t', '--template-file', 'template_path', type=click.Path(exists=True), help='Template file (YAML)')
 @click.option('-l', '--limit', type=int, help='Number of rows')
 @click.option('-s', '--sort', help="Sorting by given key (-s [-]<key>)")
+@click.option('-m', '--method', default='list', help='List API method', show_default=True)
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='table', help='Output format',
               type=click.Choice(['table', 'json', 'yaml', 'csv', 'quiet']), show_default=True)
 def list(resource, parameter, json_parameter, file_path, minimal_columns, all_columns, columns, template_path,
-         limit, sort, api_version, output):
+         limit, sort, method, api_version, output):
     """Display one or many resources"""
     service, resource = _get_service_and_resource(resource)
     template = load_template(service, resource, columns, template_path)
@@ -85,7 +86,7 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
             'desc': desc
         }
 
-    _execute_api(service, resource, 'list', params=params, api_version=api_version, output=output, parser=parser)
+    _execute_api(service, resource, method, 'list', params=params, api_version=api_version, output=output, parser=parser)
 
 
 @cli.command()
@@ -95,10 +96,11 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
 @click.option('-f', '--file-parameter', 'file_path', type=click.Path(exists=True), help='YAML file only')
 @click.option('-c', '--columns', help='Specific columns (-c id,name)')
 @click.option('-l', '--limit', type=int, help='Number of rows')
+@click.option('-m', '--method', default='stat', help='Stat API method', show_default=True)
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='table', help='Output format',
               type=click.Choice(['table', 'json', 'yaml', 'csv', 'quiet']), show_default=True)
-def stat(resource, parameter, json_parameter, file_path, columns, limit, api_version, output):
+def stat(resource, parameter, json_parameter, file_path, columns, limit, method, api_version, output):
     """Querying statistics for resources"""
     service, resource = _get_service_and_resource(resource)
     parser = None
@@ -116,7 +118,7 @@ def stat(resource, parameter, json_parameter, file_path, columns, limit, api_ver
             params['query'] = params.get('query', {})
             params['query']['page'] = {'limit': limit}
 
-    _execute_api(service, resource, 'stat', params=params, api_version=api_version, output=output, parser=parser)
+    _execute_api(service, resource, method, 'stat', params=params, api_version=api_version, output=output, parser=parser)
 
 
 @cli.command()
@@ -132,7 +134,7 @@ def exec(verb, resource, parameter, json_parameter, file_path, api_version, outp
     """Execute a method to resource"""
     service, resource = _get_service_and_resource(resource)
     params = _parse_parameter(file_path, json_parameter, parameter)
-    _execute_api(service, resource, verb, params=params, api_version=api_version, output=output)
+    _execute_api(service, resource, verb, 'exec', params=params, api_version=api_version, output=output)
 
 
 def _parse_parameter(file_parameter=None, json_parameter=None, parameter=None):
@@ -158,7 +160,7 @@ def _parse_parameter(file_parameter=None, json_parameter=None, parameter=None):
     return params
 
 
-def _execute_api(service, resource, verb, params=None, api_version='v1', output='yaml', parser=None):
+def _execute_api(service, resource, verb, command, params=None, api_version='v1', output='yaml', parser=None):
     if params is None:
         params = {}
 
@@ -167,7 +169,7 @@ def _execute_api(service, resource, verb, params=None, api_version='v1', output=
     client = _get_client(service, api_version)
     response = _call_api(client, resource, verb, params, config=config)
 
-    if verb in ['list', 'stat'] and parser:
+    if command in ['list', 'stat'] and parser:
         results = []
         try:
             for result in response.get('results', []):
