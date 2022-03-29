@@ -89,7 +89,7 @@ Mode means how you will call APIs
 | `<Task\>.spec.matches`          | Fields which will be used as parameters when you read resources. | a list. [“domain_id”, “name”]                   | X            |
 | `<Task\>.spec.verb`             | Overrides default verbs to customize the execution.          | a dictionary. {“read”: None, “create”: "issue"} | X            |
 | `<Task\>.spec.mode`             | How your apply process will be executed.                     | `DEFAULT`, `READ_ONLY`, `NO_UPDATE`, `EXEC`     | X            |
-| `<Task\>.spec.output.template`          | Defines the format for the execution result. Supports `metadata` and `file` type. <br> In the `metadta` in the options, Get the metadata value of the specified `cloud service type` and output using the value specified in table as it is. <br> If `file` is specified, If file is specified, the template yaml file in the path of  specified in options is read. | `metadata`<br>`file`    | X            |
+| `<Task\>.spec.output.template`          | Defines the format for the execution result. Supports `metadata` and `file` type. <br> In the `metadta` in the options, Get the metadata value of the specified `cloud service type` output using the value specified in table as it is. <br> If `file` is specified, If file is specified, the template yaml file in the path of  specified in options is read. | `metadata`<br>`file`    | X            |
 | `<Task\>.spec.output.options.file`      | If `file` is specified in `output.template`, set the path to the yaml file to be used as template in file in options.                     |  template.yaml   | X            |
 | `<Task\>.spec.output.options.metadata`  | If `metadata` is specified in `output.template`, Specifies the cloud service type with metadata to use as a template. The format is `<provider>`.`<cloud_service_group>`.`<cloud_service_type>` |  `aws.EC2.Volume` <br> `aws.DocumentDB.Cluster`   | X            |
 
@@ -179,9 +179,7 @@ You can export the execution results to google sheets with @modules/export-googl
 | ----------------- | ------------------------------- | ----------------------- | --------------- |
 | `<Task>.spec.service_account_json` | This is a google account json file for accessing google sheets. The json file is available at https://console.cloud.google.com. | /Users/xx/google_account/service_account.json | O               |
 | `<Task>.spec.sheet_id`             | The ID of google sheet to export | 1xk0wZHxfW9crcyOAJse_nY_Nd_30M5tlwP56wcwSD1A | O               |
-| `<Task>.spec.worksheet_index`      | The Index of worksheet to be written the data. Default is 0. | 1  | X               |
-| `<Task>.spec.header_start_at`      | The cell position to start writing the header. Default is A3. | 'A3' <br> 'B10' | X               |
-| `<Task>.spec.data.input_data`      | The list of data to be exported to the specified worksheet. This is a list of data to be exported to the specified sheet. <br> The data format is a list of the dictionary, the key of the dictionary is the header of data, and the value is recorded in the column. |  | O               |
+| `<Task>.spec.data[].input`      | The list of data to be exported to the specified worksheet. This is a list of data to be exported to the specified sheet. <br> The data format is a list of the dictionary, the key of the dictionary is the header of data, and the value is recorded in the column. |  | O               |
 
 ### Example cases
 
@@ -213,10 +211,8 @@ tasks:
     spec:
       service_account_json: ${{ var.service_account_json_path }}
       sheet_id: ${{ var.sheet_id }}
-      worksheet_index: 0
-      header_start_at: A3
       data:
-        input_data: ${{ tasks.ebs_volume.output }}
+        - input: ${{ tasks.ebs_volume.output }}
 ```
 
 
