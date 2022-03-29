@@ -1,5 +1,3 @@
-import click
-import copy
 import gspread
 import json
 import re
@@ -7,7 +5,8 @@ import string
 import pandas as pd
 import datetime
 
-from spacectl.command.execute import _check_api_permissions, _get_service_and_resource, _get_client,_call_api, _parse_parameter
+from spacectl.command.execute import _check_api_permissions, _get_service_and_resource, _get_client,_call_api, \
+    _parse_parameter
 from spacectl.conf.my_conf import get_config, get_endpoint, get_template
 from spacectl.lib.apply.task import Task
 from spacectl.lib.apply.task import execute_wrapper
