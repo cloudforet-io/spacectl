@@ -250,7 +250,7 @@ def _execute_api(service, resource, verb, params={}, api_version='v1', output='y
     # e.g. credential of identity.Token
     response = _call_api(client, resource, verb, copy.deepcopy(params), config=config)
 
-    if verb == 'list':
+    if verb in ['list', 'stat']:
         results = response.get('results', [])
 
         if len(results) == 0:
