@@ -1,6 +1,7 @@
 import click
 import copy
 from spaceone.core import utils
+from spaceone.core.auth.jwt import JWTUtil
 
 from spacectl.command.execute import _check_api_permissions, _get_service_and_resource, _get_client,_call_api, \
     _parse_parameter
@@ -44,7 +45,6 @@ class ResourceTask(Task):
         validate.check_valid_verb(self.name, mode, custom_verb)
         self.spec["verb"] = default_verb
         self.spec["verb"].update(custom_verb)
-
 
     @execute_wrapper
     def execute(self):
@@ -96,7 +96,7 @@ class ResourceTask(Task):
         try:
             read_params = {match: self.spec["data"][match] for match in self.spec["matches"]}
             verb = self.spec["verb"]["read"]
-            # list를 지원안하면 exception
+
             read_resources = _execute_api(service, resource, verb, read_params, api_version="v1", output="yaml", parser={}, silent=self.silent)
             if isinstance(read_resources, list):
                 length = len(read_resources)
@@ -153,9 +153,13 @@ class ResourceTask(Task):
 
     def _load_parser_from_metadata(self, metadata):
         cloud_service_type = self._get_cloud_service_type(metadata)
+        user_config = self._get_user_config(metadata)
 
-        table_fields = cloud_service_type.get('metadata', {}).get('view', {}).get('table', {}).get('layout', {}).get(
-            'options', {}).get('fields', [])
+        if user_config:
+            table_fields = user_config.get('data', {}).get('options', {}).get('fields', [])
+        else:
+            table_fields = cloud_service_type.get('metadata', {}).get('view', {}).get('table', {}).get('layout', {}).get(
+                'options', {}).get('fields', [])
         template = self._generate_template_from_metadata_table_fields(table_fields)
         return load_parser(None, None, template)
 
@@ -188,6 +192,27 @@ class ResourceTask(Task):
         except Exception as e:
             raise Exception(e)
 
+    def _get_user_config_name(self, metadata, user):
+        provider, cloud_service_group, cloud_service_type = self._get_resource_type_from_metadata(metadata)
+        return f"console:USER:{user}:page-schema:inventory.CloudService?provider={provider}&cloud_service_group={cloud_service_group}&cloud_service_type={cloud_service_type}:table"
+
+    def _get_user_name(self):
+        api_key = get_config().get('api_key', '')
+        user_name = JWTUtil.unverified_decode(api_key).get('aud', '')
+        return user_name
+
+    def _get_user_config(self, metadata):
+        verb = 'list'
+        params = {
+            'name': self._get_user_config_name(metadata, self._get_user_name())
+        }
+        responses = _execute_api('config', 'UserConfig', verb, params, api_version="v1", output="json", parser={}, silent=True)
+
+        if responses:
+            return responses[0]
+        else:
+            return {}
+
     def _get_cloud_service_type(self, metadata):
         provider, cloud_service_group, cloud_service_type = self._get_resource_type_from_metadata(metadata)
 
@@ -205,6 +230,7 @@ class ResourceTask(Task):
         else:
             return {}
 
+
 def _execute_api(service, resource, verb, params={}, api_version='v1', output='yaml', parser=None, silent=False):
     config = get_config()
     _check_api_permissions(service, resource, verb)
@@ -212,21 +238,22 @@ def _execute_api(service, resource, verb, params={}, api_version='v1', output='y
 
     # _call_api can change some data of params so need deepcopy
     # e.g. credential of identity.Token
-    response = _call_api(client, resource, verb, copy.deepcopy(params), config=config)
+    response_stream = _call_api(client, resource, verb, copy.deepcopy(params), config=config)
 
-    if verb == 'list':
-        results = response.get('results', [])
+    for response in response_stream:
+        if verb in ['list', 'stat']:
+            results = response.get('results', [])
 
-        if len(results) == 0:
-            return []
-        elif len(results) > 0:
-            return results
+            if len(results) == 0:
+                return []
+            elif len(results) > 0:
+                return results
+            else:
+                Exception()
+        elif verb == 'create':
+            return response
+        elif verb == 'update':
+            return response
         else:
-            Exception()
-    elif verb == 'create':
-        return response
-    elif verb == 'update':
-        return response
-    else:
-        echo("[INFO] Non-standard verb: " + verb, flag=not silent)
-        return response
+            echo("[INFO] Non-standard verb: " + verb, flag=not silent)
+            return response
