@@ -96,7 +96,7 @@ class ResourceTask(Task):
         try:
             read_params = {match: self.spec["data"][match] for match in self.spec["matches"]}
             verb = self.spec["verb"]["read"]
-            # list를 지원안하면 exception
+
             read_resources = _execute_api(service, resource, verb, read_params, api_version="v1", output="yaml", parser={}, silent=self.silent)
             if isinstance(read_resources, list):
                 length = len(read_resources)
@@ -155,7 +155,7 @@ class ResourceTask(Task):
         cloud_service_type = self._get_cloud_service_type(metadata)
         user_config = self._get_user_config(metadata)
 
-        if len(user_config) > 0:
+        if user_config:
             table_fields = user_config.get('data', {}).get('options', {}).get('fields', [])
         else:
             table_fields = cloud_service_type.get('metadata', {}).get('view', {}).get('table', {}).get('layout', {}).get(
@@ -193,16 +193,8 @@ class ResourceTask(Task):
             raise Exception(e)
 
     def _get_user_config_name(self, metadata, user):
-        '''
-        console:USER:gikang@mz.co.kr:page-schema:inventory.CloudService?provider=aws&cloud_service_group=VPC&cloud_service_type=Subnet:table
-        '''
         provider, cloud_service_group, cloud_service_type = self._get_resource_type_from_metadata(metadata)
-        name = "console:USER:{}:page-schema:inventory.CloudService?provider={}&cloud_service_group={}&cloud_service_type={}:table".format(user, provider, cloud_service_group, cloud_service_type)
-        '''
-        이게 더 조음
-        name = f"console:USER:{user}:page-schema:inventory.CloudService?provider={provider}&cloud_service_group={cloud_service_group}&cloud_service_type={cloud_service_type}:table"
-        '''
-        return name
+        return f"console:USER:{user}:page-schema:inventory.CloudService?provider={provider}&cloud_service_group={cloud_service_group}&cloud_service_type={cloud_service_type}:table"
 
     def _get_user_name(self):
         api_key = get_config().get('api_key', '')
@@ -214,11 +206,9 @@ class ResourceTask(Task):
         params = {
             'name': self._get_user_config_name(metadata, self._get_user_name())
         }
-        echo(f'user_config params =====> {params}')
-        responses = _execute_api('config', 'UserConfig', verb, params,
-                                 api_version="v1", output="json", parser={}, silent=True)
-        echo(f'user_config responses =====> {responses}')
-        if len(responses) > 0:
+        responses = _execute_api('config', 'UserConfig', verb, params, api_version="v1", output="json", parser={}, silent=True)
+
+        if responses:
             return responses[0]
         else:
             return {}
@@ -234,7 +224,7 @@ class ResourceTask(Task):
         }
         responses = _execute_api('inventory', 'CloudServiceType', verb, params,
                                  api_version="v1", output="json", parser={}, silent=True)
-        echo(f'cloud_service_type responses =====> {responses}')
+
         if len(responses) > 0:
             return responses[0]
         else:
@@ -251,7 +241,7 @@ def _execute_api(service, resource, verb, params={}, api_version='v1', output='y
     response_stream = _call_api(client, resource, verb, copy.deepcopy(params), config=config)
 
     for response in response_stream:
-        if verb == 'list':
+        if verb in ['list', 'stat']:
             results = response.get('results', [])
 
             if len(results) == 0:
