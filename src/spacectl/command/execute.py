@@ -1,10 +1,10 @@
 import click
 import fnmatch
+import types
 
 from google.protobuf.json_format import MessageToDict
 from spaceone.core.error import ERROR_BASE
 from spaceone.core import pygrpc
-from spaceone.core.utils import parse_endpoint, load_json, load_yaml_from_file
 
 from spacectl.lib.output import print_data
 from spacectl.lib.template import *
@@ -167,29 +167,30 @@ def _execute_api(service, resource, verb, command, params=None, api_version='v1'
     config = get_config()
     _check_api_permissions(service, resource, verb)
     client = _get_client(service, api_version)
-    response = _call_api(client, resource, verb, params, config=config)
+    response_stream = _call_api(client, resource, verb, params, config=config)
 
-    if command in ['list', 'stat'] and parser:
-        results = []
-        try:
-            for result in response.get('results', []):
-                results.append(parser.parse_data(result))
-        except Exception:
-            raise Exception(f'{service}.{resource} template format is invalid.')
+    for response in response_stream:
+        if command in ['list', 'stat'] and parser:
+            results = []
+            try:
+                for result in response.get('results', []):
+                    results.append(parser.parse_data(result))
+            except Exception:
+                raise Exception(f'{service}.{resource} template format is invalid.')
 
-        response['results'] = results
+            response['results'] = results
 
-    if output in ['table', 'csv', 'quiet'] and 'results' in response:
-        options = {
-            'root_key': 'results'
-        }
+        if output in ['table', 'csv', 'quiet'] and 'results' in response:
+            options = {
+                'root_key': 'results'
+            }
 
-        if 'total_count' in response:
-            options['total_count'] = response['total_count']
+            if 'total_count' in response:
+                options['total_count'] = response['total_count']
 
-        print_data(response, output, **options)
-    else:
-        print_data(response, output)
+            print_data(response, output, **options)
+        else:
+            print_data(response, output)
 
 
 def _check_api_permissions(service, resource, verb):
@@ -265,12 +266,16 @@ def _call_api(client, resource, verb, params=None, **kwargs):
         metadata = (()) if api_key is None else (('token', api_key),)
         resource_client = getattr(client, resource)
         resource_verb = getattr(resource_client, verb)
-        message = resource_verb(
+        response_or_iterator = resource_verb(
             params,
             metadata=metadata
         )
 
-        return _change_message(message)
+        if isinstance(response_or_iterator, types.GeneratorType):
+            for response in response_or_iterator:
+                yield _change_message(response)
+        else:
+            yield _change_message(response_or_iterator)
     except ERROR_BASE as e:
         if e.error_code == 'ERROR_AUTHENTICATE_FAILURE':
             raise Exception('The api_key of spaceconfig is not set. (Use "spacectl config init")')

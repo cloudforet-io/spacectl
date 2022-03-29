@@ -248,21 +248,22 @@ def _execute_api(service, resource, verb, params={}, api_version='v1', output='y
 
     # _call_api can change some data of params so need deepcopy
     # e.g. credential of identity.Token
-    response = _call_api(client, resource, verb, copy.deepcopy(params), config=config)
+    response_stream = _call_api(client, resource, verb, copy.deepcopy(params), config=config)
 
-    if verb in ['list', 'stat']:
-        results = response.get('results', [])
+    for response in response_stream:
+        if verb == 'list':
+            results = response.get('results', [])
 
-        if len(results) == 0:
-            return []
-        elif len(results) > 0:
-            return results
+            if len(results) == 0:
+                return []
+            elif len(results) > 0:
+                return results
+            else:
+                Exception()
+        elif verb == 'create':
+            return response
+        elif verb == 'update':
+            return response
         else:
-            Exception()
-    elif verb == 'create':
-        return response
-    elif verb == 'update':
-        return response
-    else:
-        echo("[INFO] Non-standard verb: " + verb, flag=not silent)
-        return response
+            echo("[INFO] Non-standard verb: " + verb, flag=not silent)
+            return response
