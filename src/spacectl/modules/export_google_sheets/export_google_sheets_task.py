@@ -5,6 +5,7 @@ import json
 import re
 import string
 import pandas as pd
+import datetime
 
 from spacectl.command.execute import _check_api_permissions, _get_service_and_resource, _get_client,_call_api, _parse_parameter
 from spacectl.conf.my_conf import get_config, get_endpoint, get_template
@@ -13,8 +14,7 @@ from spacectl.lib.apply.task import execute_wrapper
 from spacectl.modules.resource import validate
 from spacectl.lib.output import echo
 
-DEFAULT_WORKSHEET = 'Sheet1'
-DEFAULT_HEADER_CELL = 'A3'
+DEFAULT_HEADER_CELL = 'A4'
 GOOGLE_SERVICE_ACCOUNT_JSON_DEFAULT_PATH = '~/.config/gspread/service_account.json'
 
 
@@ -29,44 +29,35 @@ class ExportGoogleSheetsTask(Task):
     def execute(self):
         google_sheets = self._init_google_sheets()
         sheet = self._get_sheets(google_sheets)
-        header_cell = self.spec.get('header_start_at', DEFAULT_HEADER_CELL)
-        default_worksheet_name = self.spec.get('worksheet_start_at', DEFAULT_WORKSHEET)
-        self.export_data(sheet, header_cell, default_worksheet_name)
+        self.clear_all_worksheet(sheet)
+        self.export_data(sheet)
 
-    def export_data(self, sheet, header_cell, default_worksheet_name):
-        for input_data in self.spec.get('data', {}).get('input_data', []):
-            output = self._get_output(input_data)
-            verb = self._get_verb(input_data)
-            worksheet_name = self._get_worksheet_name(input_data)
+    def export_data(self, sheet):
+        for _index, raw_data in enumerate(self.spec.get('data', [])):
+            task = self._convert_json(raw_data.get('input', {}))
+            worksheet_name = self.set_worksheet_name(task, _index)
+            echo(f"Export Worksheet: {worksheet_name}", flag=not self.silent)
+            worksheet = self.select_worksheet(sheet, _index, worksheet_name)
+            self.write_update_time(worksheet)
+            self.export_worksheet(worksheet, task.get('output', []))
 
-            # Creating or rename worksheet
-            worksheet_exists = self._chk_worksheet_exists(sheet, worksheet_name)
-            default_worksheet_exists = self._chk_worksheet_exists(sheet, default_worksheet_name)
-            if worksheet_exists & default_worksheet_exists:
-                # Overwrite data into existed worksheet
-                pass
-            elif default_worksheet_exists:
-                # Rename default worksheets and overwrites on them.
-                default_worksheet = self._get_worksheet(sheet, default_worksheet_name)
-                default_worksheet.update_title(worksheet_name)
-            else:
-                if not worksheet_exists:
-                    sheet.add_worksheet(title=worksheet_name, rows=100, cols=20)
+    def select_worksheet(self, sheet, index, worksheet_title):
+        try:
+            worksheet = sheet.get_worksheet(index)
+            worksheet.update_title(worksheet_title)
+            return worksheet
+        except Exception:
+            return sheet.add_worksheet(title=worksheet_title, rows=1000, cols=26)
 
-            worksheet = self._get_worksheet(sheet, worksheet_name)
-            if verb == 'stat':
-                df = pd.DataFrame(output.get('results',[]))
-                headers = df.columns.values.tolist()
-                self._clear_worksheet(worksheet)
-                self._format_header(worksheet, header_cell, headers)
-                worksheet.update(header_cell, [headers] + df.values.tolist())
-                pass
-            else:
-                df = pd.DataFrame(output)
-                headers = df.columns.values.tolist()
-                self._clear_worksheet(worksheet)
-                self._format_header(worksheet, header_cell, headers)
-                worksheet.update(header_cell, [headers] + df.values.tolist())
+    def export_worksheet(self, worksheet, data):
+        df = pd.DataFrame(data)
+        headers = df.columns.values.tolist()
+        self._format_header(worksheet, DEFAULT_HEADER_CELL, headers)
+        worksheet.update(DEFAULT_HEADER_CELL, [headers] + df.values.tolist())
+
+    def write_update_time(self, worksheet):
+        worksheet.update('A1', 'Update Time (UTC)')
+        worksheet.update('B1', str(datetime.datetime.utcnow()))
 
     def _init_google_sheets(self):
         echo("Access Google Sheets..", flag=not self.silent)
@@ -77,39 +68,16 @@ class ExportGoogleSheetsTask(Task):
         echo(f"Open Sheets : {self.spec.get('sheet_id')}", flag=not self.silent)
         return google_sheets.open_by_key(self.spec.get('sheet_id'))
 
-    @staticmethod
-    def _get_worksheet(sheet, worksheet_name):
-        return sheet.worksheet(worksheet_name)
+    def clear_all_worksheet(self, sheet):
+        echo(f"Clear All Worksheet in selected sheet..", flag=not self.silent)
+        sheet.add_worksheet(title='', rows=1000, cols=26)
 
-    def _get_output(self, raw_task_output):
-        value = raw_task_output.get('value', {})
-        json_value = self._convert_json(value)
-        return json_value.get('output', [])
-
-    def _get_verb(self, raw_task_output):
-        value = raw_task_output.get('value', {})
-        json_value = self._convert_json(value)
-        name = json_value.get('spec', {}).get('verb', {}).get('exec', '')
-        mode = f'{name}'
-        return mode
-
-    def _get_worksheet_name(self, raw_task_output):
-        value = raw_task_output.get('value', {})
-        json_value = self._convert_json(value)
-        name = json_value.get('name', '')
-        worksheet_name = f'{name}'
-        return worksheet_name
+        for worksheet in sheet.worksheets()[:-1]:
+            sheet.del_worksheet(worksheet)
 
     @staticmethod
-    def _chk_worksheet_exists(sheet, worksheet_name):
-        worksheet_exists = False
-        worksheet_list = sheet.worksheets()
-        worksheet_name_list = []
-        for i in worksheet_list:
-            worksheet_name_list.append(i.title)
-        if worksheet_name in worksheet_name_list:
-            worksheet_exists = True
-        return worksheet_exists
+    def set_worksheet_name(task, index):
+        return f'{index}. {task.get("name", "")}'
 
     @staticmethod
     def _convert_json(data):
@@ -117,34 +85,8 @@ class ExportGoogleSheetsTask(Task):
         data = data.replace("None", "null")
         data = data.replace("True", "true")
         data = data.replace("False", "false")
-        json_data = json.loads(data)
 
-        return json_data
-
-    @staticmethod
-    def _clear_worksheet(worksheet):
-        header_format = {
-            'horizontalAlignment': 'LEFT',
-            'backgroundColor': {
-                "red": 1.0,
-                "green": 1.0,
-                "blue": 1.0
-            },
-            'borders': {
-                'top': {'style': 'NONE'},
-                'bottom': {'style': 'NONE'},
-                'left': {'style': 'NONE'},
-                'right': {'style': 'NONE'}
-            },
-            'textFormat': {'bold': False}
-        }
-        try:
-            header_cells = f'A1:Z100'
-            worksheet.format(header_cells, header_format)
-            worksheet.clear()
-        except Exception as e:
-            echo(f'e => {e}')
-            pass
+        return json.loads(data)
 
     @staticmethod
     def _format_header(worksheet, start_at, headers):
