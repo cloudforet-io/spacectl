@@ -21,11 +21,12 @@ class TaskManager:
     def load(self, file_path):
         data = utils.load_yaml_from_file(file_path)
         # data = yaml.safe_load(file_path)
-        if "import" in data:
-            for import_file in data["import"]:
-                # import file path is relative to current file_path
-                absolute_location = Path(file_path).parent
-                self.load(os.path.join(absolute_location, import_file))
+
+        for import_file in data.get('import', []):
+            # import file path is relative to current file_path
+            absolute_location = Path(file_path).parent
+            self.load(os.path.join(absolute_location, import_file))
+
         store.set_var(data.get('var', {}))
         store.set_env(data.get('env', {}))
 
