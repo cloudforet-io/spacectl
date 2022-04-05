@@ -6,8 +6,6 @@ You can filter specific resources which has complex data format.
 
 ## Search EC2 which was created at specific date range
 
-~~~
-
 Example 1.
 
 Query resources which is created from 2022-04-01 to 2022-04-02
