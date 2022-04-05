@@ -154,13 +154,16 @@ class ResourceTask(Task):
     def _load_parser_from_metadata(self, metadata):
         cloud_service_type = self._get_cloud_service_type(metadata)
         user_config = self._get_user_config(metadata)
+        show_optional = False
 
         if user_config:
             table_fields = user_config.get('data', {}).get('options', {}).get('fields', [])
+            show_optional = True
         else:
             table_fields = cloud_service_type.get('metadata', {}).get('view', {}).get('table', {}).get('layout', {}).get(
                 'options', {}).get('fields', [])
-        template = self._generate_template_from_metadata_table_fields(table_fields)
+
+        template = self._generate_template_from_metadata_table_fields(table_fields, show_optional)
         return load_parser(None, None, template)
 
     def _add_only_query(self, parser):
@@ -168,22 +171,28 @@ class ResourceTask(Task):
         query['only'] = parser.keys
         self.spec['data']['query'] = query
 
-    def _generate_template_from_metadata_table_fields(self, table_fields):
+    def _generate_template_from_metadata_table_fields(self, table_fields, show_optional):
         _list = []
-        for _fields in table_fields:
-            if not _fields.get('options', {}).get('is_optional', False):
-                if key := _fields.get('key'):
-                    _f = key
-
-                    if sub_key := _fields.get('options', {}).get('sub_key'):
-                        _f = f'{_f}.{sub_key}'
-
-                    if name := _fields.get('name'):
-                        _list.append(f'{_f}|{name}')
-                    else:
-                        _list.append(_f)
+        for _field in table_fields:
+            if show_optional:
+                _list.append(self._set_field(_field))
+            else:
+                if not _fields.get('options', {}).get('is_optional', False):
+                    _list.append(self._set_field(_field))
 
         return {'template': {'list': _list}}
+
+    def _set_field(self, field):
+        if key := field.get('key'):
+            _f = key
+
+            if sub_key := field.get('options', {}).get('sub_key'):
+                _f = f'{_f}.{sub_key}'
+
+            if name := field.get('name'):
+                return f'{_f}|{name}'
+            else:
+                return _f
 
     def _get_resource_type_from_metadata(self, metadata):
         try:
