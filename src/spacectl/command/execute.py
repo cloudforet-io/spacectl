@@ -270,8 +270,9 @@ def _call_api(client, resource, verb, params=None, **kwargs):
             params,
             metadata=metadata
         )
-
-        if isinstance(response_or_iterator, types.GeneratorType):
+        if isinstance(response_or_iterator, Exception):
+            raise response_or_iterator
+        elif isinstance(response_or_iterator, types.GeneratorType):
             for response in response_or_iterator:
                 yield _change_message(response)
         else:
@@ -282,7 +283,10 @@ def _call_api(client, resource, verb, params=None, **kwargs):
         else:
             raise Exception(e.message.strip())
     except Exception as e:
-        raise Exception(e)
+        if hasattr(e, 'exception'):
+            return Exception(e.exception())
+        else:
+            raise Exception(e)
 
 
 def _change_message(message):
