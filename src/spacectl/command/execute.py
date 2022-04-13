@@ -284,7 +284,7 @@ def _call_api(client, resource, verb, params=None, **kwargs):
             raise Exception(e.message.strip())
     except Exception as e:
         if hasattr(e, 'exception'):
-            return Exception(e.exception())
+            raise Exception(e.exception())
         else:
             raise Exception(e)
 
