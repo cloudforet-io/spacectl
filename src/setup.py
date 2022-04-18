@@ -21,7 +21,7 @@ with open('VERSION', 'r') as f:
     f.close()
 
 setup(
-    name='spacectl',
+    name='foretctl',
     version=VERSION,
     description='SpaceONE Command Line Interface',
     long_description='',
