@@ -9,6 +9,7 @@ def print_data(data, output, **kwargs):
     if 'root_key' in kwargs:
         data = utils.get_dict_value(data, kwargs['root_key'], [])
         del kwargs['root_key']
+    print("test")
 
     if output == 'table':
         if len(data) == 0:
