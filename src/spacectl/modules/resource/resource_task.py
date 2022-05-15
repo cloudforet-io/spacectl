@@ -177,7 +177,7 @@ class ResourceTask(Task):
             if show_optional:
                 _list.append(self._set_field(_field))
             else:
-                if not _fields.get('options', {}).get('is_optional', False):
+                if not _field.get('options', {}).get('is_optional', False):
                     _list.append(self._set_field(_field))
 
         return {'template': {'list': _list}}
