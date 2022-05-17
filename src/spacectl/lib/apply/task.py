@@ -17,7 +17,8 @@ def execute_wrapper(func):
             func(self)
         except Exception as e:
             if not self.silent:
-                click.echo(f'(ERROR) =>\n{e}',  err=True)
+                click.echo(f'(ERROR) =>\n{e}\n'
+                           f'>> Spec: {self.spec}',  err=True)
                 click.echo('')
 
             store.increase_failure()
