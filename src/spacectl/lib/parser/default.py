@@ -1,6 +1,5 @@
 from spaceone.core import utils
 from spacectl.lib.parser import BaseParser
-from spacectl.lib.output import echo
 
 
 class DefaultParser(BaseParser):
@@ -57,33 +56,10 @@ def get_key_and_name(rule):
     return key.strip(), name.strip()
 
 
-def parse_key_value(inputs):
-    result = {}
-    for data in inputs:
-        try:
-            key, value = data.split("=", 1)
-            if value.find("=") != -1:
-                raise ValueError
-
-            result[key] = value
-        except ValueError:
-            echo(f'[Error] input should be like <key>=<value>, not {data}',
-                 err=True, terminate=True)
-
-    return result
-
-
 def get_tags_value(data, key):
     sub_key = key[5:]
     tags = data.get('tags', {})
     return tags.get(sub_key)
-
-
-def parse_uses(uses):
-    uses = uses.strip()
-    _, module = uses.split("/")
-
-    return module
 
 
 if __name__ == '__main__':

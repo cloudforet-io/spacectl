@@ -1,58 +1,79 @@
 import click
 import abc
+import os
 from functools import wraps
+from spaceone.core import utils
 from spacectl.lib.apply import store
+
 
 def execute_wrapper(func):
     # the instance which calls this func is bounded as self
     @wraps(func)
-    def apply_inner(self):
-        if self.apply_if:
-            if not self.silent:
-                click.echo("\n##### Start: {task_name} #####".format(task_name=self.name))
+    def wrapper(self):
+        if not self.silent:
+            click.echo(f'{"  "*self.depth}TASK [{self.name}] {"*"*1000}'[:self.terminal_width])
+
+        try:
             func(self)
+        except Exception as e:
             if not self.silent:
-                click.echo("##### Finish: {task_name} #####\n".format(task_name=self.name))
-                click.echo("")
+                click.echo(f'(ERROR) =>\n{e}',  err=True)
+                click.echo('')
+
+            store.increase_failure()
+            exit(1)
+
+        if not self.silent:
+            if self.debug:
+                if self.output_path:
+                    output_data = self.output.get(self.output_path)
+                else:
+                    output_data = utils.dump_json(self.output, 4)
+
+                click.echo(f'(DEBUG) =>\n{output_data}')
+                click.echo('')
+
+        store.increase_success()
+
+        if self.is_loop:
+            store.append_task_result(self.to_dict())
         else:
-            if not self.silent:
-                click.echo("\n##### Skip: {task_name} #####".format(task_name=self.name))
-                click.echo("[INFO] {condition_statement} is not True\n".format(condition_statement = self.task_dict["if"]))
-        store.append_task_result(self)
-    return apply_inner
+            store.set_task_result(self.to_dict())
+
+    return wrapper
 
 
-class Task(metaclass=abc.ABCMeta):
+class BaseTask(metaclass=abc.ABCMeta):
     fields_to_apply_template = ["name", "uses", "spec", "apply_if"]
 
-    def __init__(self, task_dict, silent):
-        self.name = task_dict.get("name", "Anonymous")
-        self.id = task_dict.get("id", "no_id")
-        self.uses = task_dict.get("uses")
-        self.spec = {}
-        self.apply_if = task_dict.get("if", True)
-        self.task_dict = task_dict
+    output_path = None
+
+    def __init__(self, task_info, silent=False, depth=0, is_loop=False):
+        self.name = task_info['name']
+        self.id = task_info.get('id')
+        self.debug = task_info.get('debug', False)
         self.silent = silent
+        self.depth = depth
+        self.is_loop = is_loop
+        self.state = 'IN_PROGRESS'
+        self.terminal_width = os.get_terminal_size()[0]
+
+        self.spec = {}
         self.output = {}
-        self.set_spec(task_dict.get("spec"))
+
+        self.set_spec(task_info.get('spec', {}))
 
     def to_dict(self):
-        fields = self.__dict__
-        excluded_fields = ["task_dict", "silent"]
+        return {
+            'name': self.name,
+            'id': self.id,
+            'state': self.state,
+            'spec': self.spec,
+            'output': self.output
+        }
 
-        d = {k: attr for k, attr in fields.items() if k not in excluded_fields}
-
-        override_key_names = (
-            ("apply_if", "if"),
-        )
-        for old_name, new_name in override_key_names:
-            d[new_name] = d[old_name]
-            del d[old_name]
-        return d
-
-    @abc.abstractmethod
-    def set_spec(self, spec_dict):
-        pass
+    def set_spec(self, spec):
+        self.spec = spec
 
     @abc.abstractmethod
     @execute_wrapper
