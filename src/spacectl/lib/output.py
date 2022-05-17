@@ -23,6 +23,8 @@ def print_data(data, output, **kwargs):
         _print_csv(data, **kwargs)
     elif output == 'quiet':
         _print_quiet(data, **kwargs)
+    elif output == 'text':
+        echo(data)
 
 
 def _print_table(data, **kwargs):
