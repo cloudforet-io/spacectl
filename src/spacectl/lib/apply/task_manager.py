@@ -204,10 +204,10 @@ class TaskManager:
         except Exception as e:
             raise ValueError(f'[{task_name}] Loop Condition Error: {loop_cond_str}')
 
-        if not isinstance(loop_cond, list):
+        if loop_cond and not isinstance(loop_cond, list):
             raise ValueError(f'[{task_name}] Loop Condition Error: {loop_cond_str}')
 
-        return loop_cond
+        return loop_cond or []
 
     def _finish_tasks(self):
         task_output = store.get_output()

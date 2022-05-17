@@ -52,13 +52,18 @@ class Task(BaseTask):
 
         if output := self.spec.get('output'):
             options = output.get('options', {})
+            add_only = options.get('add_only', True)
+            template = output.get('template')
 
-            if output.get('template') == 'file':
-                parser = self._load_parser(options.get('file', ''))
-            elif output.get('template') == 'metadata':
+            if template == 'file':
+                parser = self._load_parser(template_path=options.get('file', ''))
+            elif template == 'metadata':
                 parser = self._load_parser_from_metadata(options.get('metadata', ''))
+            elif template == 'input':
+                parser = self._load_parser(columns=options.get('columns', []))
 
-            self._add_only_query(parser)
+            if add_only:
+                self._add_only_query(parser)
 
         if self.spec['mode'] == 'EXEC':
             self._exec(service, resource)
@@ -88,7 +93,7 @@ class Task(BaseTask):
             # echo(f'### {verb} Response ###', flag=not self.silent)
             # echo(self.output, flag=not self.silent)
         except Exception as e:
-            echo(e, err=True, terminate=True)
+            raise e
 
     def _read(self, service, resource):
         try:
@@ -145,8 +150,9 @@ class Task(BaseTask):
             result_dict[field] = getattr(self, field)
         return str(field)
 
-    def _load_parser(self, template_json_path):
-        template = load_template(None, None, None, template_path=template_json_path)
+    @staticmethod
+    def _load_parser(columns=None, template_path=None):
+        template = load_template(None, None, columns, template_path)
         return load_parser(None, None, template)
 
     def _load_parser_from_metadata(self, metadata):
@@ -248,7 +254,7 @@ def _execute_api(service, resource, verb, params={}, api_version='v1', output='y
     response_stream = _call_api(client, resource, verb, copy.deepcopy(params), config=config)
 
     for response in response_stream:
-        if verb in ['list', 'stat']:
+        if verb in ['list', 'stat', 'analyze']:
             results = response.get('results', [])
 
             if len(results) == 0:
