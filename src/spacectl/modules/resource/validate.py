@@ -1,5 +1,6 @@
 import click
 
+
 def check_valid_verb(task_name, mode, custom_verb):
     if mode == 'DEFAULT':
         error_if_invalid_verb(task_name, mode, ['exec'], custom_verb)
@@ -9,6 +10,7 @@ def check_valid_verb(task_name, mode, custom_verb):
         error_if_invalid_verb(task_name, mode, ['update', 'exec'], custom_verb)
     if mode == 'EXEC':
         error_if_invalid_verb(task_name, mode, ['read', 'create', 'update'], custom_verb)
+
 
 def error_if_invalid_verb(task_name, mode, verb_types, custom_verb):
     for verb_type in verb_types:
@@ -20,4 +22,3 @@ def error_if_invalid_verb(task_name, mode, verb_types, custom_verb):
                 task_name=task_name
             ), err=True)
             exit(1)
-

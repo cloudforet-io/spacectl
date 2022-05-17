@@ -1,79 +1,107 @@
-from spacectl.lib.apply.dot_dict_list import TaskResultList
-from spacectl.lib.output import echo
-from spacectl.lib.parser.default import parse_key_value
-from spaceone.core import utils
 import os
-import copy
+from spaceone.core import utils
 
 _DATA = {
-    "var": {},
-    "env": {},
-    "tasks": TaskResultList()
+    'var': {},
+    'env': {},
+    'tasks': {},
+    'results': [],
+    'success': 0,
+    'skip': 0,
+    'failure': 0,
 }
 
 
-def apply_input(env, var, var_file):
-    data = {}
-    if var_file is not None:
+def init_env(env: tuple):
+    _DATA['env'] = dict(os.environ)
+    set_env(_parse_inputs(env))
+
+
+def init_var(var_file: str, var: tuple):
+    if var_file:
         data = utils.load_yaml_from_file(var_file)
-    set_var(data.get("var", {}))
-    set_var(parse_key_value(var))
 
-    set_env(data.get("env", {}))
-    set_env(parse_key_value(env))
+        if isinstance(data, dict):
+            set_var(data.get('var', {}))
 
-def get_var(key=None):
-    if key is None:
-        return _DATA["var"]
+    set_var(_parse_inputs(var))
+
+
+def get_var(key: str = None, default=None):
+    if key:
+        return _DATA['var'].get(key, default)
     else:
-        return _DATA["var"]["key"]
+        return _DATA['var']
 
 
-def set_var(key, value=None):
-    if value is None:
-        var = key
-        for k, v in var.items():
-            _DATA["var"][k] = v
+def set_var(data: dict):
+    _DATA['var'].update(data)
+
+
+def get_env(key: str = None, default=None):
+    if key:
+        return _DATA['env'].get(key, default)
     else:
-        _DATA["var"][key] = value
+        return _DATA['env']
 
 
-def get_env(key=None):
-    if key is None:
-        return _DATA["env"]
-    else:
-        return _DATA["env"]["key"]
-
-
-def set_env(key=None, value=None):
-    if key is None:  # initial
-        _DATA["env"] = copy.deepcopy(os.environ)
-    elif value is None:
-        env = key
-        for k, v in env.items():
-            _DATA["env"][k] = v
-    else:
-        _DATA["env"][key] = value
+def set_env(data: dict):
+    _DATA['env'].update(data)
 
 
 def get_task_results():
-    return _DATA["tasks"]
+    return _DATA['tasks']
 
 
-def get_task_result(task_id):
-    return getattr(_DATA['tasks'], task_id)
+def get_task_result(task_id: str):
+    return _DATA['tasks'].get(task_id)
 
 
-def append_task_result(task):
-    _DATA["tasks"].append(task.to_dict())
+def append_task_result(task_result: dict):
+    if 'id' in task_result:
+        if task_result['id'] not in _DATA['tasks']:
+            _DATA['tasks'][task_result['id']] = []
+
+        _DATA['tasks'][task_result['id']].append(task_result)
+
+    _DATA['results'].append(task_result)
 
 
-# def update(key, value):
-#     _DATA.update({key: value})
+def set_task_result(task_result: dict):
+    if 'id' in task_result:
+        _DATA['tasks'][task_result['id']] = task_result
+
+    _DATA['results'].append(task_result)
+
+
+def increase_success():
+    _DATA['success'] += 1
+
+
+def increase_failure():
+    _DATA['failure'] += 1
+
+
+def increase_skip():
+    _DATA['skip'] += 1
 
 
 def get_output():
     return {
-        "var": _DATA["var"],
-        "tasks": _DATA["tasks"].to_list()
+        'var': _DATA['var'],
+        'results': _DATA['results'],
+        'success': _DATA['success'],
+        'skip': _DATA['skip']
     }
+
+
+def _parse_inputs(inputs: tuple):
+    result = {}
+    for data in inputs:
+        i_split = data.split('=')
+        if len(i_split) == 2:
+            result[i_split[0]] = i_split[1]
+        else:
+            raise ValueError(f'Input parameter({data}) is invalid. (format: key=value)')
+
+    return result
