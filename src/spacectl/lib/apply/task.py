@@ -1,6 +1,7 @@
 import click
 import abc
 import os
+import traceback
 from functools import wraps
 from spaceone.core import utils
 from spacectl.lib.apply import store
@@ -20,6 +21,11 @@ def execute_wrapper(func):
                 click.echo(f'(ERROR) =>\n{e}\n'
                            f'>> Spec: {self.spec}',  err=True)
                 click.echo('')
+
+            _debug = os.environ.get('SPACECTL_DEBUG', 'false')
+
+            if _debug.lower() == 'true':
+                click.echo(traceback.format_exc(), err=True)
 
             store.increase_failure()
             exit(1)
