@@ -58,18 +58,20 @@ def get_task_result(task_id: str):
 
 
 def append_task_result(task_result: dict):
-    if 'id' in task_result:
-        if task_result['id'] not in _DATA['tasks']:
-            _DATA['tasks'][task_result['id']] = []
+    task_id = task_result.get('id')
+    if task_id:
+        if task_id not in _DATA['tasks']:
+            _DATA['tasks'][task_id] = []
 
-        _DATA['tasks'][task_result['id']].append(task_result)
+        _DATA['tasks'][task_id].append(task_result)
 
     _DATA['results'].append(task_result)
 
 
 def set_task_result(task_result: dict):
-    if 'id' in task_result:
-        _DATA['tasks'][task_result['id']] = task_result
+    task_id = task_result.get('id')
+    if task_id:
+        _DATA['tasks'][task_id] = task_result
 
     _DATA['results'].append(task_result)
 

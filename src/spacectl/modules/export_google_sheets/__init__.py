@@ -13,13 +13,11 @@ from spacectl.lib.apply.task import execute_wrapper
 from spacectl.modules.resource import validate
 from spacectl.lib.output import echo
 
-DEFAULT_HEADER_CELL = 'A4'
+DEFAULT_HEADER_CELL = 'A1'
 GOOGLE_SERVICE_ACCOUNT_JSON_DEFAULT_PATH = '~/.config/gspread/service_account.json'
 
 
 class Task(BaseTask):
-    def __init__(self, task_dict, silent):
-        super().__init__(task_dict, silent)
 
     def set_spec(self, spec_dict):
         self.spec = spec_dict
@@ -33,11 +31,12 @@ class Task(BaseTask):
 
     def export_data(self, sheet):
         for _index, raw_data in enumerate(self.spec.get('data', [])):
-            task = self._convert_json(raw_data.get('input', {}))
+            # task = self._convert_json(raw_data.get('input', {}))
+            task = raw_data.get('input', {})
             worksheet_name = self.set_worksheet_name(task, _index)
             echo(f"Export Worksheet: {worksheet_name}", flag=not self.silent)
             worksheet = self.select_worksheet(sheet, _index, worksheet_name)
-            self.write_update_time(worksheet)
+            # self.write_update_time(worksheet)
             self.export_worksheet(worksheet, task.get('output', []))
 
     def select_worksheet(self, sheet, index, worksheet_title):
@@ -76,7 +75,8 @@ class Task(BaseTask):
 
     @staticmethod
     def set_worksheet_name(task, index):
-        return f'{index}. {task.get("name", "")}'
+        # return f'{index}. {task.get("name", "")}'
+        return task.get("name", "")
 
     @staticmethod
     def _convert_json(data):
@@ -96,6 +96,11 @@ class Task(BaseTask):
                 'bottom': {'style': 'SOLID'},
                 'left': {'style': 'SOLID'},
                 'right': {'style': 'SOLID'}
+            },
+            "backgroundColor": {
+                "red": 12,
+                "green": 12,
+                "blue": 12
             },
             'textFormat': {'bold': True}
         }

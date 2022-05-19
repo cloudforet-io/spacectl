@@ -53,6 +53,10 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
          limit, sort, method, api_version, output):
     """Display one or many resources"""
     service, resource = _get_service_and_resource(resource)
+
+    if columns:
+        columns = columns.split(',')
+
     template = load_template(service, resource, columns, template_path)
     parser = None
 
@@ -106,6 +110,7 @@ def stat(resource, parameter, json_parameter, file_path, columns, limit, method,
     parser = None
 
     if columns:
+        columns = columns.split(',')
         template = load_template(service, resource, columns)
         parser = load_parser(service, resource, template)
 

@@ -3,11 +3,12 @@ from spaceone.core.utils import parse_endpoint, load_json, load_yaml_from_file
 from spacectl.conf.global_conf import DEFAULT_PARSER
 from spacectl.conf.my_conf import get_template
 
+
 def load_template(service, resource, columns, template_path=None):
     if columns:
         template = {
             'template': {
-                'list': columns.split(',')
+                'list': columns
             }
         }
     else:
@@ -16,6 +17,7 @@ def load_template(service, resource, columns, template_path=None):
         else:
             template = get_template(service, resource)
     return template
+
 
 def load_parser(service, resource, template):
     parser = template.get('parser', DEFAULT_PARSER)
