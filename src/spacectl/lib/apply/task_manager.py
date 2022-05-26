@@ -180,8 +180,9 @@ class TaskManager:
 
         task_yaml: str = utils.dump_yaml(value)
         jinja_template = JINJA_ENV.from_string(task_yaml)
-        template_applied_value = jinja_template.render(**kwargs)
+        template_applied_value: str = jinja_template.render(**kwargs)
 
+        template_applied_value = template_applied_value.replace('None', 'null')
         return utils.load_yaml(template_applied_value)
 
     def _parse_if_condition(self, if_cond_str: str, task_name: str, item: Any) -> bool:
