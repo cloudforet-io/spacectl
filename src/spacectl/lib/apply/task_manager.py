@@ -146,8 +146,7 @@ class TaskManager:
             return MODULES[module]
         else:
             self._check_remote_module(location, module)
-            # Not Implemented
-            return None
+            raise ValueError(f'[{task_name}] Module Load Error: external modules are not currently supported.')
 
     def _check_remote_module(self, location: str, module: str):
         pass
