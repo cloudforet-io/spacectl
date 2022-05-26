@@ -168,6 +168,12 @@ class Task(BaseTask):
                 'options', {}).get('fields', [])
 
         template = self._generate_template_from_metadata_table_fields(table_fields, show_optional)
+
+        if not user_config:
+            template['template']['list'] = ['reference.resource_id|Resource ID'] + template['template']['list'] + \
+                                           ['provider|Provider', 'account|Account ID', 'region_code|Region',
+                                            'project_id|Project', 'updated_at|Last Collected']
+
         return load_parser(None, None, template)
 
     def _add_only_query(self, parser):
