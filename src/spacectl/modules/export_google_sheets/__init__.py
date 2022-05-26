@@ -4,6 +4,7 @@ import re
 import string
 import pandas as pd
 import datetime
+import time
 
 from spacectl.command.execute import _check_api_permissions, _get_service_and_resource, _get_client,_call_api, \
     _parse_parameter
@@ -19,9 +20,6 @@ GOOGLE_SERVICE_ACCOUNT_JSON_DEFAULT_PATH = '~/.config/gspread/service_account.js
 
 class Task(BaseTask):
 
-    def set_spec(self, spec_dict):
-        self.spec = spec_dict
-
     @execute_wrapper
     def execute(self):
         google_sheets = self._init_google_sheets()
@@ -30,28 +28,45 @@ class Task(BaseTask):
         self.export_data(sheet)
 
     def export_data(self, sheet):
+        fill_na = self.spec.get('fill_na')
         for _index, raw_data in enumerate(self.spec.get('data', [])):
+            time.sleep(5)
             # task = self._convert_json(raw_data.get('input', {}))
             task = raw_data.get('input', {})
             worksheet_name = self.set_worksheet_name(task, _index)
-            echo(f"Export Worksheet: {worksheet_name}", flag=not self.silent)
+            echo(f"Export Worksheet: {worksheet_name}")
             worksheet = self.select_worksheet(sheet, _index, worksheet_name)
             # self.write_update_time(worksheet)
-            self.export_worksheet(worksheet, task.get('output', []))
+            self.export_worksheet(worksheet, task.get('output', []), fill_na)
 
     def select_worksheet(self, sheet, index, worksheet_title):
         try:
-            worksheet = sheet.get_worksheet(index)
-            worksheet.update_title(worksheet_title)
+            worksheet = sheet.worksheet(worksheet_title)
+            # worksheet.update_title(worksheet_title)
             return worksheet
         except Exception:
             return sheet.add_worksheet(title=worksheet_title, rows=1000, cols=26)
 
-    def export_worksheet(self, worksheet, data):
+    def export_worksheet(self, worksheet, data, fill_na=None):
         df = pd.DataFrame(data)
+
+        if fill_na is not None:
+            df = df.fillna(fill_na)
+
         headers = df.columns.values.tolist()
         self._format_header(worksheet, DEFAULT_HEADER_CELL, headers)
-        worksheet.update(DEFAULT_HEADER_CELL, [headers] + df.values.tolist())
+        export_values = []
+
+        for row in df.values.tolist():
+            changed_row = []
+            for value in row:
+                if isinstance(value, list):
+                    changed_row.append('\n'.join(value))
+                else:
+                    changed_row.append(value)
+            export_values.append(changed_row)
+
+        worksheet.update(DEFAULT_HEADER_CELL, [headers] + export_values)
 
     def write_update_time(self, worksheet):
         worksheet.update('A1', 'Update Time (UTC)')
@@ -67,11 +82,14 @@ class Task(BaseTask):
         return google_sheets.open_by_key(self.spec.get('sheet_id'))
 
     def clear_all_worksheet(self, sheet):
-        echo(f"Clear All Worksheet in selected sheet..", flag=not self.silent)
-        sheet.add_worksheet(title='', rows=1000, cols=26)
+        reset = self.spec.get('reset', False)
 
-        for worksheet in sheet.worksheets()[:-1]:
-            sheet.del_worksheet(worksheet)
+        if reset:
+            echo(f"Clear All Worksheet in selected sheet..", flag=not self.silent)
+            sheet.add_worksheet(title='', rows=1000, cols=26)
+
+            for worksheet in sheet.worksheets()[:-1]:
+                sheet.del_worksheet(worksheet)
 
     @staticmethod
     def set_worksheet_name(task, index):
