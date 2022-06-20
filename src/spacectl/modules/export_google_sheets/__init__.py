@@ -6,22 +6,20 @@ import pandas as pd
 import datetime
 import time
 
-from spacectl.command.execute import _check_api_permissions, _get_service_and_resource, _get_client,_call_api, \
-    _parse_parameter
-from spacectl.conf.my_conf import get_config, get_endpoint, get_template
+from spaceone.core import utils
 from spacectl.lib.apply.task import BaseTask
 from spacectl.lib.apply.task import execute_wrapper
-from spacectl.modules.resource import validate
 from spacectl.lib.output import echo
 
 DEFAULT_HEADER_CELL = 'A1'
-GOOGLE_SERVICE_ACCOUNT_JSON_DEFAULT_PATH = '~/.config/gspread/service_account.json'
 
 
 class Task(BaseTask):
 
     @execute_wrapper
     def execute(self):
+        self._validate()
+
         google_sheets = self._init_google_sheets()
         sheet = self._get_sheets(google_sheets)
         self.clear_all_worksheet(sheet)
@@ -29,20 +27,23 @@ class Task(BaseTask):
 
     def export_data(self, sheet):
         fill_na = self.spec.get('fill_na')
-        for _index, raw_data in enumerate(self.spec.get('data', [])):
-            time.sleep(5)
+        for idx, raw_data in enumerate(self.spec.get('data', [])):
+            time.sleep(3)
             # task = self._convert_json(raw_data.get('input', {}))
             task = raw_data.get('input', {})
-            worksheet_name = self.set_worksheet_name(task, _index)
+            worksheet_name = self.set_worksheet_name(task)
             echo(f"Export Worksheet: {worksheet_name}")
-            worksheet = self.select_worksheet(sheet, _index, worksheet_name)
+            worksheet = self.select_worksheet(sheet, idx, worksheet_name)
             # self.write_update_time(worksheet)
             self.export_worksheet(worksheet, task.get('output', []), fill_na)
 
-    def select_worksheet(self, sheet, index, worksheet_title):
+    def select_worksheet(self, sheet, idx, worksheet_title):
         try:
-            worksheet = sheet.worksheet(worksheet_title)
-            # worksheet.update_title(worksheet_title)
+            if self.spec.get('reset', False) is True and idx == 0:
+                worksheet = sheet.get_worksheet(0)
+                worksheet.update_title(worksheet_title)
+            else:
+                worksheet = sheet.worksheet(worksheet_title)
             return worksheet
         except Exception:
             return sheet.add_worksheet(title=worksheet_title, rows=1000, cols=26)
@@ -74,7 +75,7 @@ class Task(BaseTask):
 
     def _init_google_sheets(self):
         echo("Access Google Sheets..", flag=not self.silent)
-        service_account = self.spec.get('service_account_json', GOOGLE_SERVICE_ACCOUNT_JSON_DEFAULT_PATH)
+        service_account = self.spec.get('service_account_json')
         return gspread.service_account(filename=service_account)
 
     def _get_sheets(self, google_sheets):
@@ -92,9 +93,8 @@ class Task(BaseTask):
                 sheet.del_worksheet(worksheet)
 
     @staticmethod
-    def set_worksheet_name(task, index):
-        # return f'{index}. {task.get("name", "")}'
-        return task.get("name", "")
+    def set_worksheet_name(task):
+        return task.get('name', '')
 
     @staticmethod
     def _convert_json(data):
@@ -137,3 +137,12 @@ class Task(BaseTask):
         except Exception as e:
             echo(f'e => {e}')
             pass
+
+    def _validate(self):
+        if 'service_account_json' not in self.spec:
+            raise ValueError(f'Required key: service_account_json\n'
+                             f'spec: {utils.dump_json(self.spec, 4)}')
+
+        if 'data' not in self.spec:
+            raise ValueError(f'Required key: data\n'
+                             f'spec: {utils.dump_json(self.spec, 4)}')
