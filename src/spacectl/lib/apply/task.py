@@ -2,6 +2,7 @@ import click
 import abc
 import os
 import traceback
+import shutil
 from functools import wraps
 from spaceone.core import utils
 from spacectl.lib.apply import store
@@ -63,7 +64,7 @@ class BaseTask(metaclass=abc.ABCMeta):
         self.depth = depth
         self.is_loop = is_loop
         self.state = 'IN_PROGRESS'
-        self.terminal_width = os.get_terminal_size()[0]
+        self.terminal_width = shutil.get_terminal_size(fallback=(120, 50)).columns
 
         self.spec = {}
         self.output = {}
