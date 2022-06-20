@@ -3,6 +3,7 @@ import os
 import click
 import jinja2
 from pathlib import Path
+import shutil
 
 from spaceone.core import utils
 from spacectl.lib.apply import store
@@ -32,7 +33,7 @@ class TaskManager:
         self.task_queue = []
         self.silent = silent
         self.output = output
-        self.terminal_width = os.get_terminal_size()[0]
+        self.terminal_width = shutil.get_terminal_size(fallback=(120, 50)).columns
 
     def load(self, file_path: str):
         data: dict = utils.load_yaml_from_file(file_path)
