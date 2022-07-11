@@ -20,7 +20,7 @@ def execute_wrapper(func):
         except Exception as e:
             if not self.silent:
                 click.echo(f'(ERROR) =>\n{e}\n'
-                           f'>> Spec: {self.spec}',  err=True)
+                           f'>> Spec: {utils.dump_json(self.spec)}',  err=True)
                 click.echo('')
 
             _debug = os.environ.get('SPACECTL_DEBUG', 'false')
