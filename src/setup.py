@@ -37,7 +37,9 @@ setup(
         'tabulate',
         'jinja2',
         'gspread',
-        'pandas'
+        'pandas',
+        'google-api-python-client',
+        'oauth2client'
     ],
     package_data={
         'spacectl': ['template/*.yml']

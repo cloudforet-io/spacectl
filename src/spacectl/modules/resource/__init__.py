@@ -1,11 +1,10 @@
 import click
 import copy
-from spaceone.core import utils
+import os
 from spaceone.core.auth.jwt import JWTUtil
 
-from spacectl.command.execute import _check_api_permissions, _get_service_and_resource, _get_client,_call_api, \
-    _parse_parameter
-from spacectl.conf.my_conf import get_config, get_endpoint, get_template
+from spacectl.command.execute import _check_api_permissions, _get_client,_call_api
+from spacectl.conf.my_conf import get_config
 from spacectl.lib.apply.task import BaseTask
 from spacectl.lib.apply.task import execute_wrapper
 from spacectl.modules.resource import validate
@@ -170,9 +169,10 @@ class Task(BaseTask):
         template = self._generate_template_from_metadata_table_fields(table_fields, show_optional)
 
         if not user_config:
-            template['template']['list'] = ['reference.resource_id|Resource ID'] + template['template']['list'] + \
-                                           ['provider|Provider', 'account|Account ID', 'region_code|Region',
-                                            'project_id|Project', 'updated_at|Last Collected']
+            template['template']['list'] = ['project_id', 'provider|Provider',
+                                            'region_code|Region', 'name|Name'] \
+                                           + template['template']['list'] \
+                                           + ['reference.resource_id|Resource ID']
 
         return load_parser(None, None, template)
 
@@ -188,7 +188,10 @@ class Task(BaseTask):
                 _list.append(self._set_field(_field))
             else:
                 if not _field.get('options', {}).get('is_optional', False):
-                    _list.append(self._set_field(_field))
+                    # Temporary Code
+                    if _field.get('key') not in ['project_id', 'provider', 'region_code', 'name', 'updated_at',
+                                                 'launched_at']:
+                        _list.append(self._set_field(_field))
 
         return {'template': {'list': _list}}
 
@@ -216,7 +219,7 @@ class Task(BaseTask):
         return f"console:USER:{user}:page-schema:inventory.CloudService?provider={provider}&cloud_service_group={cloud_service_group}&cloud_service_type={cloud_service_type}:table"
 
     def _get_user_name(self):
-        api_key = get_config().get('api_key', '')
+        api_key = os.environ.get('SPACECTL_API_KEY', get_config().get('api_key'))
         user_name = JWTUtil.unverified_decode(api_key).get('aud', '')
         return user_name
 

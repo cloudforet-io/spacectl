@@ -1,6 +1,7 @@
 import click
 import fnmatch
 import types
+import os
 
 from google.protobuf.json_format import MessageToDict
 from spaceone.core.error import ERROR_BASE
@@ -261,7 +262,7 @@ def _call_api(client, resource, verb, params=None, **kwargs):
     _check_resource_and_verb(client, resource, verb)
 
     config = kwargs.get('config', {})
-    api_key = config.get('api_key')
+    api_key = os.environ.get('SPACECTL_API_KEY', config.get('api_key'))
     domain_id = config.get('domain_id')
 
     if domain_id:

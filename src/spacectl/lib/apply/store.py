@@ -65,7 +65,7 @@ def append_task_result(task_result: dict):
 
         _DATA['tasks'][task_id].append(task_result)
 
-    _DATA['results'].append(task_result)
+    # _DATA['results'].append(task_result)
 
 
 def set_task_result(task_result: dict):
@@ -73,7 +73,7 @@ def set_task_result(task_result: dict):
     if task_id:
         _DATA['tasks'][task_id] = task_result
 
-    _DATA['results'].append(task_result)
+    # _DATA['results'].append(task_result)
 
 
 def increase_success():
