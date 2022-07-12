@@ -263,7 +263,7 @@ def _call_api(client, resource, verb, params=None, **kwargs):
 
     config = kwargs.get('config', {})
     api_key = os.environ.get('SPACECTL_API_KEY', config.get('api_key'))
-    domain_id = config.get('domain_id')
+    domain_id = os.environ.get('SPACECTL_DOMAIN_ID', config.get('domain_id'))
 
     if domain_id:
         params['domain_id'] = config.get('domain_id')
