@@ -48,8 +48,9 @@ class Task(BaseTask):
         # execute the SpaceONE API
         service, resource = self.spec["resource_type"].split(".")
         parser = None
+        output = self.spec.get('output', {})
 
-        if output := self.spec.get('output'):
+        if output:
             options = output.get('options', {})
             add_only = options.get('add_only', True)
             template = output.get('template')
@@ -195,14 +196,18 @@ class Task(BaseTask):
 
         return {'template': {'list': _list}}
 
-    def _set_field(self, field):
-        if key := field.get('key'):
+    @staticmethod
+    def _set_field(field):
+        key = field.get('key')
+        if key:
             _f = key
 
-            if sub_key := field.get('options', {}).get('sub_key'):
+            sub_key = field.get('options', {}).get('sub_key')
+            if sub_key:
                 _f = f'{_f}.{sub_key}'
 
-            if name := field.get('name'):
+            name = field.get('name')
+            if name:
                 return f'{_f}|{name}'
             else:
                 return _f
