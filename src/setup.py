@@ -38,6 +38,7 @@ setup(
         'jinja2',
         'gspread',
         'pandas',
+        'google-api-core',
         'google-api-python-client',
         'oauth2client'
     ],
