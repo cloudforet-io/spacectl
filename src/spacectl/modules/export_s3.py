@@ -1,4 +1,3 @@
-import click
 import io
 import boto3
 import pandas as pd
