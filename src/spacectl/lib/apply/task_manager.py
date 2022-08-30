@@ -11,7 +11,13 @@ from spacectl.lib.output import print_data
 from spacectl.modules import MODULES
 
 
+def to_data(value):
+    json_value = utils.dump_json(value).strip()
+    return f'<DATA>{json_value}</DATA>'
+
+
 JINJA_ENV = jinja2.Environment(loader=jinja2.BaseLoader(), variable_start_string='${{', variable_end_string='}}')
+JINJA_ENV.filters['to_data'] = to_data
 TASK_KEYS = [
     'id',
     'name',
@@ -178,12 +184,24 @@ class TaskManager:
         if item:
             kwargs['item'] = item
 
-        task_yaml: str = utils.dump_yaml(value)
-        jinja_template = JINJA_ENV.from_string(task_yaml)
+        task_json: str = utils.dump_json(value)
+        jinja_template = JINJA_ENV.from_string(task_json)
+
         template_applied_value: str = jinja_template.render(**kwargs)
 
-        template_applied_value = template_applied_value.replace('None', 'null')
-        return utils.load_yaml(template_applied_value)
+        template_applied_value = template_applied_value.replace('"<DATA>', '')
+        template_applied_value = template_applied_value.replace('</DATA>"', '')
+
+        return utils.load_json(template_applied_value)
+
+        # task_yaml: str = utils.dump_yaml(value)
+        # jinja_template = JINJA_ENV.from_string(task_yaml)
+        # template_applied_value: str = jinja_template.render(**kwargs)
+        #
+        # template_applied_value = template_applied_value.replace('None', 'null')
+        # template_applied_value = template_applied_value.replace("\\\'", '"')
+        #
+        # return utils.load_yaml(template_applied_value)
 
     def _parse_if_condition(self, if_cond_str: str, task_name: str, item: Any) -> bool:
         try:
