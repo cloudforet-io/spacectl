@@ -60,7 +60,7 @@ def _parse_data_by_options(data, **kwargs):
     headers = kwargs.get('headers')
     total_count = kwargs.get('total_count')
 
-    if len(data) > 0 and not isinstance(data[0], (dict, list, tuple)):
+    if isinstance(data, list) and len(data) > 0 and not isinstance(data[0], (dict, list, tuple)):
         headers = ['Values']
         data = [[v] for v in data]
 
