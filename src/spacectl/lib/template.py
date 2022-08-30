@@ -1,4 +1,4 @@
-from spaceone.core.utils import parse_endpoint, load_json, load_yaml_from_file
+from spaceone.core.utils import load_yaml_from_file
 
 from spacectl.conf.global_conf import DEFAULT_PARSER
 from spacectl.conf.my_conf import get_template
@@ -12,14 +12,14 @@ def load_template(service, resource, columns, template_path=None):
             }
         }
     else:
-        if template_path is not None:
+        if template_path:
             template = load_yaml_from_file(template_path)
         else:
             template = get_template(service, resource)
     return template
 
 
-def load_parser(service, resource, template):
+def load_parser(service, resource, template, use_name_alias=True):
     parser = template.get('parser', DEFAULT_PARSER)
     template = template.get('template')
 
@@ -36,6 +36,6 @@ def load_parser(service, resource, template):
         raise Exception(f'Parser is invalid. ({parser})')
 
     try:
-        return getattr(parser_module, class_name)(template)
+        return getattr(parser_module, class_name)(template, use_name_alias)
     except Exception:
         raise Exception(f'{service}.{resource} template format is invalid.')

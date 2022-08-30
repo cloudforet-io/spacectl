@@ -7,7 +7,7 @@ class DefaultParser(BaseParser):
     def load_template(self, template):
         keys = []
         for rule in template.get('list', []):
-            key, name = get_key_and_name(rule)
+            key, name = get_key_and_name(rule, self.use_name_alias)
             key = self._check_index_and_condition(key)
             keys.append(key)
             self._sort_map[name] = key
@@ -17,7 +17,7 @@ class DefaultParser(BaseParser):
     def parse_data(self, raw_data):
         parsed_data = {}
         for rule in self.template.get('list', []):
-            key, name = get_key_and_name(rule)
+            key, name = get_key_and_name(rule, self.use_name_alias)
 
             if key.startswith('tags.'):
                 parsed_data[name] = get_tags_value(raw_data, key)
@@ -46,9 +46,13 @@ class DefaultParser(BaseParser):
         return '.'.join(index_keys[:i])
 
 
-def get_key_and_name(rule):
+def get_key_and_name(rule, use_name_alias=True):
     if '|' in rule:
         key, name = rule.split('|')
+
+        if not use_name_alias:
+            name = key.rsplit('.', 1)[-1]
+
     else:
         key = rule
         name = rule
