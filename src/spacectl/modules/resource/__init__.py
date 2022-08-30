@@ -58,7 +58,8 @@ class Task(BaseTask):
             if template == 'file':
                 parser = self._load_parser(template_path=options.get('file', ''))
             elif template == 'metadata':
-                parser = self._load_parser_from_metadata(options.get('metadata', ''))
+                parser = self._load_parser_from_metadata(options.get('metadata', ''),
+                                                         options.get('use_name_alias', True))
             elif template == 'input':
                 parser = self._load_parser(columns=options.get('columns', []))
 
@@ -88,7 +89,10 @@ class Task(BaseTask):
             verb = self.spec["verb"]["exec"]
             # echo("Start " + ".".join([service, resource, verb]), flag=not self.silent)
             _check_api_permissions(service, resource, verb)
-            self.output = _execute_api(service, resource, verb, self.spec.get("data", {}), api_version="v1", output="yaml", parser={}, silent=self.silent)
+
+            pagination = self.spec.get('pagination')
+            self.output = _execute_api(service, resource, verb, self.spec.get("data", {}), api_version="v1",
+                                       output="yaml", parser={}, silent=self.silent, pagination=pagination)
             # echo("Finish " + ".".join([service, resource, verb]), flag=not self.silent)
             # echo(f'### {verb} Response ###', flag=not self.silent)
             # echo(self.output, flag=not self.silent)
@@ -152,10 +156,10 @@ class Task(BaseTask):
 
     @staticmethod
     def _load_parser(columns=None, template_path=None):
-        template = load_template(None, None, columns, template_path)
+        template = load_template(None, None, columns, template_path=template_path)
         return load_parser(None, None, template)
 
-    def _load_parser_from_metadata(self, metadata):
+    def _load_parser_from_metadata(self, metadata, use_name_alias):
         cloud_service_type = self._get_cloud_service_type(metadata)
         user_config = self._get_user_config(metadata)
         show_optional = False
@@ -175,7 +179,7 @@ class Task(BaseTask):
                                            + template['template']['list'] \
                                            + ['reference.resource_id|Resource ID']
 
-        return load_parser(None, None, template)
+        return load_parser(None, None, template, use_name_alias)
 
     def _add_only_query(self, parser):
         query = self.spec['data'].get('query', {})
@@ -258,14 +262,46 @@ class Task(BaseTask):
             return {}
 
 
-def _execute_api(service, resource, verb, params={}, api_version='v1', output='yaml', parser=None, silent=False):
+def _execute_api(service, resource, verb, params={}, api_version='v1', output='yaml', parser=None,
+                 silent=False, pagination=None):
     config = get_config()
     _check_api_permissions(service, resource, verb)
     client = _get_client(service, api_version)
 
     # _call_api can change some data of params so need deepcopy
     # e.g. credential of identity.Token
-    response_stream = _call_api(client, resource, verb, copy.deepcopy(params), config=config)
+
+    if pagination:
+        page_size = pagination.get('size', 1000)
+        req_params = copy.deepcopy(params)
+        response = {
+            'results': [],
+            'total_count': 0
+        }
+        req_params['query'] = req_params.get('query', {})
+        req_params['query']['count_only'] = True
+        count_response_stream = _call_api(client, resource, verb, req_params, config=config)
+        for count_response in count_response_stream:
+            response['total_count'] = count_response.get('total_count', 0)
+
+        req_params['query']['count_only'] = False
+        page_count = int(response['total_count'] / page_size) + 1
+
+        click.echo(f'Pagination ({service}.{resource}.{verb}): total_count={response["total_count"]}, '
+                   f'page_size={page_size}, page_count={page_count}')
+
+        for page_num in range(page_count):
+            req_params['query']['page'] = {
+                'start': (page_size * page_num) + 1,
+                'limit': page_size
+            }
+            p_response_stream = _call_api(client, resource, verb, req_params, config=config)
+            for p_response in p_response_stream:
+                response['results'] += p_response.get('results', [])
+
+        response_stream = [response]
+    else:
+        response_stream = _call_api(client, resource, verb, copy.deepcopy(params), config=config)
 
     for response in response_stream:
         if verb in ['list', 'stat', 'analyze']:

@@ -6,11 +6,12 @@ import os
 from google.protobuf.json_format import MessageToDict
 from spaceone.core.error import ERROR_BASE
 from spaceone.core import pygrpc
+from spaceone.core.utils import parse_endpoint, load_json
 
 from spacectl.lib.output import print_data
 from spacectl.lib.template import *
-from spacectl.conf.global_conf import RESOURCE_ALIAS, EXCLUDE_APIS, DEFAULT_PARSER
-from spacectl.conf.my_conf import get_config, get_endpoint, get_template
+from spacectl.conf.global_conf import RESOURCE_ALIAS, EXCLUDE_APIS
+from spacectl.conf.my_conf import get_config, get_endpoint
 
 __all__ = ['cli']
 
@@ -58,7 +59,7 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
     if columns:
         columns = columns.split(',')
 
-    template = load_template(service, resource, columns, template_path)
+    template = load_template(service, resource, columns, template_path=template_path)
     parser = None
 
     params = _parse_parameter(file_path, json_parameter, parameter)
@@ -186,13 +187,13 @@ def _execute_api(service, resource, verb, command, params=None, api_version='v1'
 
             response['results'] = results
 
-        if output in ['table', 'csv', 'quiet'] and 'results' in response:
-            options = {
-                'root_key': 'results'
-            }
+        options = {}
 
-            if 'total_count' in response:
-                options['total_count'] = response['total_count']
+        if 'total_count' in response:
+            options['total_count'] = response['total_count']
+
+        if output in ['table', 'csv', 'quiet'] and 'results' in response:
+            options['root_key'] = 'results'
 
             print_data(response, output, **options)
         else:

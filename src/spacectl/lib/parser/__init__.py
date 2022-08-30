@@ -3,10 +3,11 @@ from abc import *
 
 class BaseParser(metaclass=ABCMeta):
 
-    def __init__(self, template):
+    def __init__(self, template, use_name_alias=True):
         self._template = template
         self._keys = []
         self._sort_map = {}
+        self.use_name_alias = use_name_alias
         self.load_template(template)
 
     @property

@@ -52,7 +52,7 @@ class Task(BaseTask):
 
     @staticmethod
     def _load_parser(columns):
-        template = load_template(None, None, columns, None)
+        template = load_template(None, None, columns)
         return load_parser(None, None, template)
 
     def _validate(self):
