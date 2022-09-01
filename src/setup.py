@@ -40,7 +40,9 @@ setup(
         'pandas',
         'google-api-core',
         'google-api-python-client',
-        'oauth2client'
+        'oauth2client',
+        'boto3',
+        'PyMySQL'
     ],
     package_data={
         'spacectl': ['template/*.yml']
