@@ -1,4 +1,3 @@
-import boto3
 import pymysql
 
 from spaceone.core import utils
@@ -35,12 +34,19 @@ class Task(BaseTask):
         self.conn.commit()
 
     def _create_session(self):
-        self.conn = pymysql.connect(host=self.spec['host'],
-                                    port=self.spec.get('port', 3306),
-                                    user=self.spec['user'],
-                                    password=self.spec['password'],
-                                    db=self.spec['db'],
-                                    charset='utf8')
+        conn_info = {
+            'host': self.spec['host'],
+            'port': self.spec.get('port', 3306),
+            'user': self.spec['user'],
+            'password': self.spec['password'],
+            'db': self.spec['db'],
+            'charset': self.spec['utf8']
+        }
+
+        if 'pem' in self.spec:
+            conn_info['pem'] = self.spec['pem']
+
+        self.conn = pymysql.connect(**conn_info)
 
     def _validate(self):
         if 'host' not in self.spec:
