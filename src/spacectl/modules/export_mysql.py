@@ -44,7 +44,7 @@ class Task(BaseTask):
         }
 
         if 'pem' in self.spec:
-            conn_info['pem'] = self.spec['pem']
+            conn_info['ssl_ca'] = self.spec['pem']
 
         self.conn = pymysql.connect(**conn_info)
 
