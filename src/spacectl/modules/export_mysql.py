@@ -40,7 +40,7 @@ class Task(BaseTask):
             'user': self.spec['user'],
             'password': self.spec['password'],
             'db': self.spec['db'],
-            'charset': self.spec['utf8']
+            'charset': 'utf8'
         }
 
         if 'pem' in self.spec:
