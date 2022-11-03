@@ -24,7 +24,7 @@ FOLDER_QUERY = "mimeType = 'application/vnd.google-apps.folder'"
 class Task(BaseTask):
 
     def __init__(self, task_info, *args, **kwargs):
-        super().__init__(task_info)
+        super().__init__(task_info, *args, **kwargs)
         self._validate()
 
         service_account_json = self.spec.get('service_account_json')

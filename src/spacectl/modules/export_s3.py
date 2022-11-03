@@ -10,7 +10,7 @@ from spacectl.lib.apply.task import execute_wrapper
 class Task(BaseTask):
 
     def __init__(self, task_info, *args, **kwargs):
-        super().__init__(task_info)
+        super().__init__(task_info, *args, **kwargs)
         self.s3 = None
         self._validate()
         self._create_session()
@@ -36,8 +36,30 @@ class Task(BaseTask):
                 raise Exception(f'The put_object command in S3 failed. (status = {status})')
 
     def _create_session(self):
-        self.s3 = boto3.client('s3', aws_access_key_id=self.spec['aws_access_key_id'],
-                               aws_secret_access_key=self.spec['aws_secret_access_key'])
+        if 'role_arn' in self.spec:
+            session = boto3.Session(aws_access_key_id=self.spec['aws_access_key_id'],
+                                    aws_secret_access_key=self.spec['aws_secret_access_key'])
+
+            sts = session.client('sts')
+            sts.get_caller_identity()
+
+            assume_role_request = {
+                'RoleArn': self.spec['role_arn'],
+                'RoleSessionName': utils.generate_id('AssumeRoleSession')
+            }
+
+            if 'external_id' in self.spec:
+                assume_role_request['ExternalId'] = self.spec['external_id']
+
+            assume_role_object = sts.assume_role(**assume_role_request)
+            credentials = assume_role_object['Credentials']
+            self.s3 = boto3.client('s3', aws_access_key_id=credentials['AccessKeyId'],
+                                   aws_secret_access_key=credentials['SecretAccessKey'],
+                                   aws_session_token=credentials['SessionToken'])
+
+        else:
+            self.s3 = boto3.client('s3', aws_access_key_id=self.spec['aws_access_key_id'],
+                                   aws_secret_access_key=self.spec['aws_secret_access_key'])
 
     def _validate(self):
         if 'aws_access_key_id' not in self.spec:
