@@ -8,7 +8,7 @@ from spacectl.lib.apply.task import execute_wrapper
 class Task(BaseTask):
 
     def __init__(self, task_info, *args, **kwargs):
-        super().__init__(task_info)
+        super().__init__(task_info, *args, **kwargs)
         self.conn = None
         self._validate()
         self._create_session()
