@@ -318,5 +318,4 @@ def _execute_api(service, resource, verb, params={}, api_version='v1', output='y
         elif verb == 'update':
             return response
         else:
-            echo("[INFO] Non-standard verb: " + verb, flag=not silent)
             return response
