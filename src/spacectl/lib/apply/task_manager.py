@@ -209,7 +209,7 @@ class TaskManager:
             if_cond = eval(str(if_cond_str))
 
         except Exception as e:
-            click.echo(f'[{task_name}] If Condition Error: {if_cond_str}')
+            click.echo(f'[{task_name}] If Condition Error: {if_cond_str}=>\n{e}')
             if_cond = False
 
         if not isinstance(if_cond, bool):
@@ -222,7 +222,7 @@ class TaskManager:
             loop_cond = self._render_template(loop_cond_str)
 
         except Exception as e:
-            click.echo(f'[{task_name}] Loop Condition Error: {loop_cond_str}')
+            click.echo(f'[{task_name}] Loop Condition Error: {loop_cond_str}=>\n{e}')
             loop_cond = []
 
         if loop_cond and not isinstance(loop_cond, list):
