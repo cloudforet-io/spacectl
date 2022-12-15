@@ -42,7 +42,6 @@ RESOURCE_ALIAS = {
     'rg': ['inventory', 'ResourceGroup'],
     'collector': ['inventory', 'Collector'],
 
-
     # Config
     'user_config': ['config', 'UserConfig'],
     'domain_config': ['config', 'UserConfig'],
@@ -79,6 +78,15 @@ RESOURCE_ALIAS = {
     'cost': ['cost_analysis', 'Cost'],
     'budget': ['cost_analysis', 'Budget'],
     'budget_usage': ['cost_analysis', 'BudgetUsage'],
+
+    # Board
+    'board': ['board', 'Board'],
+    'post': ['board', 'Post'],
+
+    # Dashboard
+    'cw': ['dashboard', 'CustomWidget'],
+    'domain_dashboard': ['dashboard', 'DomainDashboard'],
+    'project_dashboard': ['dashboard', 'ProjectDashboard']
 }
 
 EXCLUDE_APIS = [
