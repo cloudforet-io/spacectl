@@ -6,7 +6,7 @@ image:
 imagePullPolicy: IfNotPresent
 replicas: 1
 
-#imagePullSecret
+#imagePullSecret:
 # - {imagePullSecret_name}
 
 #serviceAccountName: {name}
@@ -18,6 +18,6 @@ replicas: 1
 pvc:
     storageClassName: null # You must specify a storage class name. Otherwise, the spacectl pod will use empty volume.
     accessModes: 
-        - "ReadWriteOnce"
+        - "ReadWriteMany"
     requests:
         storage: 8Gi
