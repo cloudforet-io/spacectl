@@ -6,7 +6,15 @@ image:
 imagePullPolicy: IfNotPresent
 replicas: 1
 
-#imagePullSecret:
+resources: {}
+#     requests:
+#         memory: "128Mi"
+#         cpu: "25m"
+#     limits:
+#         memory: "256Mi"
+#         cpu: "50m"
+
+#imagePullSecrets:
 # - {imagePullSecret_name}
 
 #serviceAccountName: {name}
