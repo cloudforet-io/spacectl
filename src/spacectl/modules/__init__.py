@@ -1,4 +1,4 @@
-from spacectl.modules import shell, print, resource, export_google_sheets, date, join, concat, export_s3, export_mysql
+from spacectl.modules import shell, print, resource, export_google_sheets, export_s3, export_mysql, date, join, concat, csv
 
 MODULES = {
     'shell': shell.Task,
@@ -9,5 +9,6 @@ MODULES = {
     'export-mysql': export_mysql.Task,
     'date': date.Task,
     'join': join.Task,
-    'concat': concat.Task
+    'concat': concat.Task,
+    'csv': csv.Task
 }
