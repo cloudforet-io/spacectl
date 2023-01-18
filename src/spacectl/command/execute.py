@@ -186,7 +186,6 @@ def _execute_api(service, resource, verb, command, params=None, api_version='v1'
                 raise Exception(f'{service}.{resource} template format is invalid.')
 
             response['results'] = results
-
         options = {}
 
         if 'total_count' in response:
