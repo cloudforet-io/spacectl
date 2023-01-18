@@ -61,9 +61,11 @@ def get_key_and_name(rule, use_name_alias=True):
 
 
 def get_tags_value(data, key):
+    # Remove prefix key (tags.)
     sub_key = key[5:]
+
     tags = data.get('tags', {})
-    return tags.get(sub_key)
+    return utils.get_dict_value(tags, sub_key)
 
 
 if __name__ == '__main__':
