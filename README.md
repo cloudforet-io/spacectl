@@ -15,7 +15,7 @@
 # Getting Started with spacectl
 The SpaceONE command-line tool, spacectl, allows you to run commands against resources managed by SpaceONE.     
 
-API Reference: https://spaceone-dev.gitbook.io/spaceone-apis
+API Reference: https://cloudforet.gitbook.io/cloudforet-apis
 
 # Install and Set Up spacectl
 Install the latest release with the command from PyPI using pip:
