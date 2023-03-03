@@ -1,6 +1,7 @@
 FROM python:3.8
 
 ENV SRC_DIR /tmp/src
+RUN apt-get update && apt-get install vim -y
 RUN pip3 install --upgrade pip && \
     pip3 install --upgrade spaceone-core spaceone-api --pre
 
