@@ -28,10 +28,18 @@ class Task(BaseTask):
             # Create directory
             os.makedirs(directory, exist_ok=True)
 
+            # set output data
+            if isinstance(self.spec['data'], list):
+                output_data = {
+                    'results': self.spec['data']
+                }
+            else:
+                output_data = self.spec['data']
+
             # Save data to file
             click.echo(f'Save data to file: {path}')
             click.echo('')
-            utils.save_json_to_file(self.spec['data'], path, indent=4)
+            utils.save_json_to_file(output_data, path, indent=4)
         else:
             print_data(self.spec['data'], output)
             click.echo('')
