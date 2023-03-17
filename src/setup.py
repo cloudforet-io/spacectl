@@ -42,7 +42,8 @@ setup(
         'google-api-python-client',
         'oauth2client',
         'boto3',
-        'PyMySQL'
+        'PyMySQL',
+        'openpyxl'
     ],
     package_data={
         'spacectl': ['template/*.yml']
