@@ -1,5 +1,6 @@
 import click
 import os
+import pandas as pd
 from spaceone.core import utils
 from spacectl.lib.apply.task import BaseTask
 from spacectl.lib.apply.task import execute_wrapper
@@ -39,7 +40,14 @@ class Task(BaseTask):
             # Save data to file
             click.echo(f'Save data to file: {path}')
             click.echo('')
-            utils.save_json_to_file(output_data, path, indent=4)
+
+            if output == 'yaml':
+                utils.save_yaml_to_file(output_data, path)
+            elif output == 'csv' and 'results' in output_data:
+                df = pd.DataFrame(output_data.get('results', []))
+                df.to_csv(path, index=False)
+            else:
+                utils.save_json_to_file(output_data, path, indent=4)
         else:
             print_data(self.spec['data'], output)
             click.echo('')
