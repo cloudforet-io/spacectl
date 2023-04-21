@@ -131,8 +131,8 @@ $ spacectl list domain -c domain_id,name,plugin_info.plugin_id,plugin_info.versi
 ------------------+------------+-----------------------+---------------------+--------------------------------
  domain-123abc123 | umi0410    | plugin-123abc123      | 1.1                 | google_oauth2
 
-# column alias
-$ spacectl list domain -c domain_id,name,plugin_info.plugin_id|Plugin ID,plugin_info.version|Version
+# column alias with Quotation Marks
+$ spacectl list domain -c 'domain_id,name,plugin_info.plugin_id|Plugin ID,plugin_info.version|Version'
  domain_id        | name       | Plugin ID         | Version
 ------------------+------------+-------------------+-----------
  domain-123abc123 | umi0410    | plugin-123abc123  | 1.2
