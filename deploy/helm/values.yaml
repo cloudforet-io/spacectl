@@ -1,3 +1,4 @@
+enabled: true
 name: spacectl
 namespace: spaceone
 image:
