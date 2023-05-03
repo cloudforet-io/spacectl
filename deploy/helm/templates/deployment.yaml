@@ -47,8 +47,14 @@ spec:
           volumeMounts:
             - name: spacectl-data
               mountPath: /root/.spaceone/
+            - name: environment-conf
+              mountPath: /root/.spaceone/environments/default.yml
+              subPath: default.yml
 
       volumes:
+      - name: environment-conf
+        configMap:
+          name: {{ .Values.name }}-environment-conf
 {{ if .Values.pvc.storageClassName }}
         - name: spacectl-data
           persistentVolumeClaim:
