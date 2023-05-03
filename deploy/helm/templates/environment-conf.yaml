@@ -5,6 +5,6 @@ metadata:
   name: {{ .Values.name }}-environment-conf
   namespace: {{ .Values.global.namespace | default .Release.Namespace }}
 data:
-  environment.yml: |-
+  default.yml: |-
 {{ .Files.Get "config/environment.yaml" | nindent 4 }}
 {{ end }}
