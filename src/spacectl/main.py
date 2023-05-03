@@ -7,7 +7,7 @@ import traceback
 
 try:
     import spacectl
-except Exception:
+except Exception as e:
     path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if path not in sys.path:
         sys.path.append(path)
@@ -23,8 +23,17 @@ Following steps for first time user.\n
     3. spacectl config endpoint add <service> <endpoint>
 """
 
-cli = click.CommandCollection(sources=[apply.cli, config.cli, execute.cli, version.cli,
-                                       api_resource.cli, template.cli], help=_HELP)
+cli = click.CommandCollection(
+    sources=[
+        apply.cli,
+        config.cli,
+        execute.cli,
+        version.cli,
+        api_resource.cli,
+        template.cli
+    ],
+    help=_HELP
+)
 
 
 def main():

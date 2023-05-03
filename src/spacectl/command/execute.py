@@ -260,8 +260,8 @@ def _call_api(client, resource, verb, params=None, **kwargs):
     _check_resource_and_verb(client, resource, verb)
 
     config = kwargs.get('config', {})
-    api_key = os.environ.get('SPACECTL_API_KEY', config.get('api_key'))
-    domain_id = os.environ.get('SPACECTL_DOMAIN_ID', config.get('domain_id'))
+    api_key = config.get('api_key')
+    domain_id = config.get('domain_id')
 
     if domain_id:
         params['domain_id'] = config.get('domain_id')
@@ -283,7 +283,7 @@ def _call_api(client, resource, verb, params=None, **kwargs):
             yield _change_message(response_or_iterator)
     except ERROR_BASE as e:
         if e.error_code == 'ERROR_AUTHENTICATE_FAILURE':
-            raise Exception('The api_key of spaceconfig is not set. (Use "spacectl config init")')
+            raise Exception('The api_key is not set or incorrect. (Use "spacectl config init")')
         else:
             raise Exception(e.message.strip())
     except Exception as e:

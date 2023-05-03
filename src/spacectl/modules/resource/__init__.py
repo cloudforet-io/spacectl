@@ -228,7 +228,7 @@ class Task(BaseTask):
         return f"console:USER:{user}:page-schema:inventory.CloudService?provider={provider}&cloud_service_group={cloud_service_group}&cloud_service_type={cloud_service_type}:table"
 
     def _get_user_name(self):
-        api_key = os.environ.get('SPACECTL_API_KEY', get_config().get('api_key'))
+        api_key = get_config().get('api_key')
         user_name = JWTUtil.unverified_decode(api_key).get('aud', '')
         return user_name
 
