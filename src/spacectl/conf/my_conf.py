@@ -16,14 +16,27 @@ def set_environment(environment):
 def get_environment():
     try:
         data = utils.load_yaml_from_file(ENVIRONMENT_CONF_PATH)
-    except Exception:
-        raise Exception('spaceconfig is undefined. (Use "spacectl config init")')
+        environment = data.get('environment')
 
-    environment = data.get('environment')
-    if not environment:
-        raise Exception('The environment is not set. Switch the environment. (Use "spacectl config environment --help")')
+        if not environment:
+            raise Exception(
+                'The environment is not set. Switch the environment. (Use "spacectl config environment --help")')
 
-    return environment
+        return environment
+
+    except Exception as e:
+        default_env = os.environ.get('SPACECTL_DEFAULT_ENVIRONMENT')
+        environments = list_environments()
+
+        if default_env in environments:
+            set_environment(default_env)
+            return default_env
+
+        elif len(environments) > 0:
+            raise Exception(
+                'The environment is not set. Switch the environment. (Use "spacectl config environment --help")')
+        else:
+            raise Exception('spaceconfig is undefined. (Use "spacectl config init")')
 
 
 def remove_environment(environment):
