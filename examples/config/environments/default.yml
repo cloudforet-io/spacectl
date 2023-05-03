@@ -1,0 +1,14 @@
+endpoints:
+  identity: grpc://identity:50051
+  inventory: grpc://inventory:50051
+  monitoring: grpc://monitoring:50051
+  plugin: grpc://plugin:50051
+  repository: grpc://repository:50051
+  cost_analysis: grpc://cost-analysis:50051
+  secret: grpc://secret:50051
+  statistics: grpc://statistics:50051
+  config: grpc://config:50051
+  notification: grpc://notification:50051
+  board: grpc://board:50051
+  file_manager: grpc://file-manager:50051
+  dashboard: grpc://dashboard:50051
