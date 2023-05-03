@@ -1,5 +1,4 @@
 {{- if .Values.enabled }}
-{{- if .Values.grpc }}
 
 apiVersion: apps/v1
 kind: Deployment
@@ -64,5 +63,4 @@ spec:
           emptyDir: {}
 {{- end }}
 
-{{- end }}
 {{- end }}
