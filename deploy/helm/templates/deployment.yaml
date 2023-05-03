@@ -47,9 +47,9 @@ spec:
             - name: spacectl-data
               mountPath: /root/.spaceone/
             - name: environment-conf
-              mountPath: /root/.spaceone/environments/default.yml
-              subPath: default.yml
-
+              mountPath: /root/default.yaml
+              subPath: default.yaml
+              readOnly: true
       volumes:
         - name: environment-conf
           configMap:
