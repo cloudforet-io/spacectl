@@ -51,9 +51,9 @@ spec:
               subPath: default.yml
 
       volumes:
-      - name: environment-conf
-        configMap:
-          name: {{ .Values.name }}-environment-conf
+        - name: environment-conf
+          configMap:
+            name: {{ .Values.name }}-environment-conf
 {{ if .Values.pvc.storageClassName }}
         - name: spacectl-data
           persistentVolumeClaim:
