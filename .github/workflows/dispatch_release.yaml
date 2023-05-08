@@ -140,7 +140,7 @@ jobs:
           author_name: Github Action Slack
 
   notification:
-    needs: pypi
+    needs: docker
     runs-on: ubuntu-latest
     steps:
       - name: Slack
