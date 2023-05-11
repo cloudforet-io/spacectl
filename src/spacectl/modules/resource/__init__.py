@@ -161,23 +161,33 @@ class Task(BaseTask):
 
     def _load_parser_from_metadata(self, metadata, use_name_alias):
         cloud_service_type = self._get_cloud_service_type(metadata)
-        user_config = self._get_user_config(metadata)
-        show_optional = False
+        # user_config = self._get_user_config(metadata)
+        # show_optional = False
+        #
+        # if user_config:
+        #     table_fields = user_config.get('data', {}).get('options', {}).get('fields', [])
+        #     show_optional = True
+        # else:
+        #     table_fields = cloud_service_type.get('metadata', {}).get('view', {}).get('table', {}).get('layout', {}).get(
+        #         'options', {}).get('fields', [])
+        #
+        # template = self._generate_template_from_metadata_table_fields(table_fields, show_optional)
+        #
+        # if not user_config:
+        #     template['template']['list'] = ['project_id', 'provider|Provider',
+        #                                     'region_code|Region', 'name|Name'] \
+        #                                    + template['template']['list'] \
+        #                                    + ['reference.resource_id|Resource ID']
 
-        if user_config:
-            table_fields = user_config.get('data', {}).get('options', {}).get('fields', [])
-            show_optional = True
-        else:
-            table_fields = cloud_service_type.get('metadata', {}).get('view', {}).get('table', {}).get('layout', {}).get(
-                'options', {}).get('fields', [])
+        show_optional = False
+        table_fields = cloud_service_type.get('metadata', {}).get('view', {}).get('table', {}).get('layout', {}).get(
+            'options', {}).get('fields', [])
 
         template = self._generate_template_from_metadata_table_fields(table_fields, show_optional)
 
-        if not user_config:
-            template['template']['list'] = ['project_id', 'provider|Provider',
-                                            'region_code|Region', 'name|Name'] \
-                                           + template['template']['list'] \
-                                           + ['reference.resource_id|Resource ID']
+        template['template']['list'] = ['project_id', 'provider|Provider', 'region_code|Region', 'name|Name']
+        template['template']['list'] += template['template']['list']
+        template['template']['list'] += ['reference.resource_id|Resource ID']
 
         return load_parser(None, None, template, use_name_alias)
 
@@ -197,6 +207,9 @@ class Task(BaseTask):
                     if _field.get('key') not in ['project_id', 'provider', 'region_code', 'name', 'updated_at',
                                                  'launched_at']:
                         _list.append(self._set_field(_field))
+
+        if 'project_id' not in _list:
+            _list.append('project_id')
 
         return {'template': {'list': _list}}
 
