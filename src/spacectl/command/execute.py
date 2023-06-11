@@ -203,7 +203,7 @@ def _execute_api(service, resource, verb, params=None, api_version='v1', output=
     response_stream = _call_api(client, resource, verb, params, config=config)
 
     for response in response_stream:
-        if verb in ['list', 'stat'] and parser:
+        if verb in ['list', 'stat', 'analyze'] and parser:
             results = []
             try:
                 for result in response.get('results', []):
