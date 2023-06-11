@@ -33,11 +33,11 @@ RESOURCE_ALIAS = {
 
     # Inventory
     'region': ['inventory', 'Region'],
-    'server': ['inventory', 'Server'],
-    'sv': ['inventory', 'Server'],
-    'cloud_service_type': ['inventory', 'CloudServiceType'],
     'cloud_service': ['inventory', 'CloudService'],
+    'cloud_service_type': ['inventory', 'CloudServiceType'],
     'cs': ['inventory', 'CloudService'],
+    'cloud_service_query_set': ['inventory', 'CloudServiceQuerySet'],
+    'cloud_service_stats': ['inventory', 'CloudServiceStats'],
     'resource_group': ['inventory', 'ResourceGroup'],
     'rg': ['inventory', 'ResourceGroup'],
     'collector': ['inventory', 'Collector'],
