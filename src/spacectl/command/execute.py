@@ -104,6 +104,34 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
 @click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
 @click.option('-o', '--output', default='table', help='Output format',
               type=click.Choice(['table', 'json', 'yaml', 'csv', 'quiet']), show_default=True)
+def analyze(resource, parameter, json_parameter, file_path, columns, limit, api_version, output):
+    """Analyze resources"""
+    service, resource = _get_service_and_resource(resource)
+    parser = None
+
+    if columns:
+        columns = columns.split(',')
+        template = load_template(service, resource, columns)
+        parser = load_parser(service, resource, template)
+
+    params = _parse_parameter(file_path, json_parameter, parameter)
+
+    if limit:
+        params['query'] = params.get('query', {})
+        params['query']['page'] = {'limit': limit}
+
+    _execute_api(service, resource, 'analyze', params=params, api_version=api_version, output=output, parser=parser)
+
+@cli.command()
+@click.argument('resource')
+@click.option('-p', '--parameter', multiple=True, help='Input Parameter (-p <key>=<value> -p ...)')
+@click.option('-j', '--json-parameter', help='JSON type parameter')
+@click.option('-f', '--file-parameter', 'file_path', type=click.Path(exists=True), help='YAML file only')
+@click.option('-c', '--columns', help='Specific columns (-c id,name)')
+@click.option('-l', '--limit', type=int, help='Number of rows')
+@click.option('-v', '--api-version', default='v1', help='API Version', show_default=True)
+@click.option('-o', '--output', default='table', help='Output format',
+              type=click.Choice(['table', 'json', 'yaml', 'csv', 'quiet']), show_default=True)
 def stat(resource, parameter, json_parameter, file_path, columns, limit, api_version, output):
     """Querying statistics for resources"""
     service, resource = _get_service_and_resource(resource)
