@@ -73,14 +73,19 @@ spacectl api-resources
 ```
 
 # Examples
-### Case 1: List Servers:
+### Case 1: List Cloud Service Type with AWS:
 ```commandline
-spacectl list server
+spacectl list inventory.CloudServiceType -p provider=aws
 ```
 
 ### Case 2: Create Project Group:
 ```commandline
 spacectl exec create project_group -p name=<project_group_name>
+```
+
+### Case 2: List only 10 Cost data within AWS US-EAST-1 region:
+```commandline
+spacectl list cost_analysis.Cost -p provider=aws -p region_code=us-east-1 --limit 10
 ```
 
 # Advanced Guides
