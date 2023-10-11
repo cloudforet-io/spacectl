@@ -1,0 +1,13 @@
+spaceone-core
+spaceone-api
+tabulate
+jinja2
+click
+google-api-core
+gspread
+pandas
+google-api-python-client
+oauth2client
+boto3
+PyMySQL
+openpyxl

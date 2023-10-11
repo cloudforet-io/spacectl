@@ -31,6 +31,8 @@ setup(
         'spaceone-api',
         'tabulate',
         'jinja2',
+        'click',
+        'google-api-core',
         'gspread',
         'pandas',
         'google-api-python-client',
