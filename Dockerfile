@@ -3,7 +3,10 @@ FROM cloudforet/python-core:1.12
 ENV SRC_DIR /tmp/src
 ENV SPACECTL_DEFAULT_ENVIRONMENT default
 
-RUN apt-get update && apt-get install vim -y
+COPY pkg/pip_requirements.txt pip_requirements.txt
+
+RUN apt-get update && apt-get install vim -y  \
+    && pip install --upgrade -r pip_requirements.txt
 
 COPY src ${SRC_DIR}
 WORKDIR ${SRC_DIR}
