@@ -29,12 +29,10 @@ setup(
     install_requires=[
         'spaceone-core',
         'spaceone-api',
-        'Click',
         'tabulate',
         'jinja2',
         'gspread',
         'pandas',
-        'google-api-core',
         'google-api-python-client',
         'oauth2client',
         'boto3',
