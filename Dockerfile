@@ -1,4 +1,4 @@
-FROM cloudforet/python-core:1.12
+FROM cloudforet/python-core:2.0
 
 ENV SRC_DIR /tmp/src
 ENV SPACECTL_DEFAULT_ENVIRONMENT default
@@ -12,8 +12,6 @@ COPY src ${SRC_DIR}
 WORKDIR ${SRC_DIR}
 
 RUN python3 setup.py install && rm -rf /tmp/*
-
-RUN pip install --upgrade spaceone-api
 
 WORKDIR /root
 

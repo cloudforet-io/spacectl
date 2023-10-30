@@ -1,12 +1,10 @@
 spaceone-core
-spaceone-api
 tabulate
 jinja2
-click
-google-api-core
-gspread
 pandas
+google-api-core
 google-api-python-client
+gspread
 oauth2client
 boto3
 PyMySQL
