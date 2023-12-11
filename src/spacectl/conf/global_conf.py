@@ -83,6 +83,10 @@ RESOURCE_ALIAS = {
     'board': ['board', 'Board'],
     'post': ['board', 'Post'],
 
+    # File Manager
+    'file': ['file_manager', 'File'],
+    'global_file': ['file_manager', 'GlobalFile'],
+
     # Dashboard
     'cw': ['dashboard', 'CustomWidget'],
     'domain_dashboard': ['dashboard', 'DomainDashboard'],
