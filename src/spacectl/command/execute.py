@@ -287,15 +287,9 @@ def _call_api(client, resource, verb, params=None, **kwargs):
 
     _check_resource_and_verb(client, resource, verb)
 
-    config = kwargs.get('config', {})
-    api_key = config.get('api_key')
-    domain_id = config.get('domain_id')
-
-    if domain_id:
-        params['domain_id'] = config.get('domain_id')
-
     try:
-        metadata = (()) if api_key is None else (('token', api_key),)
+        config = kwargs.get('config', {})
+        metadata = _make_grpc_metadata(config)
         resource_client = getattr(client, resource)
         resource_verb = getattr(resource_client, verb)
         response_or_iterator = resource_verb(
@@ -319,6 +313,24 @@ def _call_api(client, resource, verb, params=None, **kwargs):
             raise Exception(e.exception())
         else:
             raise Exception(e)
+
+
+def _make_grpc_metadata(config: dict) -> tuple:
+    api_key = config.get('api_key')
+    x_domain_id = config.get('x_domain_id')
+    x_workspace_id = config.get('x_workspace_id')
+
+    metadata = ()
+    if api_key:
+        metadata += (('token', api_key),)
+
+    if x_domain_id:
+        metadata += (('x_domain_id', x_domain_id),)
+
+    if x_workspace_id:
+        metadata += (('x_workspace_id', x_workspace_id),)
+
+    return metadata
 
 
 def _change_message(message):
