@@ -61,7 +61,7 @@ RESOURCE_ALIAS = {
     "cr": ["inventory", "CollectorRule"],
     # Config
     "user_config": ["config", "UserConfig"],
-    "domain_config": ["config", "UserConfig"],
+    "domain_config": ["config", "DomainConfig"],
     # Repository
     "repository": ["repository", "Repository"],
     "repo": ["repository", "Repository"],
