@@ -86,10 +86,10 @@ def list(resource, parameter, json_parameter, file_path, minimal_columns, all_co
         if parser:
             sort_key = parser.get_sort_key(sort_key) or sort_key
 
-        params['query']['sort'] = {
+        params['query']['sort'] = [{
             'key': sort_key,
             'desc': desc
-        }
+        }]
 
     _execute_api(service, resource, 'list', params=params, api_version=api_version, output=output, parser=parser)
 
