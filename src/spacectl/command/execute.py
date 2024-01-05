@@ -316,13 +316,13 @@ def _call_api(client, resource, verb, params=None, **kwargs):
 
 
 def _make_grpc_metadata(config: dict) -> tuple:
-    api_key = config.get('api_key')
+    token = config.get('token', config.get('api_key'))
     x_domain_id = config.get('x_domain_id')
     x_workspace_id = config.get('x_workspace_id')
 
     metadata = ()
-    if api_key:
-        metadata += (('token', api_key),)
+    if token:
+        metadata += (('token', token),)
 
     if x_domain_id:
         metadata += (('x_domain_id', x_domain_id),)
