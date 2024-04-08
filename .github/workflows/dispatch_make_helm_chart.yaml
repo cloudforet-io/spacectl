@@ -4,6 +4,9 @@ on:
   repository_dispatch:
     types: [make_helm_chart]
 
+env:
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
 jobs:
   helm_cloudforet:
     if: github.repository_owner == 'cloudforet-io'
