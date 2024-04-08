@@ -63,7 +63,7 @@ jobs:
 
   notify_to_slack:
     if: github.repository_owner == 'cloudforet-io'
-    needs: [helm_cloudforet]
+    needs: helm_cloudforet
     runs-on: ubuntu-latest
     steps:
       - name: Slack
